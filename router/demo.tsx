@@ -38,7 +38,6 @@ const RouterApp = () => (
 class Controller {
     constructor() {
         rebind(this)
-        patch(document.body, <RouterApp />)
         initrouter(this.setroute)
     }
 
@@ -49,5 +48,6 @@ class Controller {
 }
 
 let c = new Controller()
+patch(document.body, <RouterApp />)
 
-mount({ m, c })
+mount({ m, c, updateview })
