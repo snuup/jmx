@@ -4,7 +4,7 @@ export default {
     base: "/",
     esbuild: {
         ignoreAnnotations: true,
-        target: 'esnext',
+        target: 'esnext', // this should be the default target anway, but I remember that once there were problems without this.
     },
     plugins: [
         jmxplugin()
