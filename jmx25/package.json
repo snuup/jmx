@@ -1,0 +1,19 @@
+{
+  "name": "jmx-lib",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "api": "swagger-typescript-api -t tools/swaggerts/templates/default -p http://localhost:5188/swagger/v1/swagger.json -n api.ts --unwrap-response-data"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/plugin-transform-typescript": "^7.20.2",
+    "@babel/types": "^7.19.3",
+    "happy-dom": "^16.8.1",
+    "vitest": "^3.0.5"
+  }
+}
