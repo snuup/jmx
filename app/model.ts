@@ -1,4 +1,4 @@
-import { mount } from './base/common'
+import { mount } from '../base/common'
 
 export let m = {
 	i: 10,

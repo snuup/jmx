@@ -273,7 +273,7 @@ function setcomp(e: Element, htag: HTFC) {
     }
 
     // debug
-    e.setAttribute('comp', getHName(htag)!)
+    //e.setAttribute('comp', getHName(htag)!)
 }
 
 function getHName(h: H) {

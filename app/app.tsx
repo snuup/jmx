@@ -1,8 +1,8 @@
-import { mount } from './base/common'
-import { jsx, patch, updateview } from './jmx/jmx'
+import { mount } from '../base/common'
+import { jsx, patch, updateview } from '../jmx/jmx'
 import { m } from './model'
 import { Numero } from './number'
-import { Map } from './views/map'
+import { Map } from './map'
 
 export let Numerotti = ({ n }: { n: number }) => <div class="carrots">{n}</div>
 
