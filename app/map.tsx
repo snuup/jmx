@@ -1,4 +1,4 @@
-import { jsx, updateview } from '../jmx/jmx'
+import { jsx, updateview } from '../../jmx/jmx'
 
 class BaseComp<P> {
     element: HTMLElement

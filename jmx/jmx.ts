@@ -1,146 +1,238 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { rebind, setAttributeSmooth } from "../util/common"
-import { setape } from "./props"
+import { setape } from './props'
+
+function rebind(o) {
+    let proto = Object.getPrototypeOf(o)
+    let names = Object.entries(Object.getOwnPropertyDescriptors(proto))
+        .filter(([, p]) => p.value instanceof Function)
+        .filter(([name]) => name != 'constructor')
+        .map(([name]) => name)
+    for (const name of names) o[name] = o[name].bind(o)
+    return o
+}
+
+// the following types describe the js expression we get from tsx after conversion be our jmx plugin
 
 // dumy function for app code - jmxplugin removes calls to this function
-export function jsx(): HTag { throw "" }
+export function jsx(): HTag { throw '' } // later
 
 type Expr<T> = () => T
 
-type Children = Expr<(HNode | null)[]>
+type ChildrenH = (H | undefined)[]
+type Children = Expr<ChildrenH>
 
-type FComponent = (Props: Props | null, { children, comp }: { children: Children, comp: CompInfo }) => HTag
+//declare type ActionT<T> = (arg: T) => void
 
-// tbd
-type CComponent = {
-    new(): CComponent
+type Props = Record<string, any>
+
+type FComponent = (props: Props | undefined, children?: ChildrenH) => HTag // show an example for usage of children
+
+type UpdateContext = {
+    patchElementOnly?: boolean
+    replace?: boolean
+    [key: string]: any
+}
+
+interface IClassComponent {
     element: Node
     props: any
-    children: Children
-    view(): HElement
-    update?: () => void
-    mounted?: (Node) => void
+    //children: Children //tbd ??
+    view(): H
+    update?: (uc: UpdateContext) => void
+    mounted?: (n: Node) => void
 }
 
-type H = {
-    props?: Props
-    children: Children
+interface CComponent {
+    new(props: any): IClassComponent
 }
 
-type HFunction = { tag: FComponent } & H
+class BaseComp<P extends any> implements IClassComponent {
+    element: Node
+    constructor(public props: P) { }
+    updateview() { updateview(this.element) }
+    view(): any { return 'tbd' }
+}
 
-type HClassComp = { tag: CComponent } & H
+type HTag =
+    {
+        tag: string,
+        props?: Expr<Props>
+        children: Children
+        i?: any
+    }
+type HFunction =
+    {
+        tag: FComponent,
+        props?: Expr<Props>
+        children: Children
+    }
+type HClass =
+    {
+        tag: CComponent,
+        props?: Expr<Props>
+        children: Children
+        i?: IClassComponent
+    }
+type HComp = HFunction | HClass
+type H = // a hyperscript atom that describes a ...
+    | string // text node
+    | number // text node
+    | boolean // do not allow boolean, that
+    | HTag // a tag, like p, div with attributes and children
+    | HComp // a dynamic component computing any other HNode
+type HTFC = HTag | HFunction | HClass
 
-type HTag = { tag: string } & H
+export { HTag, HFunction }
 
-type HComp = HFunction | HClassComp
+/////////////////////////
 
-type HElement = HTag | HComp
+let Numero = ({ n }): HTag => ({
+    tag: "DIV",
+    props: () => ({ class: "carrots" }),
+    children: () => [n]
+})
 
-type HNode = string | number | boolean | HTag | HComp
+let m: any
 
+
+class Map extends BaseComp<{ a: number; s: string }> {
+
+    state = 500;
+
+    increment() {
+        this.state++
+        this.updateview()
+    }
+    update() {
+        console.log("updating", this, arguments)
+    }
+    view() {
+        return {
+            tag: "DIV",
+            props: () => ({
+                class: "map"
+            }),
+            children: () => ["map ", JSON.stringify(this.props.a), " - ", this.state, {
+                tag: "DIV",
+                props: null,
+                children: () => [{
+                    tag: "BUTTON",
+                    props: () => ({
+                        onclick: this.increment
+                    }),
+                    children: () => ["increment"]
+                }]
+            }]
+        }
+    }
+}
+
+let App = {
+    tag: "BODY",
+    props: null,
+    children: () => [{
+        tag: "DIV",
+        props: null,
+        children: () => ["hase mit ", {
+            tag: Numero,
+            props: () => ({
+                n: m.i
+            }),
+            children: () => []
+        }, " karotten ente mit ", {
+                tag: Numero,
+                props: () => ({
+                    n: m.i
+                }),
+                children: () => []
+            }, " schnecken", {
+                tag: Map,
+                props: () => ({
+                    a: m.i,
+                    s: "hase"
+                }),
+                children: () => []
+            }, {
+                tag: "UL",
+                props: null,
+                children: () => [{
+                    tag: "LI",
+                    props: null,
+                    children: () => ["aa"]
+                }, {
+                    tag: "LI",
+                    props: null,
+                    children: () => ["bb"]
+                }]
+            }]
+    }]
+}
+
+
+
+/////////////////////////
+
+// api
 declare global {
-
     interface HTMLElement {
         events?: any // holds event listeners, so we can remove them
+        model: any
     }
-
     interface Node {
-        comp: CompInfo
+        h?: HTFC
         mounted?: (e: Element) => void
         update?: (e: Element) => void
     }
 }
 
-export class CompInfo {
-
-    factory: HNode // will be HComp when jmx finds a component in the tree. only when another HNode is passed to updateview,
-    instance?: CComponent
-    n: Node
-
-    [key: string]: any // expandos
-
-    constructor(factory, instance?) {
-        // console.log("CompInfo", getHName(factory))
-        this.factory = factory
-        this.instance = instance
-    }
-
-    get<T>(ctor: new () => T): T {
-        return this[ctor.name] ??= new ctor()
-    }
-
-    getr<T>(ctor: new () => T): T {
-        let o = this[ctor.name]
-        if (o) return o
-        // return existing
-
-        // create new
-        o = this[ctor.name] = new ctor()
-        rebind(o)
-        o.comp = this
-        return o
-    }
-
-    update() { // function components can override this
-        patch(this.n, this.factory, false)
-    }
-}
+// export class CompInfo {
+//     constructor(public h: H, public i?: IClassComponent) { }
+// }
 
 export const jsxf = (props, { children }) => {
-    return ({ tag: "jsxf", props: null, children })
+    return { tag: 'jsxf', children }
 }
 
 const evaluate = <T>(expr: T | Expr<T>): T => {
     return expr instanceof Function ? evaluate(expr()) : expr
 }
 
-function isClassComp(h: HComp): h is HClassComp {
-    return h.tag.prototype?.view
-}
+let isClassComponent = (h: HTFC): h is HClass => (h.tag as any).prototype?.view
 
-function evalComponent(h: HComp, n: Node | null): [HNode, CompInfo?] {
-    //console.log("evalComponent", getHName(h))
+function evalComponent(h: HComp, n: Node): H {
 
-    const props = evalprops(h.props)
-    let isupdate = ((n?.comp?.factory as HComp)?.tag === h.tag)
+    console.log("evalComponent", h, n)
 
-    if (isClassComp(h)) {
-        let instance = isupdate ? n?.comp.instance as CComponent : rebind(new h.tag()) // reuse state, reuse instance
-        instance.props = props // assign props before evaluating view()
-        instance.children = h.children
-        let comp = isupdate ? n!.comp : new CompInfo(h, instance)
-        return [instance.view(), comp] // inefficient: we compute view() although we do not use if then the component has an update function
+    const props = evaluate(h.props)
+
+    let isupdate = n?.h?.tag === h.tag // was was already computed with this h
+
+    if (isClassComponent(h)) {
+        // HClass
+        if (!isupdate) {
+            // create new
+            h.i = rebind(new h.tag(props)) // rebind is important for simple event handlers
+        } else {
+            // update
+            h.i!.props = props //new props
+        }
+        return h.i!.view() // inefficient: we compute view() although we do not use if then the component has an update function
+    } else {
+        // HFunction
+        let f: FComponent = h.tag
+        let cn = evaluate(h.children)
+        return f(evaluate(h.props), cn)
+        //let comp = isupdate ? (n!.h) : h
+        //return [h.tag(props, { children: h.children, comp }), comp]
     }
-    else {
-        let comp = isupdate ? n!.comp as CompInfo : new CompInfo(h)
-        return [h.tag(props, { children: h.children, comp }), comp]
-    }
 }
 
-function removeexcesschildren(n: HTMLElement, i: number) {
-    while (n.childNodes[i]) n.childNodes[i].remove()
-}
+function removeexcesschildren(n: HTMLElement, i: number) { while (n.childNodes[i]) n.childNodes[i].remove() }
 
-function evalprops(props): Props | null {
-    return props && evaluate(props)
-}
+function createElement(tag) { return document.createElement(tag) }
 
-function issvg(tag) { // tbd: simplifiy and enhance svg handling
-    return ["SVG", "DEFS", "MARKER", "PATH"].includes(tag)
-}
-
-function createElement(tag) {
-    // console.log(`%ccreateElement ${tag}`, "background:#8f5296;color:white;padding:2px")
-    return issvg(tag) ? (document.createElementNS("http://www.w3.org/2000/svg", tag.toLowerCase()) as any) : document.createElement(tag)
-}
-
-function syncelement(p: HTMLElement, i: number, tag: string, props: Props | null, comp?: FComponent): HTMLElement {
-
+function syncelement(p: HTMLElement, i: number, tag: string, props: Props | undefined, comp?: FComponent): HTMLElement {
     const c: any = p.childNodes[i]
-
-    //console.log("syncelement", p, i, c, tag)
-
     if (!c || c.tagName != tag) {
         const n = createElement(tag)
         c ? c.replaceWith(n) : p.appendChild(n)
@@ -164,24 +256,34 @@ function synctextnode(p: HTMLElement, i: number, text) {
     }
 }
 
-function setcomp(n: Element, comp?: CompInfo) {
-    if (!comp) return
-    n.comp = comp
-    comp.n = n
-    if (comp.instance) comp.instance.element = n
-    let name = getHName(comp.factory)
-    setAttributeSmooth(n, "comp", name)
-    comp.instance?.mounted?.(n)
+function setcomp(e: Element, htag: HTFC) {
+
+    console.log("setcomp", e, htag)
+
+    // attach component info only on function or class components instead of the every html element:
+    // if(typeof ((comp?.factory as any).tag) != "function" ) return
+
+    //e.h = htag
+
+    // class component, first time, instance must have been set before
+    if (isClassComponent(htag) && !htag.i) {
+        //htag.i.element = e
+        //htag.i?.mounted?.(e)
+        throw "??? tbd"
+    }
+
+    // debug
+    e.setAttribute('comp', getHName(htag)!)
 }
 
-function getHName(h: HNode) {
+function getHName(h: H) {
     switch (typeof h) {
-        case "string":
-        case "number":
+        case 'string':
+        case 'number':
             return h.toString()
-        case "object":
+        case 'object':
             switch (typeof h.tag) {
-                case "string":
+                case 'string':
                     return h.tag.toLowerCase()
                 default:
                     return h.tag.name
@@ -189,58 +291,56 @@ function getHName(h: HNode) {
     }
 }
 
-const iswebcomponent = (h: HTag) => (h.tag as string).includes("-")
+const iswebcomponent = (h: HTag) => (h.tag as string).includes('-')
 
-function sync(p: HTMLElement, i: number, h: HNode, compinfo?: CompInfo, syncchildren = true): number {
+function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
 
     // console.log("sync", p, i, h, compinfo, compinfo && getHName(compinfo.factory))
+    let syncchildren = !uc.patchElementOnly
 
     switch (typeof h) {
-
-        case "string":
-        case "number":
-        case "boolean":
+        case 'string':
+        case 'number':
+        case 'boolean':
             synctextnode(p, i, h.toString())
             return i + 1
 
-        case "object":
+        case 'object':
             switch (typeof h.tag) {
-                case "function":
+                case 'function':
+                    // let cc = p.childNodes[i]?.h?.i
+                    // if (cc?.constructor === h.tag && cc.update) {
+                    //     cc.update?.(uc)
+                    //     return i + 1
+                    // }
+                    console.log("tbd: update life cycle", h.tag)
 
-                    let cc = p.childNodes[i]?.comp?.instance
-                    if (cc?.constructor === h.tag && cc.update) {
-                        cc.update?.()
-                        return i + 1
-                    }
+                    const h2 = evalComponent(h as HComp, p.childNodes[i])
+                    return h2 ? sync(p, i, h2, uc) : i // can be null, if function component returns null | undefined
 
-                    const [h2, ci] = evalComponent(h as HFunction | HClassComp, p.childNodes[i])
-                    return h2 ? sync(p, i, h2, ci) : i // can be null, if function component returns null | undefined
-
-                case "string": {
+                case 'string': {
                     switch (h.tag) {
-                        case "jsxf":
-                            return syncChildren(p, h, i)
+                        case 'jsxf':
+                            return syncChildren(p, h, i, uc)
 
                         default:
-                            const props = evalprops(h.props)
+                            const props = evaluate(h.props)
                             const n = syncelement(p, i, h.tag, props)
 
                             if (props?.patch) {
                                 // call patch() instead of processing children
                                 props?.patch(n)
-                            }
-                            else if (n.comp?.instance?.update) {
+                            } else if (n.h?.i?.update) {
                                 // call update() instead of processing children
-                                let o = n.comp?.instance
-                                o.update?.()
-                            }
-                            else if (syncchildren && !iswebcomponent(h as HTag)) {
+                                let o = n.h?.i
+                                o.update?.(uc)
+                            } else if (syncchildren && !iswebcomponent(h as HTag)) {
                                 // standard children processing
-                                const j = syncChildren(n, h, 0)
+                                const j = syncChildren(n, h, 0, uc)
                                 removeexcesschildren(n, j)
                             }
 
-                            setcomp(n, compinfo ?? new CompInfo(h)) // ?? : could attach comps only to elements with id/class property. or could mark nodes in updateview as update targets and then lazily attach comp
+                            setcomp(n, h) // ?? : could attach comps only to elements with id/class property. or could mark nodes in updateview as update targets and then lazily attach comp
                             return i + 1
                     }
                 }
@@ -250,35 +350,40 @@ function sync(p: HTMLElement, i: number, h: HNode, compinfo?: CompInfo, syncchil
     }
 }
 
-function syncChildren(e: HTMLElement, h: H, j: number): number {
-    const hcn =
-        evaluate(h.children)
-            .flatMap(evaluate) // children passed from components
-            .filter(c => c !== null && c !== undefined && c !== false) as HNode[]
-    hcn.forEach(hc => j = sync(e, j, hc))
+function syncChildren(e: HTMLElement, h: HTag | HComp, j: number, uc: UpdateContext): number {
+    const hcn = evaluate(h.children)
+        .flatMap(evaluate) // children passed from components
+        .filter(c => c !== null && c !== undefined) as H[]
+    hcn.forEach(hc => {
+        let j0 = j;
+        j = sync(e, j, hc, uc);
+        (e.childNodes[j0]).h = hc as any
+        return j;
+    })
     return j
 }
 
 // patches given dom and comp
-export function patch(e: Node, h: HNode, patchElementOnly = false) {
+export function patch(e: Node, h: H, uc: UpdateContext = {}) {
     //console.log("%cpatch", `background:orange;color:white;padding:2px;font-weight:bold`, e, h)
     const p = e.parentElement as HTMLElement
     const i = [].indexOf.call(p.childNodes, e) // tell typescript that parentElement is not null
-    let comp = (e.comp?.factory as HFunction)?.tag === (h as any).tag ? e.comp as CompInfo : new CompInfo(h)
-    sync(p, i, h, comp, !patchElementOnly)
+    e.h = h as any
+    sync(p, i, h, uc)
 }
 
 // uses attached comps to patch elements
-export function updateview(selector: string | Node = "body", patchElementOnly?: false, replace = false) {
-    //console.log(`updateview(%c${selector})`, "background:#d2f759;padding:2px")
-    const ns = (typeof selector == "string") ? document.querySelectorAll(selector) : [selector]
+export function updateview(selector: string | Node = 'body', uc: UpdateContext = {}) {
+    // console.log(`updateview(%c${selector}, ${patchElementOnly})`, "background:#d2f759;padding:2px")
+    const ns = typeof selector == 'string' ? document.querySelectorAll(selector) : [selector]
     let n: Node | null
     for (n of ns) {
-        while (n && !n.comp) n = n.parentElement
+        while (n && !n.h) n = n.parentElement
         if (!n) continue
 
-        if (replace) (n as HTMLElement).replaceChildren()
-        patch(n, n.comp.factory, patchElementOnly)
+        if (uc.replace) (n as HTMLElement).replaceChildren()
+        if (!n.h) throw ["cannot update, because html was not created with jmx: no h exists on the node", n]
+        patch(n, n.h, uc)
     }
 }
 

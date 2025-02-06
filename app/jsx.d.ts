@@ -36,7 +36,6 @@ declare global {
             // }
             a: AnchorHTMLAttributes & {
                 // model: TreeNode
-
                 [key: string]: any
             }
             hase: HtmlHTMLAttributes
