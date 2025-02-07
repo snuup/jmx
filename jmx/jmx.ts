@@ -350,7 +350,7 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
                                 removeexcesschildren(n, j)
                             }
 
-                            setcomp(n, h) // ?? : could attach comps only to elements with id/class property. or could mark nodes in updateview as update targets and then lazily attach comp
+                            // setcomp(n, h) // ?? : could attach comps only to elements with id/class property. or could mark nodes in updateview as update targets and then lazily attach comp
                             return i + 1
                     }
                 }
