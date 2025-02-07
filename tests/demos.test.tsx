@@ -1,4 +1,4 @@
-import { FComponent, HFunction, HTag, jsx, patch } from '../jmx/jmx'
+import { FComponent, HClass, HFunction, HTag, jsx, patch } from '../jmx/jmx'
 import { describe, it, expect, beforeEach, vitest } from 'vitest'
 
 beforeEach(() => {
@@ -57,12 +57,12 @@ describe('JMX dom tests', () => {
             tag: "BODY",
             children: () => [
                 {
-                    tag: F,
+                    tag: _F,
                     props: () => ({
                         x: 7
                     }),
                     children: () => []
-                }]
+                } as HFunction]
         }
 
         patch(document.body, a)

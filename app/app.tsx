@@ -10,8 +10,6 @@ let App = (
     <body>
 
         <Map a={33} s='s' />
-
-        {/*
         <Numerotti n={m.i} />
         <Numerotti n={m.i * 10} />
         <Numerotti n={m.i * 100} />
@@ -19,14 +17,14 @@ let App = (
         <span>hase {42} {true} {false}</span>
         <Numerotti n={m.i} />
 
-            hase mit <Numero n={m.i} /> karotten
-            ente mit <Numero n={m.i} /> schnecken
-            <Map a={m.i} s="hase" />
-            <ul>
-                <li>aa</li>
-                <li>bb</li>
-            </ul>
-            */}
+        hase mit <Numero n={m.i} /> karotten
+        ente mit <Numero n={m.i} /> schnecken
+        <Map a={m.i} s="hase" />
+        <ul update={() => { console.log("no patchin") }} >
+            <li>aa{m.i}</li>
+            <li>bb</li>
+        </ul>
+
     </body>
 )
 

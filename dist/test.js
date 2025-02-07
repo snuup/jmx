@@ -104,7 +104,7 @@ function rebind(o) {
   return o;
 }
 function jsx() {
-  throw "";
+  throw "jmx plugin not configured";
 }
 class BaseComp {
   constructor(props) {
@@ -203,6 +203,7 @@ let isClassComponent = (h) => h.tag.prototype?.view;
 function evalComponent(h, n) {
   console.log("evalComponent", h, n);
   const props = evaluate(h.props);
+  console.log("die props", props);
   let isupdate = n?.h?.tag === h.tag;
   if (isClassComponent(h)) {
     if (!isupdate) {
@@ -250,8 +251,9 @@ function synctextnode(p, i, text) {
 }
 function setcomp(e, htag) {
   console.log("setcomp", e, htag);
-  if (isClassComponent(htag) && !htag.i) {
-    throw "??? tbd";
+  if (isClassComponent(htag)) {
+    htag.i.element = e;
+    htag.i.mounted?.(e);
   }
 }
 function getHName(h) {
@@ -270,6 +272,7 @@ function getHName(h) {
 }
 const iswebcomponent = (h) => h.tag.includes("-");
 function sync(p, i, h, uc) {
+  console.log("sync", p.tagName, i, h, p.childNodes[i]);
   let syncchildren = !uc.patchElementOnly;
   switch (typeof h) {
     case "string":
@@ -280,9 +283,11 @@ function sync(p, i, h, uc) {
     case "object":
       switch (typeof h.tag) {
         case "function":
-          console.log("tbd: update life cycle", h.tag);
+          console.log("tbd: update life cycle methods");
           const h2 = evalComponent(h, p.childNodes[i]);
-          return h2 ? sync(p, i, h2, uc) : i;
+          let r = h2 ? sync(p, i, h2, uc) : i;
+          setcomp(p.childNodes[i], h);
+          return r;
         case "string": {
           switch (h.tag) {
             case "jsxf":
@@ -299,7 +304,6 @@ function sync(p, i, h, uc) {
                 const j = syncChildren(n, h, 0, uc);
                 removeexcesschildren(n, j);
               }
-              setcomp(n, h);
               return i + 1;
           }
         }
@@ -309,6 +313,7 @@ function sync(p, i, h, uc) {
   }
 }
 function syncChildren(e, h, j, uc) {
+  console.log("syncChildren", e.tagName, j);
   const hcn = evaluate(h.children).flatMap(evaluate).filter((c) => c !== null && c !== void 0);
   hcn.forEach((hc) => {
     let j0 = j;
@@ -20901,9 +20906,9 @@ var VitestIndex = /* @__PURE__ */ Object.freeze({
   vitest
 });
 
-// jmx transformed:
 beforeEach(() => {
-  document.body.innerHTML = "";
+  document.body.replaceChildren();
+  document.body.getAttributeNames().forEach(a => document.body.removeAttribute(a));
 });
 describe("JMX dom tests", () => {
   it("HTag 1", () => {
@@ -20942,17 +20947,19 @@ describe("JMX dom tests", () => {
     globalExpect(document.body.innerHTML).toBe("hase42truefalse");
   });
   it("HFunction", () => {
-    let F = x => ({
+    let F = ({
+      x
+    }) => ({
       tag: "DIV",
       props: () => ({
         class: "classo" + x * 3
       }),
       children: () => [x * 2]
     });
-    let _hh =
+    let a =
     
     {
-      tag: "ARTICLE",
+      tag: "BODY",
       children: () => [
       
       {
@@ -20963,17 +20970,27 @@ describe("JMX dom tests", () => {
         children: () => []
       }]
     };
-    let f = {
-      tag: ({
-        x
-      }) => ({
-        tag: "DIV",
+    let _F = ({
+      x
+    }) => ({
+      tag: "DIV",
+      props: () => ({
+        class: "classo" + x * 3
+      }),
+      children: () => [x * 2]
+    });
+    let _a = {
+      tag: "BODY",
+      children: () => [{
+        tag: F,
         props: () => ({
-          class: "classo" + x * 3
+          x: 7
         }),
-        children: () => ["hase", 42, true, false]
-      })
+        children: () => []
+      }]
     };
+    patch(document.body, a);
+    globalExpect(document.body.outerHTML).toBe('<body><div class="classo21">14</div></body>');
   });
 });
 

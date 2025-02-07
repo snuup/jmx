@@ -13,7 +13,7 @@ declare global {
     }
 }
 
-export function setape(n: HTMLElement, props: Props | null, clearold, refresh) {
+export function setape(n: HTMLElement, props: Props | undefined, clearold, refresh) {
     //console.log('setape', { n, props, clearold })
     if (clearold) {
         clearattrs(n, props, refresh)

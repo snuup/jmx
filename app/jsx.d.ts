@@ -18,7 +18,7 @@
 //      Dovydas Navickas <https://github.com/DovydasNavickas>
 //      Stéphane Goetz <https://github.com/onigoetz>
 
-import { EventState } from "../../app/base/types"
+// import { EventState } from "../../app/base/types"
 
 declare global {
     namespace JSX {
@@ -101,20 +101,20 @@ interface EventHandler<E extends Event> {
 }
 
 export interface AdditionalElementAttributes {
-    key?: any // jmx
-    ref?: any
+    //key?: any // jmx
+    //ref?: any
     mounted?: (e: HTMLElement) => void
     update?: (e: HTMLElement) => void
-    fclick?: Function
-    fmousedown?: Function
-    fsubmit?: Function
-    cmd?: string
+    //fclick?: Function
+    //fmousedown?: Function
+    //fsubmit?: Function
+    //cmd?: string
     //stopPropagation?:boolean // implementation to be completed
-    model?: any
-    patch?: any
+    //model?: any
+    //patch?: any
     // if?: Truthy | boolean | (() => boolean)
-    fargs?: any
-    replace?: boolean
+    //fargs?: any
+    //replace?: boolean
 }
 
 export interface HTMLAttributes extends AdditionalElementAttributes {
