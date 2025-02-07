@@ -4,9 +4,13 @@
   "devDependencies": {
     "@babel/plugin-transform-typescript": "^7.20.2",
     "@babel/types": "^7.19.3",
+    "@vitest/browser": "^3.0.5",
     "@vitest/ui": "^3.0.5",
     "happy-dom": "^16.8.1",
     "vite-node": "^3.0.5",
     "vitest": "^3.0.5"
+  },
+  "scripts": {
+    "test:browser": "vitest --workspace=vitest.workspace.ts"
   }
 }

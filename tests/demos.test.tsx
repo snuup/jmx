@@ -2,7 +2,7 @@ import { FComponent, HFunction, HTag, jsx, patch } from '../jmx/jmx'
 import { describe, it, expect, beforeEach, vitest } from 'vitest'
 
 beforeEach(() => {
-    document.body.innerHTML = '' // Clear the document body
+    document.body.outerHTML = "" // also clears styles
 })
 
 describe('JMX dom tests', () => {
@@ -39,13 +39,33 @@ describe('JMX dom tests', () => {
 
     it('HFunction', () => {
 
-        debugger
-
         let F = ({ x }: { x: number }) => <div class={"classo" + x * 3}>{x * 2}</div>
-        let a = <article><F x={7} /></article>
+        let a = <body><F x={7} /></body>
+
+        let _F = ({ x }) => (
+            {
+                tag: "DIV",
+                props: () => ({
+                    class: "classo" + x * 3
+                }),
+                children: () => [x * 2]
+            })
+
+        let _a =
+        {
+            tag: "BODY",
+            children: () => [
+                {
+                    tag: F,
+                    props: () => ({
+                        x: 7
+                    }),
+                    children: () => []
+                }]
+        }
 
         patch(document.body, a)
-        expect(document.body.outerHTML).toBe("<article></article>")
+        expect(document.body.outerHTML).toBe('<body><div class="classo21">14</div></body>')
     })
 
 })

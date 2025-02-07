@@ -21,8 +21,8 @@ function lazify(expression) {
     return t.arrowFunctionExpression([], expression)
 }
 
-function transform(code: string, id: string) {
-    const ast = parse(code, { sourceType: "module", sourceFilename: id })
+function transform(code: string, filename: string) {
+    const ast = parse(code, { sourceType: "module", sourceFilename: filename })
 
     traverse(ast, {
         CallExpression: function (path) {
@@ -55,8 +55,8 @@ function transform(code: string, id: string) {
 export const jmxplugin = () => {
     return {
         name: "vite-plugin-jmx",
-        transform(raw, id) {
-            return (id.endsWith(".tsx")) ? transform(raw, id) : raw
+        transform(raw, filename) {
+            return (filename.endsWith(".tsx")) ? transform(raw, filename) : raw
         }
     }
 }
