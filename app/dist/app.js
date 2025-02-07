@@ -1,5 +1,3 @@
-const app = '';
-
 function mount(x) {
   Object.assign(globalThis, x);
 }
@@ -155,21 +153,6 @@ function setcomp(e, htag) {
   console.log("setcomp", e, htag);
   if (isClassComponent(htag) && !htag.i) {
     throw "??? tbd";
-  }
-  e.setAttribute("comp", getHName(htag));
-}
-function getHName(h) {
-  switch (typeof h) {
-    case "string":
-    case "number":
-      return h.toString();
-    case "object":
-      switch (typeof h.tag) {
-        case "string":
-          return h.tag.toLowerCase();
-        default:
-          return h.tag.name;
-      }
   }
 }
 const iswebcomponent = (h) => h.tag.includes("-");

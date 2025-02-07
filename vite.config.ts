@@ -1,10 +1,25 @@
 import { jmxplugin } from "./jmx/vite-plugin-jmx" // "./jmx/ plugin/plugin/vite-plugin-jmx"
-import * as shared from "./vite.config.shared"
+//import * as shared from "./vite.config.shared"
 
 export default {
-    ...shared,
+    root: "app",
+    base:"",
+    esbuild: {
+        ignoreAnnotations: true,
+        target: 'esnext',
+    },
+    plugins: [
+        jmxplugin()
+    ],
     build: {
-        rollupOptions: {},
+        target: 'esnext', // !!
+        minify: false,
+        rollupOptions: {
+            output: {
+                entryFileNames: `app.js`,
+                assetFileNames: `[name].[ext]`
+            },
+        },
         css: {
             devSourcemap: true,
         },
