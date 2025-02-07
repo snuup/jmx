@@ -14,7 +14,7 @@ function rebind(o) {
 // the following types describe the js expression we get from tsx after conversion be our jmx plugin
 
 // dumy function for app code - jmxplugin removes calls to this function
-export function jsx(): HTag { throw '' } // later
+export function jsx(): HTag { throw 'jmx plugin not configured' } // later
 
 type Expr<T> = () => T
 

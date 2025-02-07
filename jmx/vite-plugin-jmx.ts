@@ -7,7 +7,7 @@ import * as t from "@babel/types"
 
 function lazifyIfNonLiteral(expression) {
     //console.log("lazifyIfNonLiteral", expression);
-    if(!expression) console.log("see here:", expression);
+    if (!expression) console.log("see here:", expression)
 
     if (t.isCallExpression(expression)) {
         //console.log("expression.callee.name", (expression.callee as any).name)
@@ -53,17 +53,17 @@ function transform(code: string) {
         },
     })
 
-    const output = generate(ast, code)
+    const output = generate(ast, { sourceMaps: true }, code)
     return output.code
 }
 
-export const jmxplugin = (options = {}) => {
+export const jmxplugin = () => {
     return {
         name: "vite-plugin-jmx",
         transform(raw, id) {
             if (id.endsWith(".tsx")) {
                 return "// jmx transformed:\n" + transform(raw)
             } else raw
-        },
+        }
     }
 }

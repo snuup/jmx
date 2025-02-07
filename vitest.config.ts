@@ -15,7 +15,7 @@ export default {
         }
     },
     plugins: [
-        jmxplugin()
+        // jmxplugin()
     ],
     test: {
         environment: 'happy-dom', // Set Happy DOM as the test environment
