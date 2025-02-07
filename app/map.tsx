@@ -2,13 +2,17 @@ import { jsx, updateview } from '../jmx/jmx'
 
 class BaseComp<P> {
     public element: HTMLElement
-    constructor(public props: P) { }
     updateview() { updateview(this.element) }
 }
 
 export class Map extends BaseComp<{ a: number; s: string }> {
 
     state = 500
+
+    constructor() {
+        super()
+        console.log("Map ctor");
+    }
 
     increment() {
         this.state++

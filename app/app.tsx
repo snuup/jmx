@@ -4,14 +4,20 @@ import { m } from './model'
 import { Numero } from './number'
 import { Map } from './map'
 
-export let Numerotti = ({ n }: { n: number }) => <div class="carrots">{n}</div>
+let a: Action<number>
+
+export let Numerotti = ({ n, mounted }: { n: number, mounted?: Action<HTMLElement> }) => {
+    return <div class="carrots">{n}</div>
+}
 
 let App = (
     <body>
 
-        <Map a={33} s='s' />
-        <Numerotti n={m.i} />
-        <Numerotti n={m.i * 10} />
+        <Numerotti n={m.i * 10} mounted={e => console.log(e)} />
+        {/* <Map a={33} s='s' /> */}
+        {/* <Map a={55} s='s' /> */}
+        {/* <Numerotti n={m.i} />
+
         <Numerotti n={m.i * 100} />
         <Numero n={m.i} />
         <span>hase {42} {true} {false}</span>
@@ -23,7 +29,7 @@ let App = (
         <ul update={() => { console.log("no patchin") }} >
             <li>aa{m.i}</li>
             <li>bb</li>
-        </ul>
+        </ul> */}
 
     </body>
 )

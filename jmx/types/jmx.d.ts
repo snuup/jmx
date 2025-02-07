@@ -5,8 +5,8 @@ type Expr<T> = () => T
 type ChildrenH = (H | undefined)[]
 type Children = Expr<ChildrenH>
 
+type Action<T> = (arg: T) => void
 type Action = () => void
-type ActionT<T> = (arg: T) => void
 
 type Props = Record<string, any> // tbd: add types for update and so on
 

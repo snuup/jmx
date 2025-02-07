@@ -12,21 +12,33 @@ export const jsxf = (props, { children }) => ({ tag: 'jsxf', children })
 
 const evaluate = <T>(expr: T | Expr<T>): T => expr instanceof Function ? evaluate(expr()) : expr
 
+let istag = (h: H): h is HTagComp => typeof h == "object"
+
+let iscomp = (h: H): h is HFunction => typeof ((h as any).tag) == "function"
+
 let isclasscomponent = (h: HTFC): h is HClass => (h.tag as any).prototype?.view
 
-let istag = (h: H): h is HTagComp => typeof h === "object"
+function evalComponent(h: HComp, n: Node | undefined): H {
 
-function evalComponent(h: HComp, n: Node): H {
+    console.log("evalComponent", h, n)
 
     const props = evaluate(h.props)
-    let isupdate = n?.h === h // was was already computed with this h
+    let isupdate = n?.h?.tag == h.tag // was was already computed with this h
     console.log("isupdate", isupdate)
 
     if (isclasscomponent(h)) {
         // HClass
-        if (!isupdate) h.i = rebind(new h.tag()) // rebind is important for simple event handlers
-        h.i!.props = props
-        return h.i!.view() // inefficient: we compute view() although we do not use if then the component has an update function
+        let hc: HClass
+        if ((hc = n?.h as HClass)?.i) {
+            // instance available
+            console.log("class update")
+        }
+        else {
+            //n.h = hc = h
+            (hc = h).i = rebind(new h.tag()) // rebind is important for simple event handlers
+        }
+        hc.i.props = props
+        return hc.i.view() // inefficient: we compute view() although we do not use if then the component has an update function
     } else {
         // HFunction
         let f: FComponent = h.tag
@@ -65,7 +77,7 @@ function synctextnode(p: HTMLElement, i: number, text) {
  */
 function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
 
-    // console.log("sync", p.tagName, i, h, p.childNodes[i])
+    console.log("sync", p.tagName, i, h, p.childNodes[i])
 
     switch (typeof h) {
 
@@ -83,20 +95,13 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
 
                     const h2 = evalComponent(h as HComp, p.childNodes[i])
                     let r = h2 ? sync(p, i, h2, uc) : i // can be null, if function component returns null | undefined
-
-                    if (isclasscomponent(h) && !h.i.element) { // if element is not yet set, the component was newly created
-                        let e = p.childNodes[i] as HTMLElement
-                        console.log("mounted!")
-                        h.i!.element = e
-                        h.i!.mounted?.(e)
-                    }
                     return r
 
                 case 'string': {
                     switch (h.tag) {
 
                         case 'jsxf':
-                            return syncChildren(p, h, i, uc)
+                            return syncchildren(p, h, i, uc)
 
                         default:
 
@@ -113,7 +118,7 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
                                 o.update?.(uc)
                             } else if (!uc.patchElementOnly && !iswebcomponent(h as HTag)) {
                                 // standard children processing
-                                const j = syncChildren(n, h, 0, uc)
+                                const j = syncchildren(n, h, 0, uc)
                                 removeexcesschildren(n, j)
                             }
 
@@ -128,7 +133,9 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
 
 /** synchronizes children starting at the i-th element.
  *  returns the index of the last child synchronized */
-function syncChildren(e: HTMLElement, h: HTag | HComp, i: number, uc: UpdateContext): number {
+function syncchildren(e: HTMLElement, h: HTag | HComp, i: number, uc: UpdateContext): number {
+
+    console.log("synchchildren", e.tagName, h, i);
 
     (evaluate(h.children) ?? [])
         .flatMap(evaluate)
@@ -137,7 +144,28 @@ function syncChildren(e: HTMLElement, h: HTag | HComp, i: number, uc: UpdateCont
             let i0 = i
             i = sync(e, i, hc, uc)
             let cn = e.childNodes[i0]
-            if (istag(hc)) cn.h = hc // the node here might not exist before the call to sync
+
+            //   console.log("hc", hc)
+
+            if (iscomp(hc)) {
+
+                console.log("comp", hc, cn)
+
+                if(!cn.h){
+
+                    console.log("mounted!")
+
+                    if (isclasscomponent(hc)) { // if element is not yet set, the component was newly created
+                        hc.i.element = e
+                        hc.i.mounted?.(e)
+                    }
+                    else{
+                        console.log("fun component mounted")
+                    }
+
+                    cn.h = hc // the node here might not exist before the call to sync
+                }
+            }
         })
 
     return i
