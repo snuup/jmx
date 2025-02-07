@@ -2,7 +2,7 @@ import { mount } from '../base/common'
 import { jsx, patch, updateview } from '../jmx/jmx'
 import { m } from './model'
 import { Numero } from './number'
-import { Map } from './map'
+import { Map, TextComp } from './map'
 
 let a: Action<number>
 
@@ -13,8 +13,10 @@ export let Numerotti = ({ n, mounted }: { n: number, mounted?: Action<HTMLElemen
 let App = (
     <body>
 
-        <Numerotti n={m.i * 10} mounted={e => console.log("Numerotti mounted", e)} />
-        <Map a={m.i} s='s' />
+        <TextComp a={123} s='jaja-sss-1' />
+        <TextComp a={123} s='jaja-sss-2' />
+        {/* <Numerotti n={m.i * 10} mounted={e => console.log("Numerotti mounted", e)} /> */}
+        {/* <Map a={m.i} s='s' /> */}
         {/* <Map a={55} s='s' /> */}
         {/* <Numerotti n={m.i} />
 

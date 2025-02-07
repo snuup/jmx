@@ -10,6 +10,8 @@ export class Map extends BaseComp<{ a: number; s: string }> {
 
     state = 500
 
+    // life
+
     constructor() {
         super()
         console.log("Map ctor")
@@ -19,25 +21,28 @@ export class Map extends BaseComp<{ a: number; s: string }> {
         console.log("Map mounted", e)
     }
 
+    update() {
+        console.log("updating", this, arguments)
+    }
+
+    // core
+
     increment() {
         this.state++
         this.updateview()
     }
 
-    __update() {
-        console.log("updating", this, arguments)
-    }
+    // view
 
     view() {
         let r = <div class='map'>
             {this.props.a}{this.state}
             <button onclick={this.increment} >increment</button>
         </div>
-
         return r
     }
 }
 
 export class TextComp extends BaseComp<{ a: number; s: string }> {
-
+    view() { return "hase" + this.props.s + Date.now() }
 }

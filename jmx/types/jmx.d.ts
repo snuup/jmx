@@ -23,7 +23,7 @@ interface IClassComponent {
 }
 
 interface CComponent {
-    new(): IClassComponent
+    new(props: Props): IClassComponent
 }
 
 type HTag =

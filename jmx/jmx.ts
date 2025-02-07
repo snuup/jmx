@@ -32,12 +32,12 @@ function evalComponent(h: HComp, n: Node | undefined): H {
         if ((hc = n?.h as HClass)?.i) {
             // instance available
             console.log("class update")
+            hc.i.props = props
         }
         else {
             //n.h = hc = h
-            (hc = h).i = rebind(new h.tag()) // rebind is important for simple event handlers
+            (hc = h).i = rebind(new h.tag(props!)) // rebind is important for simple event handlers
         }
-        hc.i.props = props
         return hc.i.view() // inefficient: we compute view() although we do not use if then the component has an update function
     } else {
         // HFunction
@@ -193,8 +193,8 @@ export function updateview(selector: string | Node = 'body', uc: UpdateContext =
 export let When = ({ cond }, { children }) => cond && jsxf(null, { children })
 
 export abstract class BaseComp<P extends Props> implements IClassComponent {
-    props: P
     element: Node
+    constructor(public props: P) {} // we do this for jsx. at runtime, we pass the props directly
     updateview() { updateview(this.element) }
     abstract view()
 }
