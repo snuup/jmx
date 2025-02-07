@@ -33,7 +33,7 @@ describe('JMX dom tests', () => {
         }
 
         patch(document.body, h)
-        expect([...document.body.classList]).toEqual(["cc"])
+        expect(document.body.className).toBe("cc")
         expect(document.body.innerHTML).toBe("hase42truefalse")
     })
 
@@ -41,13 +41,15 @@ describe('JMX dom tests', () => {
 
         let _h = x => <div class={"classo" + x * 3}>{x * 2}</div>
 
-        // let h: HFunction = {
-        //     tag: x => ,
-        //     props: () => ({
-        //         class: "cc"
-        //     }),
-        //     children: () => ["hase", 42, true, false]
-        // }
+        let h: HFunction = {
+            tag: () => ({
+                tag: "DIV",
+                props: () => ({
+                    class: "classo" //+ (x * 3)
+                }),
+                children: () => ["hase", 42, true, false]
+            })
+        }
 
     })
 

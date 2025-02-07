@@ -64,7 +64,7 @@ type HFunction =
     {
         tag: FComponent,
         props?: Expr<Props>
-        children: Children
+        children?: Children
     }
 type HClass =
     {
