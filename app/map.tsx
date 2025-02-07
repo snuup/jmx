@@ -1,9 +1,10 @@
-import { jsx, updateview } from '../jmx/jmx'
+import { BaseComp, jsx, updateview } from '../jmx/jmx'
 
-class BaseComp<P> {
-    public element: HTMLElement
-    updateview() { updateview(this.element) }
-}
+// class BaseComp<P> {
+//     public element: HTMLElement
+//     public props: P
+//     updateview() { updateview(this.element) }
+// }
 
 export class Map extends BaseComp<{ a: number; s: string }> {
 
@@ -11,7 +12,11 @@ export class Map extends BaseComp<{ a: number; s: string }> {
 
     constructor() {
         super()
-        console.log("Map ctor");
+        console.log("Map ctor")
+    }
+
+    mounted(e) {
+        console.log("Map mounted", e)
     }
 
     increment() {
@@ -31,4 +36,8 @@ export class Map extends BaseComp<{ a: number; s: string }> {
 
         return r
     }
+}
+
+export class TextComp extends BaseComp<{ a: number; s: string }> {
+
 }

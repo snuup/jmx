@@ -13,8 +13,8 @@ export let Numerotti = ({ n, mounted }: { n: number, mounted?: Action<HTMLElemen
 let App = (
     <body>
 
-        <Numerotti n={m.i * 10} mounted={e => console.log(e)} />
-        {/* <Map a={33} s='s' /> */}
+        <Numerotti n={m.i * 10} mounted={e => console.log("Numerotti mounted", e)} />
+        <Map a={m.i} s='s' />
         {/* <Map a={55} s='s' /> */}
         {/* <Numerotti n={m.i} />
 

@@ -77,7 +77,7 @@ function synctextnode(p: HTMLElement, i: number, text) {
  */
 function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
 
-    console.log("sync", p.tagName, i, h, p.childNodes[i])
+    //console.log("sync", p.tagName, i, h, p.childNodes[i])
 
     switch (typeof h) {
 
@@ -133,41 +133,35 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
 
 /** synchronizes children starting at the i-th element.
  *  returns the index of the last child synchronized */
-function syncchildren(e: HTMLElement, h: HTag | HComp, i: number, uc: UpdateContext): number {
+function syncchildren(p: HTMLElement, h: HTag | HComp, i: number, uc: UpdateContext): number {
 
-    console.log("synchchildren", e.tagName, h, i);
+    //console.log("synchchildren", p.tagName, h, i);
 
     (evaluate(h.children) ?? [])
         .flatMap(evaluate)
         .filter(c => c !== null && c !== undefined) //as H[]
         .forEach(hc => {
             let i0 = i
-            i = sync(e, i, hc, uc)
-            let cn = e.childNodes[i0]
+            i = sync(p, i, hc, uc)
 
-            //   console.log("hc", hc)
-
+            // life cycle calls
             if (iscomp(hc)) {
-
-                console.log("comp", hc, cn)
-
-                if(!cn.h){
-
-                    console.log("mounted!")
-
+                let cn = p.childNodes[i0]
+                if (!cn.h) {
                     if (isclasscomponent(hc)) { // if element is not yet set, the component was newly created
-                        hc.i.element = e
-                        hc.i.mounted?.(e)
+                        hc.i.element = cn
+                        hc.i.mounted?.(cn)
                     }
-                    else{
-                        console.log("fun component mounted")
+                    else {
+                        let props = evaluate(hc.props)
+                        if (props) {
+                            props.mounted?.(cn as HTMLElement)
+                        }
                     }
-
                     cn.h = hc // the node here might not exist before the call to sync
                 }
             }
         })
-
     return i
 }
 
@@ -198,7 +192,8 @@ export function updateview(selector: string | Node = 'body', uc: UpdateContext =
 // lib
 export let When = ({ cond }, { children }) => cond && jsxf(null, { children })
 
-export abstract class BaseComp<P extends any> implements IClassComponent {
+export abstract class BaseComp<P extends Props> implements IClassComponent {
+    props: P
     element: Node
     updateview() { updateview(this.element) }
     abstract view()

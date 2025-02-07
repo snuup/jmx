@@ -8,7 +8,8 @@ type Children = Expr<ChildrenH>
 type Action<T> = (arg: T) => void
 type Action = () => void
 
-type Props = Record<string, any> // tbd: add types for update and so on
+type Props = Record<string, any>
+type FunProps = Props & { mounted?: Action<HTMLElement> } // tbd: add types for update and so on
 
 type FComponent = (props: Props | undefined, children?: ChildrenH) => HTag // show an example for usage of children
 
