@@ -1,9 +1,8 @@
 import { jmxplugin } from "./jmx/vite-plugin-jmx" // "./jmx/ plugin/plugin/vite-plugin-jmx"
-//import * as shared from "./vite.config.shared"
 
 export default {
     root: "app",
-    base:"",
+    base: "/",
     esbuild: {
         ignoreAnnotations: true,
         target: 'esnext',
