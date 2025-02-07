@@ -2,10 +2,16 @@ import { jmxplugin } from "./jmx/vite-plugin-jmx" // "./jmx/ plugin/plugin/vite-
 
 export default {
     build: {
+        target: 'esnext', // !!
+        minify: false,
         rollupOptions: {
             input: {
                 tests: 'tests/demos.test.tsx', // Replace with your test entry file
             },
+            output: {
+                entryFileNames: `test.js`
+            },
+            treeshake: false
         }
     },
     plugins: [

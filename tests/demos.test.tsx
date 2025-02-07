@@ -1,4 +1,4 @@
-import { HFunction, HTag, jsx, patch } from '../jmx/jmx'
+import { FComponent, HFunction, HTag, jsx, patch } from '../jmx/jmx'
 import { describe, it, expect, beforeEach, vitest } from 'vitest'
 
 beforeEach(() => {
@@ -39,18 +39,13 @@ describe('JMX dom tests', () => {
 
     it('HFunction', () => {
 
-        let _h = x => <div class={"classo" + x * 3}>{x * 2}</div>
+        debugger
 
-        let h: HFunction = {
-            tag: () => ({
-                tag: "DIV",
-                props: () => ({
-                    class: "classo" //+ (x * 3)
-                }),
-                children: () => ["hase", 42, true, false]
-            })
-        }
+        let F = ({ x }: { x: number }) => <div class={"classo" + x * 3}>{x * 2}</div>
+        let a = <article><F x={7} /></article>
 
+        patch(document.body, a)
+        expect(document.body.outerHTML).toBe("<article></article>")
     })
 
 })

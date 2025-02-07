@@ -82,7 +82,7 @@ type H = // a hyperscript atom that describes a ...
     | HComp // a dynamic component computing any other HNode
 type HTFC = HTag | HFunction | HClass
 
-export { HTag, HFunction }
+export { HTag, HFunction, FComponent }
 
 /////////////////////////
 
