@@ -204,6 +204,8 @@ function evalComponent(h: HComp, n: Node): H {
     console.log("evalComponent", h, n)
 
     const props = evaluate(h.props)
+    console.log("die props", props)
+
 
     let isupdate = n?.h?.tag === h.tag // was was already computed with this h
 
@@ -266,10 +268,13 @@ function setcomp(e: Element, htag: HTFC) {
     //e.h = htag
 
     // class component, first time, instance must have been set before
-    if (isClassComponent(htag) && !htag.i) {
-        //htag.i.element = e
+    if (isClassComponent(htag)) {
+        htag.i!.element = e
+
+        console.log("mounted tbd")
+
         //htag.i?.mounted?.(e)
-        throw "??? tbd"
+
     }
 
     // debug
@@ -295,7 +300,7 @@ const iswebcomponent = (h: HTag) => (h.tag as string).includes('-')
 
 function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
 
-    // console.log("sync", p, i, h, compinfo, compinfo && getHName(compinfo.factory))
+    console.log("sync", p.tagName, i, h, p.childNodes[i])
     let syncchildren = !uc.patchElementOnly
 
     switch (typeof h) {
@@ -313,10 +318,15 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
                     //     cc.update?.(uc)
                     //     return i + 1
                     // }
-                    console.log("tbd: update life cycle", h.tag)
+                    console.log("tbd: update life cycle methods")
 
-                    const h2 = evalComponent(h as HComp, p.childNodes[i])
-                    return h2 ? sync(p, i, h2, uc) : i // can be null, if function component returns null | undefined
+                    const hresolved = evalComponent(h as HComp, p.childNodes[i])
+                    let r = hresolved ? sync(p, i, hresolved, uc) : i // can be null, if function component returns null | undefined
+
+                    console.log("können wir hier h setzen? das element sollte ja jetzt da sein?", r, p.childNodes[i], hresolved, h)
+                    setcomp(p.childNodes[i] as HTMLElement, h)
+
+                    return r
 
                 case 'string': {
                     switch (h.tag) {
@@ -351,14 +361,16 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
 }
 
 function syncChildren(e: HTMLElement, h: HTag | HComp, j: number, uc: UpdateContext): number {
+    console.log("syncChildren", e.tagName, j)
+
     const hcn = evaluate(h.children)
         .flatMap(evaluate) // children passed from components
         .filter(c => c !== null && c !== undefined) as H[]
     hcn.forEach(hc => {
-        let j0 = j;
+        let j0 = j
         j = sync(e, j, hc, uc);
         (e.childNodes[j0]).h = hc as any
-        return j;
+        return j
     })
     return j
 }

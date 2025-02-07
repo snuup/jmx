@@ -22,7 +22,7 @@ export default {
         globals: true, // Enables Jest-like global functions (`describe`, `it`, `expect`)
         //  exclude: [...configDefaults.exclude, 'e2e/*'], // Optional: Exclude end-to-end tests
 
-        browser: {
+        _browser: {
             provider: 'preview', // or 'webdriverio'
             enabled: true,
             // at least one instance is required

@@ -2,7 +2,8 @@ import { FComponent, HFunction, HTag, jsx, patch } from '../jmx/jmx'
 import { describe, it, expect, beforeEach, vitest } from 'vitest'
 
 beforeEach(() => {
-    document.body.outerHTML = "" // also clears styles
+    document.body.replaceChildren()
+    document.body.getAttributeNames().forEach(a => document.body.removeAttribute(a))
 })
 
 describe('JMX dom tests', () => {

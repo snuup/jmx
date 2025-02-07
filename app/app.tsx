@@ -8,14 +8,17 @@ export let Numerotti = ({ n }: { n: number }) => <div class="carrots">{n}</div>
 
 let App = (
     <body>
+
+        <Map a={33} s='s' />
+
+        {/*
         <Numerotti n={m.i} />
         <Numerotti n={m.i * 10} />
         <Numerotti n={m.i * 100} />
-        {/* <div>
-            <span>hase {42} {true} {false}</span>
-            <Numerotti n={m.i} />
-            <Numero n={m.i} />
-            <Map a={1} s='s' />
+        <Numero n={m.i} />
+        <span>hase {42} {true} {false}</span>
+        <Numerotti n={m.i} />
+
             hase mit <Numero n={m.i} /> karotten
             ente mit <Numero n={m.i} /> schnecken
             <Map a={m.i} s="hase" />
@@ -23,13 +26,12 @@ let App = (
                 <li>aa</li>
                 <li>bb</li>
             </ul>
-        </div> */}
+            */}
     </body>
 )
 
-let ZZZ = x => <body class="cc">{"hase"}{42}{true}{false}{x}</body>
-console.log(ZZZ)
-
+//let ZZZ = x => <body class="cc">{"hase"}{42}{true}{false}{x}</body>
+//console.log(ZZZ)
 
 patch(document.body, App)
 

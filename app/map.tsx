@@ -1,7 +1,7 @@
-import { jsx, updateview } from '../../jmx/jmx'
+import { jsx, updateview } from '../jmx/jmx'
 
 class BaseComp<P> {
-    element: HTMLElement
+    public element: HTMLElement
     constructor(public props: P) { }
     updateview() { updateview(this.element) }
 }
@@ -20,8 +20,11 @@ export class Map extends BaseComp<{ a: number; s: string }> {
     }
 
     view() {
-        return <div class='map'>map {JSON.stringify(this.props.a)} - {this.state}
-            <div><button onclick={this.increment} >increment</button></div>
+        let r = <div class='map'>
+            {this.props.a}{this.state}
+            <button onclick={this.increment} >increment</button>
         </div>
+
+        return r
     }
 }
