@@ -4,13 +4,10 @@ import traverse from "@babel/traverse"
 import generate from "@babel/generator"
 import * as t from "@babel/types"
 
-
 function lazifyIfNonLiteral(expression) {
-    //console.log("lazifyIfNonLiteral", expression);
     if (!expression) console.log("see here:", expression)
 
     if (t.isCallExpression(expression)) {
-        //console.log("expression.callee.name", (expression.callee as any).name)
         if ((expression.callee as any).name == "jsx") {
             return expression
         }
@@ -30,11 +27,10 @@ function transform(code: string) {
     traverse(ast, {
         CallExpression: function (path) {
             if (path.node.callee.name == "jsx") {
-                // path.node.callee.name = "aaaa"
                 let args = path.node.arguments
 
                 const tag = args[0]
-                if (t.isStringLiteral(tag)) tag.value = tag.value.toUpperCase() // convert tagname to uppercase
+                if (t.isStringLiteral(tag)) tag.value = tag.value.toUpperCase()
                 let tagProperty = t.objectProperty(t.identifier("tag"), tag)
 
                 let props = args[1]
@@ -48,13 +44,13 @@ function transform(code: string) {
                 let cn = t.arrayExpression(args.slice(2))
                 let childrenProperty = t.objectProperty(t.identifier("children"), lazify(cn))
 
-                path.replaceWith(t.objectExpression([tagProperty, propsProperty, childrenProperty].filter(x => !!x))) // remove props if undefined
+                path.replaceWith(t.objectExpression([tagProperty, propsProperty, childrenProperty].filter(x => !!x)))
             }
         },
     })
 
     const output = generate(ast, { sourceMaps: true }, code)
-    return output.code
+    return { code: output.code, map: output.map }
 }
 
 export const jmxplugin = () => {
@@ -62,8 +58,14 @@ export const jmxplugin = () => {
         name: "vite-plugin-jmx",
         transform(raw, id) {
             if (id.endsWith(".tsx")) {
-                return "// jmx transformed:\n" + transform(raw)
-            } else raw
+                const result = transform(raw)
+                return {
+                    code: "// jmx transformed:\n" + result.code,
+                    map: result.map
+                }
+            } else {
+                return raw
+            }
         }
     }
 }
