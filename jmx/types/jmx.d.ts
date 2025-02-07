@@ -1,5 +1,5 @@
 // the following types describe the js expression we get from tsx after conversion be our jmx plugin
-//
+
 type Expr<T> = () => T
 
 type ChildrenH = (H | undefined)[]
@@ -46,6 +46,7 @@ type HClass =
         i?: IClassComponent
     }
 type HComp = HFunction | HClass
+type HTagComp = HTag | HComp
 type H = // a hyperscript atom that describes a ...
     | string // text node
     | number // text node

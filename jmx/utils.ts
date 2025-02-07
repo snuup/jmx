@@ -9,4 +9,9 @@ export function rebind(o) {
 }
 
 /** remove all children from n with index >= i */
-export let removeExcessChildren = (n: HTMLElement, i: number) => { let c: ChildNode; while ((c = n.childNodes[i])) c.remove() }
+export let removeexcesschildren = (n: HTMLElement, i: number) => { let c: ChildNode; while ((c = n.childNodes[i])) c.remove() }
+
+export let iswebcomponent = (h: HTag) => (h.tag as string).includes('-')
+
+// lib
+export let When = ({ cond }, { children }) => cond && jsxf(null, { children })

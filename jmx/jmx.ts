@@ -1,15 +1,20 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { setape } from './props'
-import { rebind, removeExcessChildren } from './utils'
+import { iswebcomponent, rebind, removeexcesschildren } from './utils'
 
-// dumy function for app code - jmx-plugin removes calls to this function
-export function jsx(): HTag { throw 'jmx plugin not configured' } // later
+const enum NodeType { // vaporizes (but for that must be in this file, otherwise not)
+    TextNode = 3
+}
+
+export function jsx(): HTag { throw 'jmx plugin not configured' } // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it
 
 export const jsxf = (props, { children }) => ({ tag: 'jsxf', children })
 
 const evaluate = <T>(expr: T | Expr<T>): T => expr instanceof Function ? evaluate(expr()) : expr
 
-let isClassComponent = (h: HTFC): h is HClass => (h.tag as any).prototype?.view
+let isclasscomponent = (h: HTFC): h is HClass => (h.tag as any).prototype?.view
+
+let istag = (h: H): h is HTagComp => typeof h === "object"
 
 function evalComponent(h: HComp, n: Node): H {
 
@@ -17,7 +22,7 @@ function evalComponent(h: HComp, n: Node): H {
     let isupdate = n?.h === h // was was already computed with this h
     console.log("isupdate", isupdate)
 
-    if (isClassComponent(h)) {
+    if (isclasscomponent(h)) {
         // HClass
         if (!isupdate) h.i = rebind(new h.tag()) // rebind is important for simple event handlers
         h.i!.props = props
@@ -29,8 +34,6 @@ function evalComponent(h: HComp, n: Node): H {
         return f(props, cn)
     }
 }
-
-
 
 function syncelement(p: HTMLElement, i: number, tag: string, props: Props | undefined, comp?: FComponent): HTMLElement {
     const c: any = p.childNodes[i]
@@ -49,15 +52,13 @@ function syncelement(p: HTMLElement, i: number, tag: string, props: Props | unde
 
 function synctextnode(p: HTMLElement, i: number, text) {
     const c = p.childNodes[i]
-    if (c && c.nodeType == 3) {
-        if (c.textContent != text) c.textContent = text
+    if (c && c.nodeType == NodeType.TextNode) {
+        if (c.textContent != text) c.textContent = text // firefox updates even equal text, loosing an existing text selection
     } else {
         const tn = document.createTextNode(text)
         c ? c.replaceWith(tn) : p.appendChild(tn)
     }
 }
-
-const iswebcomponent = (h: HTag) => (h.tag as string).includes('-')
 
 function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
 
@@ -82,9 +83,9 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
                     const h2 = evalComponent(h as HComp, p.childNodes[i])
                     let r = h2 ? sync(p, i, h2, uc) : i // can be null, if function component returns null | undefined
 
-                    if (isClassComponent(h)) {
+                    if (isclasscomponent(h)) {
                         let e = p.childNodes[i] as HTMLElement
-                        console.log("tbd: do not call mount on every update");
+                        console.log("tbd: do not call mount on every update")
 
                         h.i!.element = e
                         h.i!.mounted?.(e)
@@ -94,12 +95,14 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
 
                 case 'string': {
                     switch (h.tag) {
+
                         case 'jsxf':
                             return syncChildren(p, h, i, uc)
 
                         default:
-                            const props = evaluate(h.props)
-                            const n = syncelement(p, i, h.tag, props)
+
+                            let props = evaluate(h.props)
+                            let n = syncelement(p, i, h.tag, props)
 
                             if (props?.update) {
                                 // call patch() instead of processing children
@@ -112,10 +115,9 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
                             } else if (syncchildren && !iswebcomponent(h as HTag)) {
                                 // standard children processing
                                 const j = syncChildren(n, h, 0, uc)
-                                removeExcessChildren(n, j)
+                                removeexcesschildren(n, j)
                             }
 
-                            // setcomp(n, h) // ?? : could attach comps only to elements with id/class property. or could mark nodes in updateview as update targets and then lazily attach comp
                             return i + 1
                     }
                 }
@@ -125,19 +127,21 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
     }
 }
 
-function syncChildren(e: HTMLElement, h: HTag | HComp, j: number, uc: UpdateContext): number {
-    console.log("syncChildren", e.tagName, j)
+/** synchronizes children starting at the i-th element.
+ *  returns the index of the last child synchronized */
+function syncChildren(e: HTMLElement, h: HTag | HComp, i: number, uc: UpdateContext): number {
 
-    const hcn = evaluate(h.children)
-        .flatMap(evaluate) // children passed from components
-        .filter(c => c !== null && c !== undefined) as H[]
-    hcn.forEach(hc => {
-        let j0 = j
-        j = sync(e, j, hc, uc);
-        (e.childNodes[j0]).h = hc as any
-        return j
-    })
-    return j
+    (evaluate(h.children) ?? [])
+        .flatMap(evaluate)
+        .filter(c => c !== null && c !== undefined) //as H[]
+        .forEach(hc => {
+            let i0 = i
+            i = sync(e, i, hc, uc)
+            let cn = e.childNodes[i0]
+            if (istag(hc)) cn.h = hc // the node here might not exist before the call to sync
+        })
+
+    return i
 }
 
 // patches given dom and comp
@@ -164,12 +168,8 @@ export function updateview(selector: string | Node = 'body', uc: UpdateContext =
     }
 }
 
-class BaseComp<P extends any> implements IClassComponent {
+export abstract class BaseComp<P extends any> implements IClassComponent {
     element: Node
-    constructor(public props: P) { }
     updateview() { updateview(this.element) }
-    view(): any { return 'tbd' }
+    abstract view()
 }
-
-// lib
-export const When = ({ cond }, { children }) => cond && jsxf(null, { children })

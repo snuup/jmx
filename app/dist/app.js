@@ -97,39 +97,34 @@ function rebind(o) {
     o[name] = o[name].bind(o);
   return o;
 }
-const evaluate = (expr) => {
-  return expr instanceof Function ? evaluate(expr()) : expr;
+let removeExcessChildren = (n, i) => {
+  let c;
+  while (c = n.childNodes[i])
+    c.remove();
 };
+
+console.log(3 /* TextNode */);
+const evaluate = (expr) => expr instanceof Function ? evaluate(expr()) : expr;
 let isClassComponent = (h) => h.tag.prototype?.view;
 function evalComponent(h, n) {
-  console.log("evalComponent", h, n);
   const props = evaluate(h.props);
-  console.log("die props", props);
-  let isupdate = n?.h?.tag === h.tag;
+  let isupdate = n?.h === h;
+  console.log("isupdate", isupdate);
   if (isClassComponent(h)) {
-    if (!isupdate) {
-      h.i = rebind(new h.tag(props));
-    } else {
-      h.i.props = props;
-    }
+    if (!isupdate)
+      h.i = rebind(new h.tag());
+    h.i.props = props;
     return h.i.view();
   } else {
     let f = h.tag;
     let cn = evaluate(h.children);
-    return f(evaluate(h.props), cn);
+    return f(props, cn);
   }
-}
-function removeexcesschildren(n, i) {
-  while (n.childNodes[i])
-    n.childNodes[i].remove();
-}
-function createElement(tag) {
-  return document.createElement(tag);
 }
 function syncelement(p, i, tag, props, comp) {
   const c = p.childNodes[i];
   if (!c || c.tagName != tag) {
-    const n = createElement(tag);
+    const n = document.createElement(tag);
     c ? c.replaceWith(n) : p.appendChild(n);
     setape(n, props, false, false);
     props?.mounted?.(n);
@@ -142,19 +137,12 @@ function syncelement(p, i, tag, props, comp) {
 }
 function synctextnode(p, i, text) {
   const c = p.childNodes[i];
-  if (c && c.nodeType == 3) {
+  if (c && c.nodeType == 3 /* TextNode */) {
     if (c.textContent != text)
       c.textContent = text;
   } else {
     const tn = document.createTextNode(text);
     c ? c.replaceWith(tn) : p.appendChild(tn);
-  }
-}
-function setcomp(e, htag) {
-  console.log("setcomp", e, htag);
-  if (isClassComponent(htag)) {
-    htag.i.element = e;
-    htag.i.mounted?.(e);
   }
 }
 const iswebcomponent = (h) => h.tag.includes("-");
@@ -173,7 +161,12 @@ function sync(p, i, h, uc) {
           console.log("tbd: update life cycle methods");
           const h2 = evalComponent(h, p.childNodes[i]);
           let r = h2 ? sync(p, i, h2, uc) : i;
-          setcomp(p.childNodes[i], h);
+          if (isClassComponent(h)) {
+            let e = p.childNodes[i];
+            console.log("tbd: do not call mount on every update");
+            h.i.element = e;
+            h.i.mounted?.(e);
+          }
           return r;
         case "string": {
           switch (h.tag) {
@@ -182,14 +175,14 @@ function sync(p, i, h, uc) {
             default:
               const props = evaluate(h.props);
               const n = syncelement(p, i, h.tag, props);
-              if (props?.patch) {
-                props?.patch(n);
+              if (props?.update) {
+                props.update(n);
               } else if (n.h?.i?.update) {
                 let o = n.h?.i;
                 o.update?.(uc);
               } else if (syncchildren && !iswebcomponent(h)) {
                 const j = syncChildren(n, h, 0, uc);
-                removeexcesschildren(n, j);
+                removeExcessChildren(n, j);
               }
               return i + 1;
           }
@@ -355,9 +348,14 @@ let App = {
     children: () => []
   }, {
     tag: "UL",
+    props: () => ({
+      update: () => {
+        console.log("no patchin");
+      }
+    }),
     children: () => [{
       tag: "LI",
-      children: () => ["aa"]
+      children: () => ["aa", m.i]
     }, {
       tag: "LI",
       children: () => ["bb"]
