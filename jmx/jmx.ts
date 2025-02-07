@@ -12,7 +12,7 @@ export const jsxf = (props, { children }) => ({ tag: 'jsxf', children })
 
 const evaluate = <T>(expr: T | Expr<T>): T => expr instanceof Function ? evaluate(expr()) : expr
 
-let istag = (h: H): h is HTagComp => typeof h == "object"
+// let istag = (h: H): h is HTagComp => typeof h == "object"
 
 let iscomp = (h: H): h is HFunction => typeof ((h as any).tag) == "function"
 
@@ -23,19 +23,17 @@ function evalComponent(h: HComp, n: Node | undefined): H {
     console.log("evalComponent", h, n)
 
     const props = evaluate(h.props)
-    let isupdate = n?.h?.tag == h.tag // was was already computed with this h
-    console.log("isupdate", isupdate)
+    //let isupdate = n?.h?.tag == h.tag // was was already computed with this h
+    //console.log("isupdate", isupdate)
 
     if (isclasscomponent(h)) {
         // HClass
         let hc: HClass
         if ((hc = n?.h as HClass)?.i) {
-            // instance available
-            console.log("class update")
             hc.i.props = props
+            console.log("best is to cancel view here if update exists")
         }
         else {
-            //n.h = hc = h
             (hc = h).i = rebind(new h.tag(props!)) // rebind is important for simple event handlers
         }
         return hc.i.view() // inefficient: we compute view() although we do not use if then the component has an update function
@@ -43,6 +41,12 @@ function evalComponent(h: HComp, n: Node | undefined): H {
         // HFunction
         let f: FComponent = h.tag
         let cn = evaluate(h.children)
+        let update
+        if (update = n?.h && (props as FunProps | undefined)?.update) {
+            update?.(n)
+            console.log("can do: update and exit here!", (props as FunProps | undefined)?.update?.(n))
+        }
+
         return f(props, cn)
     }
 }
@@ -77,7 +81,7 @@ function synctextnode(p: HTMLElement, i: number, text) {
  */
 function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
 
-    //console.log("sync", p.tagName, i, h, p.childNodes[i])
+    console.log("sync", p.tagName, i, h, p.childNodes[i])
 
     switch (typeof h) {
 
@@ -93,7 +97,12 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
 
                 case 'function':
 
+                    console.log(1)
+
                     const h2 = evalComponent(h as HComp, p.childNodes[i])
+
+                    console.log(2)
+
                     let r = h2 ? sync(p, i, h2, uc) : i // can be null, if function component returns null | undefined
                     return r
 
@@ -135,7 +144,7 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
  *  returns the index of the last child synchronized */
 function syncchildren(p: HTMLElement, h: HTag | HComp, i: number, uc: UpdateContext): number {
 
-    //console.log("synchchildren", p.tagName, h, i);
+    console.log("synchchildren", p.tagName, h, i);
 
     (evaluate(h.children) ?? [])
         .flatMap(evaluate)
@@ -194,7 +203,7 @@ export let When = ({ cond }, { children }) => cond && jsxf(null, { children })
 
 export abstract class BaseComp<P extends Props> implements IClassComponent {
     element: Node
-    constructor(public props: P) {} // we do this for jsx. at runtime, we pass the props directly
+    constructor(public props: P) { } // we do this for jsx. at runtime, we pass the props directly
     updateview() { updateview(this.element) }
     abstract view()
 }

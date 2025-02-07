@@ -6,17 +6,21 @@ import { Map, TextComp } from './map'
 
 let a: Action<number>
 
-export let Numerotti = ({ n, mounted }: { n: number, mounted?: Action<HTMLElement> }) => {
+// tbd: inherit function
+export let Numerotti : FComponent = ({ n }: { n: number }) => {
     return <div class="carrots">{n}</div>
 }
 
 let App = (
     <body>
 
-        <TextComp a={123} s='jaja-sss-1' />
-        <TextComp a={123} s='jaja-sss-2' />
-        {/* <Numerotti n={m.i * 10} mounted={e => console.log("Numerotti mounted", e)} /> */}
-        {/* <Map a={m.i} s='s' /> */}
+        {/* <TextComp a={123} s='jaja-sss-1' />
+        <TextComp a={123} s='jaja-sss-2' /> */}
+
+        {/* <Numerotti n={m.i * 10} mounted={e => console.log("Numerotti mounted", e)} update={e => console.log("Numerotti update", e)} /> */}
+
+        <Map a={m.i} s='s' />
+
         {/* <Map a={55} s='s' /> */}
         {/* <Numerotti n={m.i} />
 
