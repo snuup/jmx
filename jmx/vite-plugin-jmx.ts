@@ -49,23 +49,14 @@ function transform(code: string) {
         },
     })
 
-    const output = generate(ast, { sourceMaps: true }, code)
-    return { code: output.code, map: output.map }
+    return generate(ast, { sourceMaps: true }, code)
 }
 
 export const jmxplugin = () => {
     return {
         name: "vite-plugin-jmx",
         transform(raw, id) {
-            if (id.endsWith(".tsx")) {
-                const result = transform(raw)
-                return {
-                    code: "// jmx transformed:\n" + result.code,
-                    map: result.map
-                }
-            } else {
-                return raw
-            }
+            return (id.endsWith(".tsx")) ? transform(raw) : raw
         }
     }
 }
