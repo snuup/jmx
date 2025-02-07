@@ -43,7 +43,7 @@ type HClass =
         tag: CComponent,
         props?: Expr<Props>
         children: Children
-        i?: IClassComponent
+        i: IClassComponent
     }
 type HComp = HFunction | HClass
 type HTagComp = HTag | HComp
@@ -59,7 +59,7 @@ type HTFC = HTag | HFunction | HClass
 type UpdateContext = {
     patchElementOnly?: boolean
     replace?: boolean
-    [key: string]: any
+    //[key: string]: any
 }
 
 interface HTMLElement {

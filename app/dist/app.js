@@ -97,20 +97,21 @@ function rebind(o) {
     o[name] = o[name].bind(o);
   return o;
 }
-let removeExcessChildren = (n, i) => {
+let removeexcesschildren = (n, i) => {
   let c;
   while (c = n.childNodes[i])
     c.remove();
 };
+let iswebcomponent = (h) => h.tag.includes("-");
 
-console.log(3 /* TextNode */);
 const evaluate = (expr) => expr instanceof Function ? evaluate(expr()) : expr;
-let isClassComponent = (h) => h.tag.prototype?.view;
+let isclasscomponent = (h) => h.tag.prototype?.view;
+let istag = (h) => typeof h === "object";
 function evalComponent(h, n) {
   const props = evaluate(h.props);
   let isupdate = n?.h === h;
   console.log("isupdate", isupdate);
-  if (isClassComponent(h)) {
+  if (isclasscomponent(h)) {
     if (!isupdate)
       h.i = rebind(new h.tag());
     h.i.props = props;
@@ -145,25 +146,20 @@ function synctextnode(p, i, text) {
     c ? c.replaceWith(tn) : p.appendChild(tn);
   }
 }
-const iswebcomponent = (h) => h.tag.includes("-");
 function sync(p, i, h, uc) {
-  console.log("sync", p.tagName, i, h, p.childNodes[i]);
-  let syncchildren = !uc.patchElementOnly;
   switch (typeof h) {
     case "string":
     case "number":
     case "boolean":
-      synctextnode(p, i, h.toString());
+      synctextnode(p, i, h);
       return i + 1;
     case "object":
       switch (typeof h.tag) {
         case "function":
-          console.log("tbd: update life cycle methods");
           const h2 = evalComponent(h, p.childNodes[i]);
           let r = h2 ? sync(p, i, h2, uc) : i;
-          if (isClassComponent(h)) {
+          if (isclasscomponent(h)) {
             let e = p.childNodes[i];
-            console.log("tbd: do not call mount on every update");
             h.i.element = e;
             h.i.mounted?.(e);
           }
@@ -173,16 +169,16 @@ function sync(p, i, h, uc) {
             case "jsxf":
               return syncChildren(p, h, i, uc);
             default:
-              const props = evaluate(h.props);
-              const n = syncelement(p, i, h.tag, props);
+              let props = evaluate(h.props);
+              let n = syncelement(p, i, h.tag, props);
               if (props?.update) {
                 props.update(n);
               } else if (n.h?.i?.update) {
                 let o = n.h?.i;
                 o.update?.(uc);
-              } else if (syncchildren && !iswebcomponent(h)) {
+              } else if (!uc.patchElementOnly && !iswebcomponent(h)) {
                 const j = syncChildren(n, h, 0, uc);
-                removeExcessChildren(n, j);
+                removeexcesschildren(n, j);
               }
               return i + 1;
           }
@@ -192,16 +188,15 @@ function sync(p, i, h, uc) {
       throw `invalid h ${h}. did you forget to define a component as function, like const C = () => <div>hare</div> ?`;
   }
 }
-function syncChildren(e, h, j, uc) {
-  console.log("syncChildren", e.tagName, j);
-  const hcn = evaluate(h.children).flatMap(evaluate).filter((c) => c !== null && c !== void 0);
-  hcn.forEach((hc) => {
-    let j0 = j;
-    j = sync(e, j, hc, uc);
-    e.childNodes[j0].h = hc;
-    return j;
+function syncChildren(e, h, i, uc) {
+  (evaluate(h.children) ?? []).flatMap(evaluate).filter((c) => c !== null && c !== void 0).forEach((hc) => {
+    let i0 = i;
+    i = sync(e, i, hc, uc);
+    let cn = e.childNodes[i0];
+    if (istag(hc))
+      cn.h = hc;
   });
-  return j;
+  return i;
 }
 function patch(e, h, uc = {}) {
   const p = e.parentElement;

@@ -13,5 +13,4 @@ export let removeexcesschildren = (n: HTMLElement, i: number) => { let c: ChildN
 
 export let iswebcomponent = (h: HTag) => (h.tag as string).includes('-')
 
-// lib
-export let When = ({ cond }, { children }) => cond && jsxf(null, { children })
+

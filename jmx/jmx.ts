@@ -60,10 +60,12 @@ function synctextnode(p: HTMLElement, i: number, text) {
     }
 }
 
+/**
+ * synchronizes p.children[i] with h
+ */
 function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
 
-    console.log("sync", p.tagName, i, h, p.childNodes[i])
-    let syncchildren = !uc.patchElementOnly
+    // console.log("sync", p.tagName, i, h, p.childNodes[i])
 
     switch (typeof h) {
 
@@ -71,26 +73,23 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
         case 'string':
         case 'number':
         case 'boolean':
-            synctextnode(p, i, h.toString())
+            synctextnode(p, i, h) //not sure if we need toString() here
             return i + 1
 
         case 'object':
             switch (typeof h.tag) {
-                case 'function':
 
-                    console.log("tbd: update life cycle methods")
+                case 'function':
 
                     const h2 = evalComponent(h as HComp, p.childNodes[i])
                     let r = h2 ? sync(p, i, h2, uc) : i // can be null, if function component returns null | undefined
 
-                    if (isclasscomponent(h)) {
+                    if (isclasscomponent(h) && !h.i.element) { // if element is not yet set, the component was newly created
                         let e = p.childNodes[i] as HTMLElement
-                        console.log("tbd: do not call mount on every update")
-
+                        console.log("mounted!")
                         h.i!.element = e
                         h.i!.mounted?.(e)
                     }
-
                     return r
 
                 case 'string': {
@@ -112,7 +111,7 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
                                 // call update() instead of processing children
                                 let o = n.h?.i
                                 o.update?.(uc)
-                            } else if (syncchildren && !iswebcomponent(h as HTag)) {
+                            } else if (!uc.patchElementOnly && !iswebcomponent(h as HTag)) {
                                 // standard children processing
                                 const j = syncChildren(n, h, 0, uc)
                                 removeexcesschildren(n, j)
@@ -167,6 +166,9 @@ export function updateview(selector: string | Node = 'body', uc: UpdateContext =
         patch(n, n.h, uc)
     }
 }
+
+// lib
+export let When = ({ cond }, { children }) => cond && jsxf(null, { children })
 
 export abstract class BaseComp<P extends any> implements IClassComponent {
     element: Node
