@@ -1,30 +1,10 @@
 import { jmxplugin } from "./jmx/vite-plugin-jmx" // "./jmx/ plugin/plugin/vite-plugin-jmx"
+import * as shared from "./vite.config.shared"
 
 export default {
-    base: "/",
-    //root: "./app",
-    esbuild: {
-        ignoreAnnotations: true,
-        target: 'esnext',
-    },
-    plugins: [
-        jmxplugin()
-    ],
+    ...shared,
     build: {
-        outDir:"dist",
-        emptyOutDir: true,
-        target: 'esnext', // !!
-        minify: false,
-        rollupOptions: {
-                output: {
-                    entryFileNames: `app.js`,
-                    assetFileNames: `[name].[ext]`
-                },
-                input: {
-                    tests: 'tests/demos.test.tsx', // Replace with your test entry file
-                },
-                outDir: 'dist-tests', // Separate output for tests
-        },
+        rollupOptions: {},
         css: {
             devSourcemap: true,
         },
