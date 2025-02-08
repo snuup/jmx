@@ -55,7 +55,7 @@ function evalComponent(h: HComp, n: Node | undefined): H {
     }
 }
 
-function syncelement(p: HTMLElement, i: number, tag: string, props: Props | undefined, comp?: FComponent): HTMLElement {
+function syncelement(p: HTMLElement, i: number, tag: string, props: Props | undefined): HTMLElement {
     const c: any = p.childNodes[i]
     if (!c || c.tagName != tag) {
         const n = document.createElement(tag)

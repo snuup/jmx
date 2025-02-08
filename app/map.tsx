@@ -48,7 +48,8 @@ export class TextComp extends BaseComp<{ a: number; s: string }> {
         console.log("TextComp mounted", e, this.element)
     }
 
-    update() {
+    update(uc) {
         console.log("TextComp update")
+        return true
     }
 }

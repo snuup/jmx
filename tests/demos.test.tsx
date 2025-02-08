@@ -1,4 +1,4 @@
-import { FComponent, HClass, HFunction, HTag, jsx, patch } from '../jmx/jmx'
+import { FComponent, HClass, HFunction, HTag, jsx, patch, updateview } from '../jmx/jmx'
 import { describe, it, expect, beforeEach, vitest } from 'vitest'
 
 beforeEach(() => {
@@ -69,10 +69,13 @@ describe('JMX dom tests', () => {
         expect(document.body.outerHTML).toBe('<body><div class="classo21">14</div></body>')
     })
 
+    it.only('clear styles after update', () => {
+
+        patch(document.body, <body><div class="hase">div</div></body>)
+        expect(document.body.innerHTML).toBe('<div class="hase">div</div>')
+
+        patch(document.querySelector("div")!, <div>snuff</div>)
+        expect(document.body.innerHTML).toBe('<div>snuff</div>')
+    })
+
 })
-
-
-//const window = new Window({ url: 'https://localhost:8080' });
-//const document = window.document;
-
-//let static1 = () => <div></div>

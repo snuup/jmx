@@ -9,14 +9,14 @@ export function P<T>(x: T): T {
 declare global {
     interface HTMLElement {
         events?: any // holds event listeners, so we can remove them
-        propsset?: Action
+        propsset?: Action<void>
     }
 }
 
 export function setape(n: HTMLElement, props: Props | undefined, clearold, refresh) {
     //console.log('setape', { n, props, clearold })
     if (clearold) {
-        clearattrs(n, props, refresh)
+        clearattrs(n)
         clearprops(n, props)
     }
     if (!props) return
@@ -75,20 +75,8 @@ function setattr(n, name, value) {
     else n.setAttribute(name, value)
 }
 
-function clearattrs(e, attrs, refresh) {
-    // console.log("clear attrs", ...e.getAttributeNames())
-    if (!attrs) return
-    for (const a in attrs) if (!attrs[a]) e.removeAttribute(a)
-
-    if (!refresh) {
-        e.getAttributeNames().forEach((a) => {
-            if (!attrs || !(a in attrs)) {
-                // console.log("new removal - important", a, e)
-                if (a != "comp")
-                    e.removeAttribute(a) // there are no new attributes or a is not included
-            }
-        })
-    }
+function clearattrs(e:HTMLElement) {
+    e.getAttributeNames().forEach(a => e.removeAttribute(a))
 }
 
 // code and comments copied from preact

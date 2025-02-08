@@ -46,9 +46,6 @@ let App = (
 
 let App2 = <body><div>div</div></body>
 
-//let ZZZ = x => <body class="cc">{"hase"}{42}{true}{false}{x}</body>
-//console.log(ZZZ)
-
 patch(document.body, App2)
 
 let ub = () => updateview(document.body)
