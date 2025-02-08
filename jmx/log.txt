@@ -1,1 +1,0 @@
-avoid comp object on every tag?

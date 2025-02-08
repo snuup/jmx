@@ -30,7 +30,7 @@ function isproperty(name, value) {
     "value",
     "checked",
     "disabled",
-    "class",
+    "className",
     "style",
     "href",
     "src",
@@ -49,11 +49,12 @@ function rebind(o) {
 }
 let removeexcesschildren = (n, i) => {
   let c;
-  while (letc = n.childNodes[i])
+  while (c = n.childNodes[i])
     c.remove();
 };
 let iswebcomponent = (h) => h.tag.includes("-");
 
+const jsxf = (props, { children }) => ({ tag: "jsxf", children });
 const evaluate = (expr) => expr instanceof Function ? evaluate(expr()) : expr;
 let iscomp = (h) => typeof h.tag == "function";
 let isclasscomponent = (h) => h.tag.prototype?.view;
@@ -63,7 +64,6 @@ function evalComponent(h, n) {
     let hc;
     if ((hc = n?.h)?.i) {
       hc.i.props = props;
-      console.log("best is to cancel view here if update exists");
     } else {
       (hc = h).i = rebind(new h.tag(props));
     }
@@ -75,7 +75,6 @@ function evalComponent(h, n) {
   }
 }
 function syncelement(p, i, tag, props) {
-  console.log("syncelement", p.childNodes[i]?.h, tag, props);
   const c = p.childNodes[i];
   if (!c || c.tagName != tag) {
     const n = document.createElement(tag);
@@ -83,14 +82,10 @@ function syncelement(p, i, tag, props) {
     setprops(n, props);
     props?.mounted?.(n);
     return n;
-  } else {
-    console.log("------------");
-    console.log("old", c.h.props?.());
-    console.log("new", props);
-    setprops(c, props);
-    props?.update?.(c);
-    return c;
   }
+  setprops(c, props);
+  props?.update?.(c);
+  return c;
 }
 function synctextnode(p, i, text) {
   const c = p.childNodes[i];
@@ -111,6 +106,7 @@ function getupdatefunction(h, e) {
     return evaluate(h.props)?.update;
 }
 function sync(p, i, h, uc) {
+  console.log("sync", p.tagName, i, h, p.childNodes[i]);
   switch (typeof h) {
     case "string":
     case "number":
@@ -119,18 +115,15 @@ function sync(p, i, h, uc) {
       return i + 1;
     case "object":
       let e = p.childNodes[i];
-      let update = getupdatefunction(h, e);
-      if (update?.(uc)) {
-        console.log("early exit");
+      if (getupdatefunction(h, e)?.(uc))
         return i + 1;
-      }
       switch (typeof h.tag) {
         case "function":
           const h2 = evalComponent(h, e);
           if (!h2)
             return i;
           return sync(p, i, h2, uc);
-        case "string": {
+        case "string":
           switch (h.tag) {
             case "jsxf":
               return syncchildren(p, h, i, uc);
@@ -142,7 +135,6 @@ function sync(p, i, h, uc) {
                 removeexcesschildren(n, j);
               }
           }
-        }
       }
       return i + 1;
     default:
@@ -150,6 +142,7 @@ function sync(p, i, h, uc) {
   }
 }
 function syncchildren(p, h, i, uc) {
+  console.log("synchchildren", p.tagName, h, i);
   (evaluate(h.children) ?? []).flatMap(evaluate).filter((c) => c !== null && c !== void 0).forEach((hc) => {
     let i0 = i;
     i = sync(p, i, hc, uc);
@@ -175,8 +168,8 @@ function syncchildren(p, h, i, uc) {
 function patch(e, h, uc = {}) {
   const p = e.parentElement;
   const i = [].indexOf.call(p.childNodes, e);
-  e.h = h;
   sync(p, i, h, uc);
+  e.h = h;
 }
 function updateview(selector = "body", uc = {}) {
   const ns = typeof selector == "string" ? document.querySelectorAll(selector) : [selector];
@@ -197,12 +190,14 @@ function updateview(selector = "body", uc = {}) {
 let App = {
   tag: "BODY",
   children: () => [{
-    tag: "DIV",
-    props: () => ({
-      class: "hase",
-      ondblclick: e => console.log("hihi hase")
-    }),
-    children: () => ["hase"]
+    tag: jsxf,
+    children: () => [{
+      tag: "P",
+      children: () => ["11"]
+    }, {
+      tag: "I",
+      children: () => ["22"]
+    }]
   }]
 };
 let App2 = {

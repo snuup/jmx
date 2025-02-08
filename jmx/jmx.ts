@@ -1,13 +1,6 @@
-/* eslint-disable @typescript-eslint/ban-types */
-import { cloneWithoutLoc } from '@babel/types'
-import {
-    setprops
-} from './props'
-import {
-    iswebcomponent,
-    rebind,
-    removeexcesschildren
-} from './utils'
+import { mount } from '../base/common'
+import { setprops } from './props'
+import { iswebcomponent, rebind, removeexcesschildren } from './utils'
 
 const enum NodeType { // vaporizes (but for that must be in this file, otherwise not)
     TextNode = 3
@@ -15,11 +8,9 @@ const enum NodeType { // vaporizes (but for that must be in this file, otherwise
 
 export function jsx(): HTag { throw 'jmx plugin not configured' } // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it
 
-export const jsxf = (props, { children }) => ({ tag: 'jsxf', children })
+export const jsxf = "jsxf" //(props, { children }) => ({ tag: 'jsxf', children })
 
 const evaluate = <T>(expr: T | Expr<T>): T => expr instanceof Function ? evaluate(expr()) : expr
-
-// let istag = (h: H): h is HTagComp => typeof h == "object"
 
 let iscomp = (h: H): h is HFunction => typeof ((h as any).tag) == "function"
 
@@ -36,7 +27,7 @@ function evalComponent(h: HComp, n: Node | undefined): H {
         let hc: HClass
         if ((hc = n?.h as HClass)?.i) {
             hc.i.props = props
-            console.log("best is to cancel view here if update exists")
+            // console.log("best is to cancel view here if update exists")
         }
         else {
             (hc = h).i = rebind(new h.tag(props!)) // rebind is important for simple event handlers
@@ -58,20 +49,18 @@ function evalComponent(h: HComp, n: Node | undefined): H {
 
 function syncelement(p: HTMLElement, i: number, tag: string, props: Props | undefined): HTMLElement {
 
-    console.log("syncelement", p.childNodes[i]?.h, tag, props)
-
     const c: any = p.childNodes[i]
+
     if (!c || c.tagName != tag) {
         const n = document.createElement(tag)
         c ? c.replaceWith(n) : p.appendChild(n)
         setprops(n, props)
         props?.mounted?.(n)
         return n
-    } else {
-        setprops(c, props)
-        props?.update?.(c)
-        return c
     }
+    setprops(c, props)
+    props?.update?.(c)
+    return c
 }
 
 function synctextnode(p: HTMLElement, i: number, text) {
@@ -95,7 +84,7 @@ function getupdatefunction(h: HTFC, e: Node | undefined) {
  */
 function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
 
-    //console.log("sync", p.tagName, i, h, p.childNodes[i])
+    console.log("sync", p.tagName, i, h, p.childNodes[i])
 
     switch (typeof h) {
 
@@ -109,11 +98,7 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
         case 'object':
 
             let e = p.childNodes[i]
-            let update = getupdatefunction(h, e)
-            if (update?.(uc)) {
-                console.log("early exit")
-                return i + 1
-            }
+            if (getupdatefunction(h, e)?.(uc)) return i + 1
 
             switch (typeof h.tag) {
 
@@ -121,10 +106,10 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
 
                     const h2 = evalComponent(h as HComp, e)
                     if (!h2) return i // can be null, if function component returns null | undefined
-
                     return sync(p, i, h2, uc)
 
-                case 'string': {
+                case 'string':
+
                     switch (h.tag) {
 
                         case 'jsxf':
@@ -141,7 +126,6 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
                                 removeexcesschildren(n, j)
                             }
                     }
-                }
             }
             return i + 1
         default:
@@ -153,7 +137,7 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
  *  returns the index of the last child synchronized */
 function syncchildren(p: HTMLElement, h: HTag | HComp, i: number, uc: UpdateContext): number {
 
-    // console.log("synchchildren", p.tagName, h, i);
+    console.log("synchchildren", p.tagName, h, i);
 
     (evaluate(h.children) ?? [])
         .flatMap(evaluate)
@@ -182,9 +166,7 @@ function syncchildren(p: HTMLElement, h: HTag | HComp, i: number, uc: UpdateCont
                 }
             }
 
-//            console.log("set-cn", cn.h, hc)
-
-            if(cn) cn.h = hc as any // the node here might not exist before the call to sync // tbd, make this nicer
+            if (cn) cn.h = hc as any // the node here might not exist before the call to sync // tbd, make this nicer
         })
     return i
 }
@@ -227,3 +209,5 @@ export abstract class BaseComp<P extends Props> implements IClassComponent {
 
     abstract view()
 }
+
+mount({ jsxf })

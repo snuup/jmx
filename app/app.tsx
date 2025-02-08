@@ -1,5 +1,5 @@
 import { mount } from '../base/common'
-import { jsx, patch, updateview } from '../jmx/jmx'
+import { jsx, jsxf, patch, updateview } from '../jmx/jmx'
 import { m } from './model'
 import { Numero } from './number'
 import { Map, TextComp } from './map'
@@ -8,19 +8,24 @@ let a: Action<number>
 
 // tbd: inherit function
 export let Numerotti: FComponent = ({ n }: { n: number }) => {
-    return <div class="carrots">{n}</div>
+    return <div class='carrots'>{n}</div>
 }
 
 let App = (
     <body>
-
         {/* <TextComp a={123} s='jaja-sss-1' />
         <TextComp a={123} s='jaja-sss-2' /> */}
 
         {/* <Numerotti n={m.i * 10} mounted={e => console.log("Numerotti mounted", e)} update={e => console.log("Numerotti update", e)} />*/}
 
         {/* <Map a={m.i} s='s' /> */}
-        <div class="hase" ondblclick={e => console.log("hihi hase")}>hase</div>
+
+        <>
+            <p>11</p>
+            <i>22</i>
+        </>
+
+        {/* <div class='hase' mounted={console.log}>hase</div> */}
 
         {/* <div update={() => false} >
             <a>hop</a>
@@ -41,15 +46,17 @@ let App = (
             <li>aa{m.i}</li>
             <li>bb</li>
         </ul> */}
-
     </body>
 )
 
-let App2 = <body><div onclick={e => console.log("hehe, ente")}>ente</div></body>
+let App2 = (
+    <body>
+        <div onclick={e => console.log('hehe, ente')}>ente</div>
+    </body>
+)
 
 patch(document.body, App)
 
 let ub = () => updateview(document.body)
 let p = x => patch(document.body, x)
-
 mount({ u: updateview, ub, patch, App, App2, p })
