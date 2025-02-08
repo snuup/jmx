@@ -50,13 +50,25 @@ let App = (
     </body>
 )
 
+let L1 = () => <>
+    <b>bb1</b>
+    <b>bb2</b>
+    <b>bb3</b>
+</>
+
+let L2 = () => <>
+    <a>aa1</a>
+    <a>aa2</a>
+</>
+
 let App2 = (
     <body>
-        <div onclick={e => console.log('hehe, ente')}>ente</div>
+        <L1 />
+        <L2 />
     </body>
 )
 
-patch(document.body, App)
+patch(document.body, App2)
 
 let ub = () => updateview(document.body)
 let p = x => patch(document.body, x)

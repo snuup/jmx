@@ -1,12 +1,16 @@
-body{
-    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-    font-size: x-large;
+body {
+	font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+	font-size: x-large;
 }
 
-.carrots{
-    color: orange;
+.carrots {
+	color: orange;
 }
 
 .map {
-    background-color: lightcoral;
+	background-color: lightcoral;
+}
+
+b, a {
+	display: block;
 }
