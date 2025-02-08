@@ -13,15 +13,33 @@ declare global {
     }
 }
 
-export function setape(n: HTMLElement, props: Props | undefined, clearold, refresh) {
-    //console.log('setape', { n, props, clearold })
-    if (clearold) {
-        clearattrs(n)
-        clearprops(n, props)
+export function setape(e: HTMLElement, newprops: Props = {}) {
+
+    // remove all attributes that do not occur in props
+    e.getAttributeNames().forEach(a => a in newprops || e.removeAttribute(a))
+
+    let oldprops = e.h?.props?.() ?? {}
+    for (let p in oldprops) {
+        if (p in newprops) {
+            // re-set
+            //console.log("reset", p)
+            e.setAttribute(p, newprops[p])
+        } else {
+            // delete
+            console.log("delete", p)
+        }
     }
-    if (!props) return
-    setprops(n, props)
-    n.propsset && n.propsset()
+    for (let p in newprops) {
+        if (!(p in oldprops))
+            // set-fresh
+            //console.log("set fresh", p)
+            e.setAttribute(p, newprops[p])
+    }
+
+    //clearprops(n, newprops)
+    //if (!newprops) return
+    //setprops(n, newprops)
+    //n.propsset && n.propsset()
 }
 // function isref(name) {
 //     return name == 'ref'
@@ -75,7 +93,7 @@ function setattr(n, name, value) {
     else n.setAttribute(name, value)
 }
 
-function clearattrs(e:HTMLElement) {
+function clearattrs(e: HTMLElement) {
     e.getAttributeNames().forEach(a => e.removeAttribute(a))
 }
 

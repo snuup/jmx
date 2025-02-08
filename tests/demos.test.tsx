@@ -69,7 +69,7 @@ describe('JMX dom tests', () => {
         expect(document.body.outerHTML).toBe('<body><div class="classo21">14</div></body>')
     })
 
-    it.only('clear styles after update', () => {
+    it('clear styles after update', () => {
 
         patch(document.body, <body><div class="hase">div</div></body>)
         expect(document.body.innerHTML).toBe('<div class="hase">div</div>')

@@ -19,7 +19,8 @@ let App = (
 
         {/* <Numerotti n={m.i * 10} mounted={e => console.log("Numerotti mounted", e)} update={e => console.log("Numerotti update", e)} />*/}
 
-        <Map a={m.i} s='s' />
+        {/* <Map a={m.i} s='s' /> */}
+        <div class="hase">hase</div>
 
         {/* <div update={() => false} >
             <a>hop</a>
@@ -44,9 +45,9 @@ let App = (
     </body>
 )
 
-let App2 = <body><div>div</div></body>
+let App2 = <body><div><input checked class='' />ente</div></body>
 
-patch(document.body, App2)
+patch(document.body, App)
 
 let ub = () => updateview(document.body)
 let p = x => patch(document.body, x)

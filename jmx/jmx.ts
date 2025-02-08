@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
+import { cloneWithoutLoc } from '@babel/types'
 import {
     setape
 } from './props'
@@ -56,14 +57,22 @@ function evalComponent(h: HComp, n: Node | undefined): H {
 }
 
 function syncelement(p: HTMLElement, i: number, tag: string, props: Props | undefined): HTMLElement {
+
+    console.log("syncelement", p.childNodes[i]?.h, tag, props)
+
     const c: any = p.childNodes[i]
     if (!c || c.tagName != tag) {
         const n = document.createElement(tag)
         c ? c.replaceWith(n) : p.appendChild(n)
-        setape(n, props, false, false)
+        setape(n, props, false)
         props?.mounted?.(n)
         return n
     } else {
+
+        console.log("------------");
+        console.log("old", c.h.props?.())
+        console.log("new", props)
+
         setape(c, props, true, false)
         props?.update?.(c)
         return c
@@ -158,9 +167,12 @@ function syncchildren(p: HTMLElement, h: HTag | HComp, i: number, uc: UpdateCont
             let i0 = i
             i = sync(p, i, hc, uc)
 
+
+            let cn = p.childNodes[i0]
+
             // life cycle calls
             if (iscomp(hc)) {
-                let cn = p.childNodes[i0]
+
                 if (!cn.h) {
                     if (isclasscomponent(hc)) { // if element is not yet set, the component was newly created
                         hc.i.element = cn
@@ -172,9 +184,12 @@ function syncchildren(p: HTMLElement, h: HTag | HComp, i: number, uc: UpdateCont
                             props.mounted?.(cn as HTMLElement)
                         }
                     }
-                    cn.h = hc // the node here might not exist before the call to sync
                 }
             }
+
+            console.log("set-cn", cn.h, hc)
+
+            if(cn) cn.h = hc as any // the node here might not exist before the call to sync // tbd, make this nicer
         })
     return i
 }
