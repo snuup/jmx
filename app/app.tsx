@@ -45,7 +45,7 @@ let App = (
     </body>
 )
 
-let App2 = <body><div><input checked class='' />ente</div></body>
+let App2 = <body><div>ente</div></body>
 
 patch(document.body, App)
 

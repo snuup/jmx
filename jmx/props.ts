@@ -16,17 +16,16 @@ declare global {
 export function setape(e: HTMLElement, newprops: Props = {}) {
 
     // remove all attributes that do not occur in props
-    e.getAttributeNames().forEach(a => a in newprops || e.removeAttribute(a))
+    //e.getAttributeNames().forEach(a => a in newprops || e.removeAttribute(a))
 
     let oldprops = e.h?.props?.() ?? {}
     for (let p in oldprops) {
         if (p in newprops) {
             // re-set
-            //console.log("reset", p)
             e.setAttribute(p, newprops[p])
         } else {
             // delete
-            console.log("delete", p)
+            e.removeAttribute(p)
         }
     }
     for (let p in newprops) {
