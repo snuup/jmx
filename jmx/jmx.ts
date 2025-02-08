@@ -100,7 +100,7 @@ function getupdatefunction(h: HTFC, e: Node | undefined) {
  */
 function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
 
-    console.log("sync", p.tagName, i, h, p.childNodes[i])
+    //console.log("sync", p.tagName, i, h, p.childNodes[i])
 
     switch (typeof h) {
 
@@ -158,7 +158,7 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
  *  returns the index of the last child synchronized */
 function syncchildren(p: HTMLElement, h: HTag | HComp, i: number, uc: UpdateContext): number {
 
-    console.log("synchchildren", p.tagName, h, i);
+    // console.log("synchchildren", p.tagName, h, i);
 
     (evaluate(h.children) ?? [])
         .flatMap(evaluate)
@@ -187,7 +187,7 @@ function syncchildren(p: HTMLElement, h: HTag | HComp, i: number, uc: UpdateCont
                 }
             }
 
-            console.log("set-cn", cn.h, hc)
+//            console.log("set-cn", cn.h, hc)
 
             if(cn) cn.h = hc as any // the node here might not exist before the call to sync // tbd, make this nicer
         })

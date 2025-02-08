@@ -20,7 +20,7 @@ let App = (
         {/* <Numerotti n={m.i * 10} mounted={e => console.log("Numerotti mounted", e)} update={e => console.log("Numerotti update", e)} />*/}
 
         {/* <Map a={m.i} s='s' /> */}
-        <div class="hase">hase</div>
+        <div class="hase" ondblclick={e => console.log("hihi hase")}>hase</div>
 
         {/* <div update={() => false} >
             <a>hop</a>
@@ -45,7 +45,7 @@ let App = (
     </body>
 )
 
-let App2 = <body><div>ente</div></body>
+let App2 = <body><div onclick={e => console.log("hehe, ente")}>ente</div></body>
 
 patch(document.body, App)
 

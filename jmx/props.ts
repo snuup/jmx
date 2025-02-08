@@ -2,9 +2,9 @@
 
 // special handling of attributes: https://github.com/jorgebucaran/hyperapp/blob/main/index.js
 
-export function P<T>(x: T): T {
-    return ((typeof x === "number") ? new Number(x) : new String(x)) as T
-}
+// export function P<T>(x: T): T {
+//     return ((typeof x === "number") ? new Number(x) : new String(x)) as T
+// }
 
 declare global {
     interface HTMLElement {
@@ -22,17 +22,37 @@ export function setape(e: HTMLElement, newprops: Props = {}) {
     for (let p in oldprops) {
         if (p in newprops) {
             // re-set
+            console.log("re-set", p)
             e.setAttribute(p, newprops[p])
         } else {
             // delete
-            e.removeAttribute(p)
+            console.log("delete", p)
+            if (isevent(p)) {
+                console.log("event")
+                e[p] = null
+            } else if (isproperty(p, newprops[p])) {
+                console.log("property")
+                e[p] = null // tbd: not sure if that is correct, should be rare border cases where this matters
+            } else {
+                e.removeAttribute(p)
+            }
         }
     }
     for (let p in newprops) {
-        if (!(p in oldprops))
+        if (!(p in oldprops)) {
             // set-fresh
-            //console.log("set fresh", p)
-            e.setAttribute(p, newprops[p])
+            console.log("set-fresh", p)
+            if (isevent(p)) {
+                console.log("event")
+                e[p] = newprops[p]
+            } else if (isproperty(p, newprops[p])) {
+                console.log("property")
+                e[p] = newprops[p]
+            } else {
+                console.log("attribute", p)
+                e.setAttribute(p, newprops[p])
+            }
+        }
     }
 
     //clearprops(n, newprops)
@@ -50,8 +70,8 @@ function isproperty(name: string, value: any) {
         value instanceof Object
         ||
         value instanceof Function
-        ||
-        value instanceof Number
+        //||
+        //value instanceof Number
     )
         || value === undefined
         || value === null
