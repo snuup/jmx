@@ -56,14 +56,13 @@ let L1 = () => <>
     <b>bb3</b>
 </>
 
-let L2 = () => <>
+let L2 = <>
     <a>aa1</a>
     <a>aa2</a>
 </>
 
 let App2 = (
     <body>
-        <L1 />
         <L2 />
     </body>
 )

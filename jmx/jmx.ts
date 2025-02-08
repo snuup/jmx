@@ -18,7 +18,7 @@ let isclasscomponent = (h: HTFC): h is HClass => (h.tag as any).prototype?.view
 
 function evalComponent(h: HComp, n: Node | undefined): H {
 
-    // console.log("evalComponent", h, n)
+    console.log("evalComponent", h, n, "h.tag:", h.tag.toString())
 
     const props = evaluate(h.props)
 
@@ -84,7 +84,7 @@ function getupdatefunction(h: HTFC, e: Node | undefined) {
  */
 function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
 
-    console.log("sync", p.tagName, i, h, p.childNodes[i])
+    console.log("sync", p.tagName, i, h, p.childNodes[i], h.tag?.toString())
 
     switch (typeof h) {
 
@@ -126,6 +126,15 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
                                 removeexcesschildren(n, j)
                             }
                     }
+                    break
+
+                case 'object':
+                    if ((h.tag as any)?.tag == jsxf) {
+                        console.log("jsxf??? !!!")
+                        return sync(p, i, h.tag, uc)
+                    }
+
+
             }
             return i + 1
         default:
@@ -196,7 +205,7 @@ export function updateview(selector: string | Node = 'body', uc: UpdateContext =
 }
 
 // lib
-export let When = ({ cond }, { children }) => cond && jsxf(null, { children })
+export let When = ({ cond }, { children }) => cond && { tag: 'jsxf', children }
 
 export abstract class BaseComp<P extends Props> implements IClassComponent {
 
