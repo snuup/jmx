@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { setape } from './props'
-import { iswebcomponent, rebind, removeexcesschildren } from './utils'
+import {
+    setape
+} from './props'
+import {
+    iswebcomponent,
+    rebind,
+    removeexcesschildren
+} from './utils'
 
 const enum NodeType { // vaporizes (but for that must be in this file, otherwise not)
     TextNode = 3
@@ -20,11 +26,9 @@ let isclasscomponent = (h: HTFC): h is HClass => (h.tag as any).prototype?.view
 
 function evalComponent(h: HComp, n: Node | undefined): H {
 
-    console.log("evalComponent", h, n)
+    // console.log("evalComponent", h, n)
 
     const props = evaluate(h.props)
-    //let isupdate = n?.h?.tag == h.tag // was was already computed with this h
-    //console.log("isupdate", isupdate)
 
     if (isclasscomponent(h)) {
         // HClass
@@ -41,11 +45,11 @@ function evalComponent(h: HComp, n: Node | undefined): H {
         // HFunction
         let f: FComponent = h.tag
         let cn = evaluate(h.children)
-        let update
-        if (update = n?.h && (props as FunProps | undefined)?.update) {
-            update?.(n)
-            console.log("can do: update and exit here!", (props as FunProps | undefined)?.update?.(n))
-        }
+        //let update
+        //if (update = n?.h && props?.update) {
+        //    update?.(n)
+        //console.log("can do: update and exit here!", props?.update?.(n))
+        //}
 
         return f(props, cn)
     }
@@ -76,6 +80,12 @@ function synctextnode(p: HTMLElement, i: number, text) {
     }
 }
 
+function getupdatefunction(h: HTFC, e: Node | undefined) {
+    if (e?.h?.tag != h.tag) return // update only if the new h is the same component
+    if (isclasscomponent(h)) return (e.h as HClass).i.update
+    else return evaluate(h.props)?.update
+}
+
 /**
  * synchronizes p.children[i] with h
  */
@@ -93,18 +103,22 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
             return i + 1
 
         case 'object':
+
+            let e = p.childNodes[i]
+            let update = getupdatefunction(h, e)
+            if (update?.(uc)) {
+                console.log("early exit")
+                return i + 1
+            }
+
             switch (typeof h.tag) {
 
                 case 'function':
 
-                    console.log(1)
+                    const h2 = evalComponent(h as HComp, e)
+                    if (!h2) return i // can be null, if function component returns null | undefined
 
-                    const h2 = evalComponent(h as HComp, p.childNodes[i])
-
-                    console.log(2)
-
-                    let r = h2 ? sync(p, i, h2, uc) : i // can be null, if function component returns null | undefined
-                    return r
+                    return sync(p, i, h2, uc)
 
                 case 'string': {
                     switch (h.tag) {
@@ -113,28 +127,19 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
                             return syncchildren(p, h, i, uc)
 
                         default:
-
                             let props = evaluate(h.props)
-                            let n = syncelement(p, i, h.tag, props)
-
-                            if (props?.update) {
-                                // call patch() instead of processing children
-                                // this allows data islands as used for a maplibre object: <div id="map" patch={() => { }}></div>
-                                props.update(n)
-                            } else if (n.h?.i?.update) {
-                                // call update() instead of processing children
-                                let o = n.h?.i
-                                o.update?.(uc)
-                            } else if (!uc.patchElementOnly && !iswebcomponent(h as HTag)) {
-                                // standard children processing
+                            let n = syncelement(p, i, h.tag, props) // tbd: order of this line right and good?
+                            // if (update(uc)) {
+                            // } else
+                            if (!uc.patchElementOnly && !iswebcomponent(h as HTag)) {
+                                // default children processing
                                 const j = syncchildren(n, h, 0, uc)
                                 removeexcesschildren(n, j)
                             }
-
-                            return i + 1
                     }
                 }
             }
+            return i + 1
         default:
             throw `invalid h ${h}. did you forget to define a component as function, like const C = () => <div>hare</div> ?`
     }
@@ -202,8 +207,13 @@ export function updateview(selector: string | Node = 'body', uc: UpdateContext =
 export let When = ({ cond }, { children }) => cond && jsxf(null, { children })
 
 export abstract class BaseComp<P extends Props> implements IClassComponent {
+
     element: Node
+
     constructor(public props: P) { } // we do this for jsx. at runtime, we pass the props directly
+    mounted(n: Node) { }
+    update(uc: UpdateContext): boolean { return false }
     updateview() { updateview(this.element) }
+
     abstract view()
 }

@@ -8,18 +8,22 @@ type Children = Expr<ChildrenH>
 type Action<T> = (arg: T) => void
 type Action = () => void
 
-type Props = Record<string, any>
-type FunProps = Props & { mounted?: Action<Node>, update?: Action<Node> } // tbd: add types for update and so on
+type Props =
+    Record<string, any>
+    & {
+        mounted?: Action<Node>,
+        update?: Action<UpdateContext>
+    }
 
-type FComponent = (props: FunProps | undefined, children?: ChildrenH) => HTag // show an example for usage of children
+type FComponent = (props: Props | undefined, children?: ChildrenH) => HTag // show an example for usage of children
 
 interface IClassComponent {
     element: Node
     props?: Record<string, any>
     //children: Children //tbd ??
     view(): H
-    update?: (uc: UpdateContext) => void
-    mounted?: (n: Node) => void
+    update(uc: UpdateContext): boolean
+    mounted(n: Node): void
 }
 
 interface CComponent {
@@ -36,7 +40,7 @@ type HTag =
 type HFunction =
     {
         tag: FComponent,
-        props?: Expr<FunProps>
+        props?: Expr<Props>
         children?: Children
     }
 type HClass =

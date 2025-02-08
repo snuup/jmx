@@ -10,5 +10,9 @@
         "**/node_modules": true,
         "package-lock.json": true
     },
-    "hide-files.files": []
+    "hide-files.files": [],
+    "workbench.colorCustomizations": {
+        "tab.activeBackground": "#5b6c74",
+        "titleBar.activeBackground": "#504753"
+    },
 }

@@ -12,12 +12,13 @@ export class Map extends BaseComp<{ a: number; s: string }> {
 
     // life
 
-    mounted(e) {
+    override mounted(e) {
         console.log("Map mounted", e)
     }
 
-    update() {
-        console.log("Map update", this)
+    override update(uc) {
+        console.log("Map update", this, uc)
+        return true
     }
 
     // core
