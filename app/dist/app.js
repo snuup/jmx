@@ -2,78 +2,42 @@ function mount(x) {
   Object.assign(globalThis, x);
 }
 
-function setape(n, props = {}) {
-  clearattrs(n);
-  clearprops(n, props);
-  if (!props)
-    return;
-  setprops(n, props);
-  n.propsset && n.propsset();
+function setprops(e, newprops = {}) {
+  let set = (p) => {
+    if (isproperty(p, newprops[p]))
+      e[p] = newprops[p];
+    else
+      e.setAttribute(p, newprops[p]);
+  };
+  let rem = (p) => {
+    if (isproperty(p, oldprops[p]))
+      e[p] = null;
+    else
+      e.removeAttribute(p);
+  };
+  let oldprops = e.h?.props?.() ?? {};
+  for (let p in oldprops)
+    if (p in newprops)
+      set(p);
+    else
+      rem(p);
+  for (let p in newprops)
+    if (!(p in oldprops))
+      set(p);
 }
 function isproperty(name, value) {
-  return ["href", "value", "model", "checked", "mounted", "fargs"].includes(name) || value instanceof Object || value instanceof Function || value instanceof Number || value === void 0 || value === null;
-}
-function isevent(name) {
-  return name.startsWith("on");
-}
-function evalProperty(value) {
-  if (value instanceof Number)
-    return value.valueOf();
-  if (value instanceof String)
-    return value.valueOf();
-  return value;
-}
-function setprops(n, props) {
-  let events = {};
-  for (let k in props) {
-    let value = props[k];
-    if (isevent(k)) {
-      events[k] = value;
-    } else if (isproperty(k, value))
-      setprop(n, k, evalProperty(value));
-    else
-      setattr(n, k, value);
-  }
-  setevents(n, events);
-}
-function setattr(n, name, value) {
-  if (value == null || value === false)
-    n.removeAttribute(name);
-  else
-    n.setAttribute(name, value);
-}
-function clearattrs(e) {
-  e.getAttributeNames().forEach((a) => e.removeAttribute(a));
-}
-function setprop(e, name, value) {
-  let d = e.defaultprops = e.defaultprops || {};
-  if (!d.hasOwnProperty(name)) {
-    d[name] = e[name];
-  }
-  try {
-    e[name] = value;
-  } catch (ex) {
-    console.error(ex);
-  }
-}
-function clearprops(e, excepts) {
-  for (var p in e.defaultprops)
-    if (!excepts || excepts[p] == void 0)
-      e[p] = e.defaultprops[p];
-}
-function setevents(e, props) {
-  if (e.events) {
-    Object.keys(e.events).filter((name) => props[name] != e.events[name]).forEach((name) => {
-      delete e.events[name];
-      return e.removeEventListener(name, e.events[name]);
-    });
-  }
-  Object.keys(props).filter((name) => isevent(name) && (!e.events || !e.events[name])).forEach((name) => {
-    let handler = props[name];
-    e.addEventListener(name.slice(2), handler);
-    e.events = e.events || {};
-    e.events[name] = handler;
-  });
+  return [
+    "value",
+    "checked",
+    "disabled",
+    "class",
+    "style",
+    "href",
+    "src",
+    "selected",
+    "readOnly",
+    "tabIndex"
+  ].includes(name) || value instanceof Object || value instanceof Function;
 }
 
 function rebind(o) {
@@ -85,7 +49,7 @@ function rebind(o) {
 }
 let removeexcesschildren = (n, i) => {
   let c;
-  while (c = n.childNodes[i])
+  while (letc = n.childNodes[i])
     c.remove();
 };
 let iswebcomponent = (h) => h.tag.includes("-");
@@ -116,14 +80,14 @@ function syncelement(p, i, tag, props) {
   if (!c || c.tagName != tag) {
     const n = document.createElement(tag);
     c ? c.replaceWith(n) : p.appendChild(n);
-    setape(n, props);
+    setprops(n, props);
     props?.mounted?.(n);
     return n;
   } else {
     console.log("------------");
     console.log("old", c.h.props?.());
     console.log("new", props);
-    setape(c, props);
+    setprops(c, props);
     props?.update?.(c);
     return c;
   }
@@ -147,7 +111,6 @@ function getupdatefunction(h, e) {
     return evaluate(h.props)?.update;
 }
 function sync(p, i, h, uc) {
-  console.log("sync", p.tagName, i, h, p.childNodes[i]);
   switch (typeof h) {
     case "string":
     case "number":
@@ -187,7 +150,6 @@ function sync(p, i, h, uc) {
   }
 }
 function syncchildren(p, h, i, uc) {
-  console.log("synchchildren", p.tagName, h, i);
   (evaluate(h.children) ?? []).flatMap(evaluate).filter((c) => c !== null && c !== void 0).forEach((hc) => {
     let i0 = i;
     i = sync(p, i, hc, uc);
@@ -205,7 +167,6 @@ function syncchildren(p, h, i, uc) {
         }
       }
     }
-    console.log("set-cn", cn.h, hc);
     if (cn)
       cn.h = hc;
   });
@@ -238,7 +199,8 @@ let App = {
   children: () => [{
     tag: "DIV",
     props: () => ({
-      class: "hase"
+      class: "hase",
+      ondblclick: e => console.log("hihi hase")
     }),
     children: () => ["hase"]
   }]
@@ -247,6 +209,9 @@ let App2 = {
   tag: "BODY",
   children: () => [{
     tag: "DIV",
+    props: () => ({
+      onclick: e => console.log("hehe, ente")
+    }),
     children: () => ["ente"]
   }]
 };

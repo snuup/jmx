@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { cloneWithoutLoc } from '@babel/types'
 import {
-    setape
+    setprops
 } from './props'
 import {
     iswebcomponent,
@@ -64,7 +64,7 @@ function syncelement(p: HTMLElement, i: number, tag: string, props: Props | unde
     if (!c || c.tagName != tag) {
         const n = document.createElement(tag)
         c ? c.replaceWith(n) : p.appendChild(n)
-        setape(n, props, false)
+        setprops(n, props, false)
         props?.mounted?.(n)
         return n
     } else {
@@ -73,7 +73,7 @@ function syncelement(p: HTMLElement, i: number, tag: string, props: Props | unde
         console.log("old", c.h.props?.())
         console.log("new", props)
 
-        setape(c, props, true, false)
+        setprops(c, props, true, false)
         props?.update?.(c)
         return c
     }
