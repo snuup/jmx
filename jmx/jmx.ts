@@ -64,16 +64,11 @@ function syncelement(p: HTMLElement, i: number, tag: string, props: Props | unde
     if (!c || c.tagName != tag) {
         const n = document.createElement(tag)
         c ? c.replaceWith(n) : p.appendChild(n)
-        setprops(n, props, false)
+        setprops(n, props)
         props?.mounted?.(n)
         return n
     } else {
-
-        console.log("------------");
-        console.log("old", c.h.props?.())
-        console.log("new", props)
-
-        setprops(c, props, true, false)
+        setprops(c, props)
         props?.update?.(c)
         return c
     }
@@ -199,8 +194,8 @@ export function patch(e: Node, h: H, uc: UpdateContext = {}) {
     //console.log("%cpatch", `background:orange;color:white;padding:2px;font-weight:bold`, e, h)
     const p = e.parentElement as HTMLElement
     const i = [].indexOf.call(p.childNodes, e) // tell typescript that parentElement is not null
-    e.h = h as any
     sync(p, i, h, uc)
+    e.h = h as any
 }
 
 // uses attached comps to patch elements

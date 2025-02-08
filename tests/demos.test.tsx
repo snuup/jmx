@@ -1,4 +1,4 @@
-import { FComponent, HClass, HFunction, HTag, jsx, patch, updateview } from '../jmx/jmx'
+import { jsx, patch, updateview } from '../jmx/jmx'
 import { describe, it, expect, beforeEach, vitest } from 'vitest'
 
 beforeEach(() => {
