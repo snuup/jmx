@@ -30,19 +30,23 @@ interface CComponent {
     new(props: Props): IClassComponent
 }
 
-type HTag =
-    {
-        tag: string,
-        props?: Expr<Props>
-        children: Children
-        i?: any
-    }
+type HText =
+    | string // text node
+    | number // text node
+    | boolean // do not allow boolean, that
 type HFragment =
     {
         //tag: never,
         //props: never,
         children: Children,
         [string]: never // no other keys
+    }
+type HTag =
+    {
+        tag: string,
+        props?: Expr<Props>
+        children: Children
+        i?: any
     }
 type HFunction =
     {
@@ -60,9 +64,7 @@ type HClass =
 type HComp = HFunction | HClass
 type HTagComp = HTag | HComp
 type H = // a hyperscript atom that describes a ...
-    | string // text node
-    | number // text node
-    | boolean // do not allow boolean, that
+    | HTExt
     | HTag // a tag, like p, div with attributes and children
     | HComp // a dynamic component computing any other HNode
 type HTFC = HTag | HFunction | HClass
@@ -74,7 +76,7 @@ type UpdateContext = {
     //[key: string]: any
 }
 
-interface HTMLElement {
+interface Element {
     events?: any // holds event listeners, so we can remove them
     model: any
 }
