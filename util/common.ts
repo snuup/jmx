@@ -20,9 +20,26 @@ export function setAttributeSmooth(n: Element, name, value) {
     if (n.getAttribute(name) != value) n.setAttribute(name, value)
 }
 
-declare global {}
+declare global { }
 
-// Object.prototype.logcon = function (this: ThisType<any>, msg: string) : ThisType<any> {
-//     console.log(msg, this)
-//     return this
-// }
+export function mergePrototype(mixin, ...targets) {
+    // instance
+    let props = Object.getOwnPropertyDescriptors(mixin.prototype)
+    delete (props as any).constructor // do not copy the constructor
+    targets.forEach(t => Object.defineProperties(t.prototype, props))
+
+    // static
+    props = Object.getOwnPropertyDescriptors(mixin)
+    Object.entries(props).forEach(([key, pd]) => !pd.writable && delete props[key])
+    targets.forEach(t => Object.defineProperties(t, props))
+}
+
+mergePrototype(
+    class extends Object {
+        log(this: ThisType<any>, msg: string): ThisType<any> {
+            console.log(msg, this)
+            return this
+        }
+    },
+    Object
+)
