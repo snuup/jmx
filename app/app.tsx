@@ -102,4 +102,3 @@ patch(document.body, App3)
 //let ub = () => updateview(document.body)
 //let p = x => patch(document.body, x)
 
-
