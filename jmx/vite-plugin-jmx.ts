@@ -30,7 +30,7 @@ function transform(code: string, filename: string) {
                     let cn = t.arrayExpression(args.slice(2))
 
                     path.replaceWith(t.objectExpression([
-                        makekind("fragment"),
+                        makekind("<>"),
                         t.objectProperty(t.identifier("children"), lazify(cn))
                     ]))
                 }
@@ -61,7 +61,7 @@ function transform(code: string, filename: string) {
                     }
 
                     path.replaceWith(t.objectExpression([
-                        makekind("component"),
+                        makekind(t.isStringLiteral(a) ? "element" : "component"),
                         tagProperty,
                         propsProperty,
                         childrenProperty].filter(x => !!x)))

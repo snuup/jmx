@@ -18,7 +18,7 @@ export let Numerotti = ({
   n
 }) => {
   return {
-    kind: "component",
+    kind: "element",
     tag: "DIV",
     props: () => ({
       class: "carrots"
@@ -45,18 +45,18 @@ export class Map extends BaseComp {
   view() {
     console.log("Map view");
     return {
-      kind: "component",
+      kind: "element",
       tag: "ASIDE",
       children: () => ["map"]
     };
     let r = {
-      kind: "component",
+      kind: "element",
       tag: "DIV",
       props: () => ({
         class: "map"
       }),
       children: () => [this.props.a, this.state, {
-        kind: "component",
+        kind: "element",
         tag: "BUTTON",
         props: () => ({
           onclick: this.increment
@@ -68,7 +68,7 @@ export class Map extends BaseComp {
   }
 }
 let App = {
-  kind: "component",
+  kind: "element",
   tag: "BODY",
   children: () => [{
     kind: "component",
@@ -88,17 +88,17 @@ let App = {
   }]
 };
 let F = {
-  kind: "fragment",
+  kind: "<>",
   children: () => ["aa", "bb"]
 };
 let App3 = {
-  kind: "component",
+  kind: "element",
   tag: "BODY",
   children: () => [{
     kind: "component",
     tag: F
   }, {
-    kind: "component",
+    kind: "element",
     tag: "DIV"
   }]
 };

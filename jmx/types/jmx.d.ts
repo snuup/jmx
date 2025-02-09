@@ -1,7 +1,6 @@
 // the following types describe the js expression we get from tsx after conversion be our jmx plugin
 
-type ChildrenH = (H | undefined)[]
-type Children = Expr<ChildrenH>
+
 
 type Action<T> = (arg: T) => void
 type Action = () => void
@@ -15,7 +14,7 @@ type Props =
         update?: Action<UpdateContext>
     }
 
-type FComponent = (props: Props | undefined, children?: ChildrenH) => HTag // show an example for usage of children
+type FComponent = (props: Props | undefined, children?: ChildrenH) => HElement // show an example for usage of children
 
 interface IClassComponent {
     element: Node
@@ -30,44 +29,49 @@ interface CComponent {
     new(props: Props): IClassComponent
 }
 
+type ChildrenH = (H | undefined)[]
+type Children = Expr<ChildrenH>
+
 type HText =
     | string // text node
     | number // text node
     | boolean // do not allow boolean, that
 type HFragment =
     {
-        //tag: never,
-        //props: never,
+        kind: "<>"
         children: Children,
         [string]: never // no other keys
     }
-type HTag =
+type HElement =
     {
+        kind: "element"
         tag: string,
         props?: Expr<Props>
         children: Children
         i?: any
     }
-type HFunction =
+type HCompFun =
     {
+        kind: "component"
         tag: FComponent,
         props?: Expr<Props>
         children?: Children
     }
-type HClass =
+type HCompClass =
     {
+        kind: "component"
         tag: CComponent,
         props?: Expr<Props>
         children: Children
         i: IClassComponent
     }
-type HComp = HFunction | HClass
-type HTagComp = HTag | HComp
+type HComp = HCompFun | HCompClass
+type HTagComp = HElement | HComp
 type H = // a hyperscript atom that describes a ...
     | HTExt
-    | HTag // a tag, like p, div with attributes and children
+    | HElement // a tag, like p, div with attributes and children
     | HComp // a dynamic component computing any other HNode
-type HTFC = HTag | HFunction | HClass
+type HTFC = HElement | HCompFun | HCompClass
 
 // runtime api
 type UpdateContext = {

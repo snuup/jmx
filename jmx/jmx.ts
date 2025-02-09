@@ -58,13 +58,13 @@ let removeexcesschildren = (n: Element, i: number) => {
     let c: ChildNode; while ((c = n.childNodes[i])) c.remove()
 }
 
-let iswebcomponent = (h: HTag) => (h.tag as string).includes('-')
+let iswebcomponent = (h: HElement) => (h.tag as string).includes('-')
 
 const evaluate = <T>(expr: Expr<T>): T => expr instanceof Function ? evaluate(expr()) : expr
 
-let iscomp = (h: H): h is HFunction => typeof ((h as any).tag) == "function"
+let iscomp = (h: H): h is HCompFun => typeof ((h as any).tag) == "function"
 
-let isclasscomponent = (h: HTFC): h is HClass => (h.tag as any)?.prototype?.view
+let isclasscomponent = (h: HTFC): h is HCompClass => (h.tag as any)?.prototype?.view
 
 function sync(p: Element, i: number, h: H | Func<H>, uc: UpdateContext): number {
 
@@ -103,7 +103,7 @@ function sync(p: Element, i: number, h: H | Func<H>, uc: UpdateContext): number 
     function evalComponent(h: HComp, n: Node | undefined): H {
 
         if (isclasscomponent(h)) {
-            let i = (n?.h as HClass).i ??= rebind(new h.tag(props!)) // rebind is important for simple event handlers
+            let i = (n?.h as HCompClass).i ??= rebind(new h.tag(props!)) // rebind is important for simple event handlers
             i.props = props
             return i.view() // inefficient: we compute view() although we do not use if then the component has an update function
         } else {
@@ -130,7 +130,7 @@ function sync(p: Element, i: number, h: H | Func<H>, uc: UpdateContext): number 
 
                 case 'string':
                     let n = syncelement(h.tag as string) // tbd: order of this line right and good?
-                    if (!uc.patchElementOnly && !iswebcomponent(h as HTag)) {
+                    if (!uc.patchElementOnly && !iswebcomponent(h as HElement)) {
                         const j = syncchildren(n, h, 0, uc)
                         removeexcesschildren(n, j)
                     }
@@ -149,7 +149,7 @@ let isfragment2 = (h: any): h is any => { return h.tag instanceof Function && h.
 //         throw ""
 // }
 
-function getchildren(h: HTag | HComp) {
+function getchildren(h: HElement | HComp) {
     return (evaluate(h.children) ?? []) // unlazify children property
         .log("children")
         .flatMap(h => isfragment2(h) ? evaluate(evaluate(h.tag).children) : h)
@@ -161,7 +161,7 @@ mount({ isfragment, isfragment2, getchildren, evaluate })
 
 /** synchronizes children starting at the i-th element.
  *  returns the index of the last child synchronized */
-function syncchildren(p: Element, h: HTag | HComp, i: number, uc: UpdateContext): number {
+function syncchildren(p: Element, h: HElement | HComp, i: number, uc: UpdateContext): number {
     // console.log('synchchildren', p.tagName, h, i)
 
     getchildren(h).forEach(hc => {
@@ -192,8 +192,8 @@ function syncchildren(p: Element, h: HTag | HComp, i: number, uc: UpdateContext)
     return i
 }
 
-export function jsx(): HTag { throw 'jmx plugin not configured' } // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it
-export function jsxf(): HTag { throw 'jmx plugin not configured' } // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it
+export function jsx(): HElement { throw 'jmx plugin not configured' } // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it
+export function jsxf(): HElement { throw 'jmx plugin not configured' } // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it
 
 // patches given dom and comp
 export function patch(e: Node, h: Expr<H>, uc: UpdateContext = {}) {

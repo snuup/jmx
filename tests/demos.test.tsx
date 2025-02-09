@@ -1,4 +1,4 @@
-import { jsx, patch } from '../jmx/jmx'
+import { jsx, jsxf, patch } from '../jmx/jmx'
 import { describe, it, expect, beforeEach } from 'vitest'
 
 beforeEach(() => {
@@ -10,9 +10,10 @@ describe('JMX dom tests', () => {
 
     it('HTag 1', () => {
 
-        var _h: HTag = <body>hase</body>
+        var _h: HElement = <body>hase</body>
 
-        let h: HTag = {
+        let h: HElement = {
+            kind: "element",
             tag: "BODY",
             children: () => ["hase"]
         }
@@ -23,9 +24,10 @@ describe('JMX dom tests', () => {
 
     it('HTag 1 thunked', () => {
 
-        var _h: HTag = <body>hase</body>
+        var _h: HElement = <body>hase</body>
 
-        let h: Func<HTag> = () => ({
+        let h: Func<HElement> = () => ({
+            kind: "element",
             tag: "BODY",
             children: () => ["hase"]
         })
@@ -38,7 +40,8 @@ describe('JMX dom tests', () => {
 
         let _h = <body class="cc">hase{42}{true}{false}</body>
 
-        let h: HTag = {
+        let h: HElement = {
+            kind: "element",
             tag: "BODY",
             props: () => ({
                 class: "cc"
@@ -58,24 +61,26 @@ describe('JMX dom tests', () => {
 
         let _F = ({ x }) => (
             {
+                kind: "element",
                 tag: "DIV",
                 props: () => ({
                     class: "classo" + x * 3
                 }),
                 children: () => [x * 2]
-            })
+            }) as HElement
 
         let _a =
         {
             tag: "BODY",
             children: () => [
                 {
+                    kind: "component",
                     tag: _F,
                     props: () => ({
                         x: 7
                     }),
                     children: () => []
-                } as HFunction]
+                } as HCompFun]
         }
 
         patch(document.body, a)
