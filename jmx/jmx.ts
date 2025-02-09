@@ -1,3 +1,4 @@
+import { mount } from '../base/common'
 import "../util/common"
 
 const enum NodeType { // vaporizes (but for that must be in this file, otherwise not)
@@ -143,13 +144,20 @@ function sync(p: Element, i: number, h: H | Func<H>, uc: UpdateContext): number 
 let isfragment = (h: any): h is HFragment => { return h.tag == undefined && h.children != undefined }
 let isfragment2 = (h: any): h is any => { return h.tag instanceof Function && h.children == undefined && h.props == undefined }
 
+// function evaluatefragment(c: HTag | HComp | HFragment) : H[] {
+//     if (c.tag && isfragment(c.tag) return evaluate(evaluate(c.tag).children)
+//         throw ""
+// }
+
 function getchildren(h: HTag | HComp) {
-    return (evaluate(h.children) ?? [])
-        //.log("children")
+    return (evaluate(h.children) ?? []) // unlazify children property
+        .log("children")
         .flatMap(h => isfragment2(h) ? evaluate(evaluate(h.tag).children) : h)
         .flatMap(c => ((c as any).tag && isfragment((c as any).tag) ? evaluate(c?.tag?.children) : c))
         .filter(c => c !== null && c !== undefined) //as H[]
 }
+
+mount({ isfragment, isfragment2, getchildren, evaluate })
 
 /** synchronizes children starting at the i-th element.
  *  returns the index of the last child synchronized */

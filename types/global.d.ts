@@ -1,5 +1,5 @@
 //declare global {
     interface Object {
-        logcon(msg: string): ThisType
+        log(msg: string): ThisType
     }
 //}

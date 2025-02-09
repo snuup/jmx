@@ -3,10 +3,14 @@ import { parse } from "@babel/parser"
 import traverse from "@babel/traverse"
 import generate from "@babel/generator"
 import * as t from "@babel/types"
+import * as fs from "fs"
 
 let lazify = (expression) => t.arrowFunctionExpression([], expression)
 
 function transform(code: string, filename: string) {
+
+    fs.writeFileSync("m:/output.tsx", code)
+
     const ast = parse(code, { sourceType: "module", sourceFilename: filename })
 
     traverse(ast, {
@@ -14,6 +18,9 @@ function transform(code: string, filename: string) {
         CallExpression: function (path) {
             if (path.node.callee.name == "jsx") {
                 let args = path.node.arguments
+
+                // fragment
+                // let F = jsx(jsxf, null, "aa", "bb");
 
                 let tagProperty
                 const tag = args[0]

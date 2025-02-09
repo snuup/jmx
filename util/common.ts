@@ -38,6 +38,7 @@ mergePrototype(
     class extends Object {
         log(this: ThisType<any>, msg: string): ThisType<any> {
             console.log(msg, this)
+            mount({ x: this })
             return this
         }
     },

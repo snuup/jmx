@@ -30,5 +30,5 @@ export default {
         environment: 'happy-dom', // Set Happy DOM as the test environment
         globals: true, // Enables Jest-like global functions (`describe`, `it`, `expect`)
         //  exclude: [...configDefaults.exclude, 'e2e/*'], // Optional: Exclude end-to-end tests
-    },
+    }
 }

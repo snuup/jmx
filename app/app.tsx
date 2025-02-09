@@ -81,7 +81,7 @@ let App = (
 //     <b>bb</b>
 // </>
 
-let F = () => <>
+let F = <>
     {"aa"}
     {"bb"}
 </>
@@ -91,7 +91,9 @@ let F = () => <>
 //     <a>2</a>
 // </>
 
-let App3 = <body><F /></body>
+let App3 = <body><F /><div /></body>
+
+mount({ u: updateview, patch, App3 })
 
 patch(document.body, App3)
 
@@ -100,4 +102,4 @@ patch(document.body, App3)
 //let ub = () => updateview(document.body)
 //let p = x => patch(document.body, x)
 
-mount({ u: updateview, patch, App3 })
+
