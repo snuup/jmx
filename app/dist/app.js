@@ -53,11 +53,14 @@ let removeexcesschildren = (n, i) => {
     c.remove();
 };
 let iswebcomponent = (h) => h.tag.includes("-");
-
-const jsxf = "jsxf";
 const evaluate = (expr) => expr instanceof Function ? evaluate(expr()) : expr;
 let iscomp = (h) => typeof h.tag == "function";
 let isclasscomponent = (h) => h.tag.prototype?.view;
+let isfragment = (h) => {
+  console.log(h);
+  return h.tag == void 0;
+};
+
 function evalComponent(h, n) {
   const props = evaluate(h.props);
   if (isclasscomponent(h)) {
@@ -106,6 +109,7 @@ function getupdatefunction(h, e) {
     return evaluate(h.props)?.update;
 }
 function sync(p, i, h, uc) {
+  console.log("sync", p.tagName, i, h, p.childNodes[i], h.tag?.toString());
   h = evaluate(h);
   switch (typeof h) {
     case "string":
@@ -126,6 +130,7 @@ function sync(p, i, h, uc) {
         case "string":
           switch (h.tag) {
             case "jsxf":
+              console.error("??????????????");
               return syncchildren(p, h, i, uc);
             default:
               let props = evaluate(h.props);
@@ -148,7 +153,8 @@ function sync(p, i, h, uc) {
   }
 }
 function syncchildren(p, h, i, uc) {
-  (evaluate(h.children) ?? []).flatMap(evaluate).filter((c) => c !== null && c !== void 0).forEach((hc) => {
+  console.log("synchchildren", p.tagName, h, i);
+  (evaluate(h.children) ?? []).flatMap(evaluate).flatMap((c) => isfragment(c) ? evaluate(c.children) : c).filter((c) => c !== null && c !== void 0).forEach((hc) => {
     let i0 = i;
     i = sync(p, i, hc, uc);
     let cn = p.childNodes[i0];
@@ -192,7 +198,6 @@ function updateview(selector = "body", uc = {}) {
     patch(n, n.h, uc);
   }
 }
-mount({ jsxf });
 
 let m = {
   i: 10
@@ -211,21 +216,19 @@ let App = {
       children: () => [m.i]
     }, {
       tag: "DIV",
-      children: [3, 4, 5].map(x => ({
+      children: () => [[3, 4, 5].map(x => ({
         tag: "I",
-        children: [x]
-      }))
+        children: () => [x]
+      }))]
     }, {
       tag: "DIV",
       children: () => [[7, 8].map(x => ({
-        tag: jsxf,
         children: () => [x]
       }))]
     }]
   }]
 };
 let L1 = () => ({
-  tag: jsxf,
   children: () => [{
     tag: "B",
     children: () => ["bb1"]
@@ -238,7 +241,6 @@ let L1 = () => ({
   }]
 });
 let L2 = {
-  tag: jsxf,
   children: () => [{
     tag: "A",
     children: () => ["aa1"]
@@ -257,7 +259,37 @@ let App2 = {
     children: () => []
   }]
 };
-patch(document.body, App);
+let F = {
+  children: () => [{
+    tag: "B",
+    children: () => ["1"]
+  }, {
+    tag: "B",
+    children: () => ["2"]
+  }, {
+    tag: "B",
+    children: () => ["3"]
+  }]
+};
+let G = {
+  children: () => [{
+    tag: "A",
+    children: () => ["1"]
+  }, {
+    tag: "A",
+    children: () => ["2"]
+  }]
+};
+patch(document.body, {
+  tag: "BODY",
+  children: () => [{
+    tag: F,
+    children: () => []
+  }, {
+    tag: G,
+    children: () => []
+  }]
+});
 let ub = () => updateview(document.body);
 let p = x => patch(document.body, x);
 mount({
@@ -266,5 +298,7 @@ mount({
   patch,
   App,
   App2,
-  p
+  p,
+  L1,
+  L2
 });

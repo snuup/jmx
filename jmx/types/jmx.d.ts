@@ -37,6 +37,13 @@ type HTag =
         children: Children
         i?: any
     }
+type HFragment =
+    {
+        //tag: never,
+        //props: never,
+        children: Children,
+        [string]: never // no other keys
+    }
 type HFunction =
     {
         tag: FComponent,

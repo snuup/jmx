@@ -14,3 +14,14 @@ export let removeexcesschildren = (n: HTMLElement, i: number) => { let c: ChildN
 export let iswebcomponent = (h: HTag) => (h.tag as string).includes('-')
 
 
+export function jsx(): HTag { throw 'jmx plugin not configured' } // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it
+
+//export const jsxf = "jsxf" //(props, { children }) => ({ tag: 'jsxf', children })
+
+export const evaluate = <T>(expr: Expr<T>): T => expr instanceof Function ? evaluate(expr()) : expr
+
+export let iscomp = (h: H): h is HFunction => typeof ((h as any).tag) == "function"
+
+export let isclasscomponent = (h: HTFC): h is HClass => (h.tag as any)?.prototype?.view
+
+export let isfragment = (h: any): h is HFragment => { return h.tag == undefined && h.children != undefined }

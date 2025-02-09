@@ -1,8 +1,9 @@
 import { mount } from '../base/common'
-import { jsx, jsxf, patch, updateview } from '../jmx/jmx'
+import { patch, updateview } from '../jmx/jmx'
 import { m } from './model'
 import { Numero } from './number'
 import { Map, TextComp } from './map'
+import { jsx } from '../jmx/utils'
 
 let a: Action<number>
 
@@ -20,12 +21,12 @@ let App = (
 
         {/* <Map a={m.i} s='s' /> */}
 
-        <h2>
+        {/* <h2>
             <div>1</div>
             <div>{m.i}</div>
-            <div>{[3,4,5].map(x => <i>{x}</i>)}</div>
-            <div>{[7,8].map(x => <>{x}</>)}</div>
-        </h2>
+            <div>{[3, 4, 5].map(x => <i>{x}</i>)}</div>
+            <div>{[7, 8].map(x => <>{x}</>)}</div>
+        </h2> */}
 
         {/* <>
             <p>11</p>
@@ -57,26 +58,43 @@ let App = (
     </body>
 )
 
-let L1 = () => <>
-    <b>bb1</b>
-    <b>bb2</b>
-    <b>bb3</b>
+// let L1 = () => <>
+//     <b>bb1</b>
+//     <b>bb2</b>
+//     <b>bb3</b>
+// </>
+
+// let L2 = <>
+//     <a>aa1</a>
+//     <a>aa2</a>
+// </>
+
+// let App2 = (
+//     <body>
+//         <L1 />
+//         <L2 />
+//     </body>
+// )
+
+// let F = () => <>
+//     <b>aa</b>
+//     <b>bb</b>
+// </>
+
+let F = <>
+    {"aa"}
+    {"bb"}
 </>
 
-let L2 = <>
-    <a>aa1</a>
-    <a>aa2</a>
-</>
+// let G = <>
+//     <a>1</a>
+//     <a>2</a>
+// </>
 
-let App2 = (
-    <body>
-        <L1 />
-        <L2 />
-    </body>
-)
+patch(document.body, <body><F /></body>)
 
-patch(document.body, App)
+//patch(document.body, App)
 
 let ub = () => updateview(document.body)
 let p = x => patch(document.body, x)
-mount({ u: updateview, ub, patch, App, App2, p, L1, L2 })
+mount({ u: updateview, ub, patch, App, p })
