@@ -7,9 +7,9 @@ import * as fs from "fs"
 
 let lazify = (expression) => t.arrowFunctionExpression([], expression)
 
-function transform(code: string, filename: string) {
+let makekind = kind => t.objectProperty(t.identifier("kind"), t.stringLiteral(kind))
 
-    fs.writeFileSync(filename + "orig.ts", code)
+function transform(code: string, filename: string) {
 
     const ast = parse(code, { sourceType: "module", sourceFilename: filename })
 
@@ -30,11 +30,14 @@ function transform(code: string, filename: string) {
                     let cn = t.arrayExpression(args.slice(2))
 
                     path.replaceWith(t.objectExpression([
-                        t.objectProperty(t.identifier("kind"), t.stringLiteral("fragment")),
+                        makekind("fragment"),
                         t.objectProperty(t.identifier("children"), lazify(cn))
                     ]))
                 }
                 else {
+
+                    // element
+                    // let App3 = jsx("body", null, jsx(F, null), jsx("div", null));
 
                     let tagProperty
                     const tag = args[0]
@@ -57,7 +60,11 @@ function transform(code: string, filename: string) {
                         childrenProperty = t.objectProperty(t.identifier("children"), lazify(cn))
                     }
 
-                    path.replaceWith(t.objectExpression([tagProperty, propsProperty, childrenProperty].filter(x => !!x)))
+                    path.replaceWith(t.objectExpression([
+                        makekind("component"),
+                        tagProperty,
+                        propsProperty,
+                        childrenProperty].filter(x => !!x)))
                 }
             }
         },
@@ -71,6 +78,8 @@ export const jmxplugin = () => {
         name: "vite-plugin-jmx",
         transform(raw, filename) {
             if(filename.endsWith(".tsx")){
+                console.log("transform", filename)
+                fs.writeFileSync(filename + "orig.ts", "" + raw)
                 let r = transform(raw, filename)
                 fs.writeFileSync(filename + ".result.tsx", "" + r.code)
                 return r

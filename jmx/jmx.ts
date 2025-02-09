@@ -193,6 +193,7 @@ function syncchildren(p: Element, h: HTag | HComp, i: number, uc: UpdateContext)
 }
 
 export function jsx(): HTag { throw 'jmx plugin not configured' } // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it
+export function jsxf(): HTag { throw 'jmx plugin not configured' } // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it
 
 // patches given dom and comp
 export function patch(e: Node, h: Expr<H>, uc: UpdateContext = {}) {
