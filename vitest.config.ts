@@ -5,9 +5,9 @@ export default {
         target: 'esnext', // !!
         minify: false,
         rollupOptions: {
-            input: {
-                tests: 'tests/demos.test.tsx', // Replace with your test entry file
-            },
+            // input: {
+            //     tests: 'tests/demos.test.tsx', // Replace with your test entry file
+            // },
             output: {
                 entryFileNames: `test.js`
             },

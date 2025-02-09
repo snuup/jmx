@@ -1,3 +1,5 @@
+import "../util/common"
+
 const enum NodeType { // vaporizes (but for that must be in this file, otherwise not)
     TextNode = 3,
 }
@@ -138,43 +140,47 @@ function sync(p: Element, i: number, h: H | Func<H>, uc: UpdateContext): number 
     throw "invalid execution - code is wrong"
 }
 
-let isfragment  = (h: any): h is HFragment => { return h.tag == undefined && h.children != undefined }
-let isfragment2 = (h: any): h is any =>       { return h.tag instanceof Function && h.children == undefined && h.props == undefined }
+let isfragment = (h: any): h is HFragment => { return h.tag == undefined && h.children != undefined }
+let isfragment2 = (h: any): h is any => { return h.tag instanceof Function && h.children == undefined && h.props == undefined }
+
+function getchildren(h: HTag | HComp) {
+    return (evaluate(h.children) ?? [])
+        //.log("children")
+        .flatMap(h => isfragment2(h) ? evaluate(evaluate(h.tag).children) : h)
+        .flatMap(c => ((c as any).tag && isfragment((c as any).tag) ? evaluate(c?.tag?.children) : c))
+        .filter(c => c !== null && c !== undefined) //as H[]
+}
 
 /** synchronizes children starting at the i-th element.
  *  returns the index of the last child synchronized */
 function syncchildren(p: Element, h: HTag | HComp, i: number, uc: UpdateContext): number {
     // console.log('synchchildren', p.tagName, h, i)
 
-    (evaluate(h.children) ?? [])
-        .map(h => isfragment2(h) ? evaluate(evaluate(h.tag).children) : h)
-        .flatMap(c => ((c as any).tag && isfragment((c as any).tag) ? evaluate(c?.tag?.children) : c))
-        .filter(c => c !== null && c !== undefined) //as H[]
-        .forEach(hc => {
-            let i0 = i
-            i = sync(p, i, hc, uc)
-            let cn = p.childNodes[i0] // this node might not exist before the sync call
+    getchildren(h).forEach(hc => {
 
-            // life cycle calls
-            if (iscomp(hc)) {
-                if (!cn.h) {
-                    if (isclasscomponent(hc)) {
-                        // if element is not yet set, the component was newly created
-                        hc.i.element = cn
-                        hc.i.mounted?.(cn)
-                    } else {
-                        let props = evaluate(hc.props)
-                        if (props) {
-                            props.mounted?.(cn as Element)
-                        }
-                    }
-                }
-            }
+        let i0 = i
+        i = sync(p, i, hc, uc)
+        let cn = p.childNodes[i0] // this node might not exist before the sync call
 
-            // console.log("set", cn, cn.h)
+        // life cycle calls -disabled for a moment
+        // if (iscomp(hc)) {
+        //     if (!cn.h) {
+        //         if (isclasscomponent(hc)) {
+        //             // if element is not yet set, the component was newly created
+        //             hc.i.element = cn
+        //             hc.i.mounted?.(cn)
+        //         } else {
+        //             let props = evaluate(hc.props)
+        //             if (props) {
+        //                 props.mounted?.(cn as Element)
+        //             }
+        //         }
+        //     }
+        // }
 
-            if (cn && !cn.h) cn.h = hc as any // the node here might not exist before the call to sync // tbd, make this nicer
-        })
+        if (cn && !cn.h) cn.h = hc as any // the node here might not exist before the call to sync // tbd, make this nicer
+    })
+
     return i
 }
 

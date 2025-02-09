@@ -19,3 +19,10 @@ export function rebind(o) {
 export function setAttributeSmooth(n: Element, name, value) {
     if (n.getAttribute(name) != value) n.setAttribute(name, value)
 }
+
+declare global {}
+
+// Object.prototype.logcon = function (this: ThisType<any>, msg: string) : ThisType<any> {
+//     console.log(msg, this)
+//     return this
+// }
