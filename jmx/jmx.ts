@@ -6,6 +6,8 @@ const enum NodeType { // vaporizes (but for that must be in this file, otherwise
     TextNode = 3
 }
 
+export function jsx(): HTag { throw 'jmx plugin not configured' } // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it
+
 function evalComponent(h: HComp, n: Node | undefined): H {
 
     // console.log("evalComponent", h, n, "h.tag:", h.tag.toString())
@@ -74,7 +76,7 @@ function getupdatefunction(h: HTFC, e: Node | undefined) {
  */
 function sync(p: HTMLElement, i: number, h: H | Func<H>, uc: UpdateContext): number {
 
-    console.log("sync", p.tagName, i, h, p.childNodes[i]) // , h.tag?.toString()
+    console.log("sync", p.tagName, i, h, "html = " + document.body.outerHTML) // , h.tag?.toString()
 
     h = evaluate(h)
 
@@ -136,50 +138,47 @@ function sync(p: HTMLElement, i: number, h: H | Func<H>, uc: UpdateContext): num
             throw `invalid h ${h}. did you forget to define a component as function, like const C = () => <div>hare</div> ?`
     }
 }
-function flattenfragment(h: HTag) { }
-
 /** synchronizes children starting at the i-th element.
  *  returns the index of the last child synchronized */
 function syncchildren(p: HTMLElement, h: HTag | HComp, i: number, uc: UpdateContext): number {
 
-    console.log("synchchildren", p.tagName, h, i);
+    console.log("synchchildren", p.tagName, h, i)
 
-    (evaluate(h.children) ?? [])
-        .flatMap(evaluate)
-        .flatMap(c => isfragment(c) ? evaluate(c.children) : c)
-        .filter(c => c !== null && c !== undefined) //as H[]
-        .forEach(hc => {
-            let i0 = i
+    let kids =
+        (evaluate(h.children) ?? [])
+            .flatMap(evaluate)
+            .flatMap(c => ((c as any).tag && isfragment((c as any).tag)) ? evaluate((c?.tag)?.children) : c)
+            .filter(c => c !== null && c !== undefined) //as H[]
 
-            console.log("i", i)
+    console.log({ kids })
 
-            i = sync(p, i, hc, uc)
+    kids.forEach(hc => {
 
-            console.log("cn.forEach", hc.tag, i)
+        let i0 = i
+        i = sync(p, i, hc, uc)
+        let cn = p.childNodes[i0]
 
-            let cn = p.childNodes[i0]
+        // life cycle calls
+        if (iscomp(hc)) {
 
-            // life cycle calls
-            if (iscomp(hc)) {
-
-                if (!cn.h) {
-                    if (isclasscomponent(hc)) { // if element is not yet set, the component was newly created
-                        hc.i.element = cn
-                        hc.i.mounted?.(cn)
-                    }
-                    else {
-                        let props = evaluate(hc.props)
-                        if (props) {
-                            props.mounted?.(cn as HTMLElement)
-                        }
+            if (!cn.h) {
+                if (isclasscomponent(hc)) { // if element is not yet set, the component was newly created
+                    hc.i.element = cn
+                    hc.i.mounted?.(cn)
+                }
+                else {
+                    let props = evaluate(hc.props)
+                    if (props) {
+                        props.mounted?.(cn as HTMLElement)
                     }
                 }
             }
+        }
 
-            // console.log("set", cn, cn.h)
+        // console.log("set", cn, cn.h)
 
-            if (cn && !cn.h) cn.h = hc as any // the node here might not exist before the call to sync // tbd, make this nicer
-        })
+        if (cn && !cn.h) cn.h = hc as any // the node here might not exist before the call to sync // tbd, make this nicer
+    })
     return i
 }
 
@@ -208,7 +207,7 @@ export function updateview(selector: string | Node = 'body', uc: UpdateContext =
 }
 
 // lib
-export let When = ({ cond }, { children }) => cond && { tag: 'jsxf', children }
+export let When = ({ cond }, { children }) => cond && { children }
 
 export abstract class BaseComp<P extends Props> implements IClassComponent {
 

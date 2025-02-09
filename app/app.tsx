@@ -1,9 +1,9 @@
 import { mount } from '../base/common'
-import { patch, updateview } from '../jmx/jmx'
+import { jsx, patch, updateview } from '../jmx/jmx'
 import { m } from './model'
 import { Numero } from './number'
 import { Map, TextComp } from './map'
-import { jsx } from '../jmx/utils'
+
 
 let a: Action<number>
 
@@ -95,6 +95,7 @@ patch(document.body, <body><F /></body>)
 
 //patch(document.body, App)
 
-let ub = () => updateview(document.body)
-let p = x => patch(document.body, x)
-mount({ u: updateview, ub, patch, App, p })
+//let ub = () => updateview(document.body)
+//let p = x => patch(document.body, x)
+
+mount({ u: updateview, patch, App })

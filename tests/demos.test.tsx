@@ -1,5 +1,5 @@
-import { jsx, jsxf, patch, updateview } from '../jmx/jmx'
-import { describe, it, expect, beforeEach, vitest } from 'vitest'
+import { jsx, patch } from '../jmx/jmx'
+import { describe, it, expect, beforeEach } from 'vitest'
 
 beforeEach(() => {
     document.body.replaceChildren()
@@ -103,7 +103,7 @@ describe('JMX dom tests', () => {
         expect(document.body.innerHTML).toBe('<b>1</b><b>2</b><b>3</b>')
     })
 
-    it('fragments thunked', () => {
+    it('fragment thunked', () => {
 
         let F = () => <>
             <b>1</b>
