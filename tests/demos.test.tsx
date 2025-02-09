@@ -1,4 +1,4 @@
-import { jsx, patch, updateview } from '../jmx/jmx'
+import { jsx, jsxf, patch, updateview } from '../jmx/jmx'
 import { describe, it, expect, beforeEach, vitest } from 'vitest'
 
 beforeEach(() => {
@@ -91,4 +91,15 @@ describe('JMX dom tests', () => {
         expect(document.body.innerHTML).toBe('<div>snuff</div>')
     })
 
+    it('fragments', () => {
+
+        let F = <>
+            <b>1</b>
+            <b>2</b>
+            <b>3</b>
+        </>
+
+        patch(document.body, <body><F /></body>)
+        expect(document.body.innerHTML).toBe('<b>1</b><b>2</b><b>3</b>')
+    })
 })

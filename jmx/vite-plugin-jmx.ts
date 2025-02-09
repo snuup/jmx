@@ -4,18 +4,18 @@ import traverse from "@babel/traverse"
 import generate from "@babel/generator"
 import * as t from "@babel/types"
 
-function lazifyIfNonLiteral(expression) {
-    if (!expression) console.log("see here:", expression)
+// function lazifyIfNonLiteral(expression) {
+//     if (!expression) console.log("see here:", expression)
 
-    if (t.isCallExpression(expression)) {
-        if ((expression.callee as any).name == "jsx") {
-            return expression
-        }
-    }
-    if (t.isLiteral(expression)) return expression
+//     if (t.isCallExpression(expression)) {
+//         if ((expression.callee as any).name == "jsx") {
+//             return expression
+//         }
+//     }
+//     if (t.isLiteral(expression)) return expression
 
-    return lazify(expression)
-}
+//     return lazify(expression)
+// }
 
 function lazify(expression) {
     return t.arrowFunctionExpression([], expression)
@@ -31,7 +31,10 @@ function transform(code: string, filename: string) {
 
                 const tag = args[0]
                 if (t.isStringLiteral(tag)) tag.value = tag.value.toUpperCase()
-                let tagProperty = t.objectProperty(t.identifier("tag"), tag)
+
+                let tagProperty
+                if (t.isIdentifier(tag) && tag.name == "jsx") {} // fragment
+                else tagProperty = t.objectProperty(t.identifier("tag"), tag)
 
                 let props = args[1]
                 let nopros = t.isNullLiteral(props)

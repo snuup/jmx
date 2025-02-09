@@ -79,4 +79,4 @@ patch(document.body, App)
 
 let ub = () => updateview(document.body)
 let p = x => patch(document.body, x)
-mount({ u: updateview, ub, patch, App, App2, p })
+mount({ u: updateview, ub, patch, App, App2, p, L1, L2 })
