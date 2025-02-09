@@ -102,4 +102,28 @@ describe('JMX dom tests', () => {
         patch(document.body, <body><F /></body>)
         expect(document.body.innerHTML).toBe('<b>1</b><b>2</b><b>3</b>')
     })
+
+    it('fragments thunked', () => {
+
+        let F = () => <>
+            <b>1</b>
+            <b>2</b>
+            <b>3</b>
+        </>
+
+        patch(document.body, <body><F /></body>)
+        expect(document.body.innerHTML).toBe('<b>1</b><b>2</b><b>3</b>')
+    })
+
+    it('fragments many', () => {
+
+        let F = <>
+            <b>1</b>
+            <b>2</b>
+            <b>3</b>
+        </>
+
+        patch(document.body, <body><F /><F /></body>)
+        expect(document.body.innerHTML).toBe('<b>1</b><b>2</b><b>3</b><b>1</b><b>2</b><b>3</b>')
+    })
 })
