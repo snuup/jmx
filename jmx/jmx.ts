@@ -18,7 +18,7 @@ let isclasscomponent = (h: HTFC): h is HClass => (h.tag as any).prototype?.view
 
 function evalComponent(h: HComp, n: Node | undefined): H {
 
-    console.log("evalComponent", h, n, "h.tag:", h.tag.toString())
+    // console.log("evalComponent", h, n, "h.tag:", h.tag.toString())
 
     const props = evaluate(h.props)
 
@@ -84,7 +84,7 @@ function getupdatefunction(h: HTFC, e: Node | undefined) {
  */
 function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
 
-    console.log("sync", p.tagName, i, h, p.childNodes[i], h.tag?.toString())
+    // console.log("sync", p.tagName, i, h, p.childNodes[i], h.tag?.toString())
 
     switch (typeof h) {
 
@@ -129,7 +129,8 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
                     break
 
                 case 'object':
-                    if ((h.tag as any)?.tag == jsxf) {
+                    // this case occurs when a fragment without thunk is nested, when a fragment is assigned to a variable
+                    if ((h.tag as any)?.tag == jsxf) { // tbd, express this as typescript type
                         console.log("jsxf??? !!!")
                         return sync(p, i, h.tag, uc)
                     }
@@ -146,7 +147,7 @@ function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
  *  returns the index of the last child synchronized */
 function syncchildren(p: HTMLElement, h: HTag | HComp, i: number, uc: UpdateContext): number {
 
-    console.log("synchchildren", p.tagName, h, i);
+    // console.log("synchchildren", p.tagName, h, i);
 
     (evaluate(h.children) ?? [])
         .flatMap(evaluate)
@@ -175,7 +176,9 @@ function syncchildren(p: HTMLElement, h: HTag | HComp, i: number, uc: UpdateCont
                 }
             }
 
-            if (cn) cn.h = hc as any // the node here might not exist before the call to sync // tbd, make this nicer
+            console.log("set", cn, cn.h)
+
+            if (cn && !cn.h) cn.h = hc as any // the node here might not exist before the call to sync // tbd, make this nicer
         })
     return i
 }

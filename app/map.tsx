@@ -33,6 +33,8 @@ export class Map extends BaseComp<{ a: number; s: string }> {
     view() {
         console.log("Map view")
 
+        return <aside>map</aside>
+
         let r = <div class='map'>
             {this.props.a}{this.state}
             <button onclick={this.increment} >increment</button>

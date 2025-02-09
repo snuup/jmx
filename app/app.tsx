@@ -18,12 +18,12 @@ let App = (
 
         {/* <Numerotti n={m.i * 10} mounted={e => console.log("Numerotti mounted", e)} update={e => console.log("Numerotti update", e)} />*/}
 
-        {/* <Map a={m.i} s='s' /> */}
+        <Map a={m.i} s='s' />
 
-        <>
+        {/* <>
             <p>11</p>
             <i>22</i>
-        </>
+        </> */}
 
         {/* <div class='hase' mounted={console.log}>hase</div> */}
 
@@ -63,11 +63,12 @@ let L2 = <>
 
 let App2 = (
     <body>
+        <L1 />
         <L2 />
     </body>
 )
 
-patch(document.body, App2)
+patch(document.body, App)
 
 let ub = () => updateview(document.body)
 let p = x => patch(document.body, x)
