@@ -1,3 +1,5 @@
+import { mount } from '../base/common'
+
 export function rebind(o) {
     let proto = Object.getPrototypeOf(o)
     let names = Object.entries(Object.getOwnPropertyDescriptors(proto))
@@ -21,3 +23,6 @@ export let iscomp = (h: H): h is HFunction => typeof ((h as any).tag) == "functi
 export let isclasscomponent = (h: HTFC): h is HClass => (h.tag as any)?.prototype?.view
 
 export let isfragment = (h: any): h is HFragment => { return h.tag == undefined && h.children != undefined }
+export let isfragment2 = (h: any): h is any => { return h.tag instanceof Function && h.children == undefined && h.props == undefined }
+
+mount({ isfragment, isfragment2 })

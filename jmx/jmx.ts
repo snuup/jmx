@@ -1,15 +1,25 @@
 import { mount } from '../base/common'
 import { setprops } from './props'
-import { evaluate, isclasscomponent, iscomp, isfragment, iswebcomponent, rebind, removeexcesschildren } from './utils'
+import {
+    evaluate,
+    isclasscomponent,
+    iscomp,
+    isfragment,
+    isfragment2,
+    iswebcomponent,
+    rebind,
+    removeexcesschildren,
+} from './utils'
 
 const enum NodeType { // vaporizes (but for that must be in this file, otherwise not)
-    TextNode = 3
+    TextNode = 3,
 }
 
-export function jsx(): HTag { throw 'jmx plugin not configured' } // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it
+export function jsx(): HTag {
+    throw 'jmx plugin not configured'
+} // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it
 
 function evalComponent(h: HComp, n: Node | undefined): H {
-
     // console.log("evalComponent", h, n, "h.tag:", h.tag.toString())
 
     const props = evaluate(h.props)
@@ -20,9 +30,8 @@ function evalComponent(h: HComp, n: Node | undefined): H {
         if ((hc = n?.h as HClass)?.i) {
             hc.i.props = props
             // console.log("best is to cancel view here if update exists")
-        }
-        else {
-            (hc = h).i = rebind(new h.tag(props!)) // rebind is important for simple event handlers
+        } else {
+            ; (hc = h).i = rebind(new h.tag(props!)) // rebind is important for simple event handlers
         }
         return hc.i.view() // inefficient: we compute view() although we do not use if then the component has an update function
     } else {
@@ -40,7 +49,6 @@ function evalComponent(h: HComp, n: Node | undefined): H {
 }
 
 function syncelement(p: HTMLElement, i: number, tag: string, props: Props | undefined): HTMLElement {
-
     const c: any = p.childNodes[i]
 
     if (!c || c.tagName != tag) {
@@ -75,38 +83,31 @@ function getupdatefunction(h: HTFC, e: Node | undefined) {
  * synchronizes p.children[i] with h
  */
 function sync(p: HTMLElement, i: number, h: H | Func<H>, uc: UpdateContext): number {
-
-    console.log("sync", p.tagName, i, h, "html = " + document.body.outerHTML) // , h.tag?.toString()
+    console.log('%csync', "background:orange", p.tagName, i, h, 'html = ' + document.body.outerHTML) // , h.tag?.toString()
 
     h = evaluate(h)
 
     switch (typeof h) {
-
         // text nodes
         case 'string':
         case 'number':
         case 'boolean':
-
             synctextnode(p, i, h) //not sure if we need toString() here
             return i + 1
 
         case 'object':
-
             let e = p.childNodes[i]
             if (getupdatefunction(h, e)?.(uc)) return i + 1
 
             switch (typeof h.tag) {
-
                 case 'function':
-
-                    console.log("function")
+                    console.log('function')
                     const h2 = evalComponent(h as HComp, e)
                     if (!h2) return i // can be null, if function component returns null | undefined
                     return sync(p, i, h2, uc)
 
                 case 'string':
-
-                    console.log("string")
+                    console.log('string')
                     let props = evaluate(h.props)
                     let n = syncelement(p, i, h.tag as string, props) // tbd: order of this line right and good?
                     // if (update(uc)) {
@@ -119,15 +120,14 @@ function sync(p: HTMLElement, i: number, h: H | Func<H>, uc: UpdateContext): num
                     return i + 1
 
                 default:
+                    console.log('default - please not')
 
-                    console.log("default")
                     if (isfragment(h)) {
-                        console.log("handle fragment", h)
+                        console.log('handle fragment', h)
                         const j = syncchildren(p, h, i, uc)
                         removeexcesschildren(p, j)
                         return j
-                    }
-                    else {
+                    } else {
                         if (isfragment(h.tag)) {
                             return sync(p, i, h.tag, uc)
                         }
@@ -138,35 +138,43 @@ function sync(p: HTMLElement, i: number, h: H | Func<H>, uc: UpdateContext): num
             throw `invalid h ${h}. did you forget to define a component as function, like const C = () => <div>hare</div> ?`
     }
 }
+
+let evalfrag = h => {
+    console.log('%cevalfrag', 'background:turquoise ', h, isfragment2(h))
+
+    let r = h
+    if (isfragment2(h)) r = evaluate(evaluate(h.tag).children)
+    console.log('r', r)
+
+    return r
+}
+
 /** synchronizes children starting at the i-th element.
  *  returns the index of the last child synchronized */
 function syncchildren(p: HTMLElement, h: HTag | HComp, i: number, uc: UpdateContext): number {
+    console.log('synchchildren', p.tagName, h, i)
 
-    console.log("synchchildren", p.tagName, h, i)
-
-    let kids =
-        (evaluate(h.children) ?? [])
-            .flatMap(evaluate)
-            .flatMap(c => ((c as any).tag && isfragment((c as any).tag)) ? evaluate((c?.tag)?.children) : c)
-            .filter(c => c !== null && c !== undefined) //as H[]
+    let kids = (evaluate(h.children) ?? [])
+        .map(evalfrag)
+        .flatMap(evaluate)
+        .flatMap(c => ((c as any).tag && isfragment((c as any).tag) ? evaluate(c?.tag?.children) : c))
+        .filter(c => c !== null && c !== undefined) //as H[]
 
     console.log({ kids })
 
     kids.forEach(hc => {
-
         let i0 = i
         i = sync(p, i, hc, uc)
         let cn = p.childNodes[i0]
 
         // life cycle calls
         if (iscomp(hc)) {
-
             if (!cn.h) {
-                if (isclasscomponent(hc)) { // if element is not yet set, the component was newly created
+                if (isclasscomponent(hc)) {
+                    // if element is not yet set, the component was newly created
                     hc.i.element = cn
                     hc.i.mounted?.(cn)
-                }
-                else {
+                } else {
                     let props = evaluate(hc.props)
                     if (props) {
                         props.mounted?.(cn as HTMLElement)
@@ -201,7 +209,7 @@ export function updateview(selector: string | Node = 'body', uc: UpdateContext =
         if (!n) continue
 
         if (uc.replace) (n as HTMLElement).replaceChildren()
-        if (!n.h) throw ["cannot update, because html was not created with jmx: no h exists on the node", n]
+        if (!n.h) throw ['cannot update, because html was not created with jmx: no h exists on the node', n]
         patch(n, n.h, uc)
     }
 }
@@ -210,13 +218,16 @@ export function updateview(selector: string | Node = 'body', uc: UpdateContext =
 export let When = ({ cond }, { children }) => cond && { children }
 
 export abstract class BaseComp<P extends Props> implements IClassComponent {
-
     element: Node
 
     constructor(public props: P) { } // we do this for jsx. at runtime, we pass the props directly
     mounted(n: Node) { }
-    update(uc: UpdateContext): boolean { return false }
-    updateview() { updateview(this.element) }
+    update(uc: UpdateContext): boolean {
+        return false
+    }
+    updateview() {
+        updateview(this.element)
+    }
 
     abstract view()
 }

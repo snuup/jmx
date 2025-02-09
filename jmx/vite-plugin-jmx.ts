@@ -33,7 +33,7 @@ function transform(code: string, filename: string) {
                 if (t.isStringLiteral(tag)) tag.value = tag.value.toUpperCase()
 
                 let tagProperty
-                if (t.isIdentifier(tag) && tag.name == "jsx") {} // fragment
+                if (t.isIdentifier(tag) && tag.name == "jsx") { } // fragment
                 else tagProperty = t.objectProperty(t.identifier("tag"), tag)
 
                 let props = args[1]
@@ -43,9 +43,12 @@ function transform(code: string, filename: string) {
                     props = lazify(props)
                     propsProperty = t.objectProperty(t.identifier("props"), props)
                 }
-
-                let cn = t.arrayExpression(args.slice(2))
-                let childrenProperty = t.objectProperty(t.identifier("children"), lazify(cn))
+                let cna = args.slice(2)
+                let childrenProperty
+                if (cna.length) {
+                    let cn = t.arrayExpression(cna)
+                    childrenProperty = t.objectProperty(t.identifier("children"), lazify(cn))
+                }
 
                 path.replaceWith(t.objectExpression([tagProperty, propsProperty, childrenProperty].filter(x => !!x)))
             }
