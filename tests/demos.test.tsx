@@ -21,6 +21,19 @@ describe('JMX dom tests', () => {
         expect(document.body.outerHTML).toBe("<body>hase</body>")
     })
 
+    it('HTag 1 thunked', () => {
+
+        var _h: HTag = <body>hase</body>
+
+        let h: Func<HTag> = () => ({
+            tag: "BODY",
+            children: () => ["hase"]
+        })
+
+        patch(document.body, h)
+        expect(document.body.outerHTML).toBe("<body>hase</body>")
+    })
+
     it('HTag 2', () => {
 
         let _h = <body class="cc">hase{42}{true}{false}</body>

@@ -1,12 +1,12 @@
 // the following types describe the js expression we get from tsx after conversion be our jmx plugin
 
-type Expr<T> = () => T
-
 type ChildrenH = (H | undefined)[]
 type Children = Expr<ChildrenH>
 
 type Action<T> = (arg: T) => void
 type Action = () => void
+type Func<T> = () => T
+type Expr<T> = T | Func<T>
 
 type Props =
     Record<string, any>

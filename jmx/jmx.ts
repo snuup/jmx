@@ -10,7 +10,7 @@ export function jsx(): HTag { throw 'jmx plugin not configured' } // dumy functi
 
 export const jsxf = "jsxf" //(props, { children }) => ({ tag: 'jsxf', children })
 
-const evaluate = <T>(expr: T | Expr<T>): T => expr instanceof Function ? evaluate(expr()) : expr
+const evaluate = <T>(expr: T | Func<T>): T => expr instanceof Function ? evaluate(expr()) : expr
 
 let iscomp = (h: H): h is HFunction => typeof ((h as any).tag) == "function"
 
@@ -82,9 +82,11 @@ function getupdatefunction(h: HTFC, e: Node | undefined) {
 /**
  * synchronizes p.children[i] with h
  */
-function sync(p: HTMLElement, i: number, h: H, uc: UpdateContext): number {
+function sync(p: HTMLElement, i: number, h: H | Func<H>, uc: UpdateContext): number {
 
     // console.log("sync", p.tagName, i, h, p.childNodes[i], h.tag?.toString())
+
+    h = evaluate(h)
 
     switch (typeof h) {
 
@@ -184,7 +186,7 @@ function syncchildren(p: HTMLElement, h: HTag | HComp, i: number, uc: UpdateCont
 }
 
 // patches given dom and comp
-export function patch(e: Node, h: H, uc: UpdateContext = {}) {
+export function patch(e: Node, h: Expr<H>, uc: UpdateContext = {}) {
     //console.log("%cpatch", `background:orange;color:white;padding:2px;font-weight:bold`, e, h)
     const p = e.parentElement as HTMLElement
     const i = [].indexOf.call(p.childNodes, e) // tell typescript that parentElement is not null

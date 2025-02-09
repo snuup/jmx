@@ -18,7 +18,14 @@ let App = (
 
         {/* <Numerotti n={m.i * 10} mounted={e => console.log("Numerotti mounted", e)} update={e => console.log("Numerotti update", e)} />*/}
 
-        <Map a={m.i} s='s' />
+        {/* <Map a={m.i} s='s' /> */}
+
+        <h2>
+            <div>1</div>
+            <div>{m.i}</div>
+            <div>{[3,4,5].map(x => <i>{x}</i>)}</div>
+            <div>{[7,8].map(x => <>{x}</>)}</div>
+        </h2>
 
         {/* <>
             <p>11</p>
