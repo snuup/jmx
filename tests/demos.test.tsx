@@ -91,7 +91,7 @@ describe('JMX dom tests', () => {
         expect(document.body.innerHTML).toBe('<div>snuff</div>')
     })
 
-    it.only('fragments', () => {
+    it('fragments', () => {
 
         let F = <>
             <b>1</b>
