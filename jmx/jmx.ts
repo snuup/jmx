@@ -176,13 +176,6 @@ function sync(p: Element, i: number, h: H | undefined, uc: UpdateContext): numbe
 //         throw ""
 // }
 
-function getchildren(h: HElement | HComp) {
-    return (evaluate(h.children) ?? []) // unlazify children property
-        .log("children")
-        .flatMap(h => isfragment2(h) ? evaluate(evaluate(h.tag).children) : h)
-    //.flatMap(c => ((c as any).tag && isfragment((c as any).tag) ? evaluate(c?.tag?.children) : c))
-    //.filter(c => c !== null && c !== undefined) //as H[]
-}
 
 mount({ isfragment, isfragment2, getchildren, evaluate })
 
@@ -194,6 +187,16 @@ function syncchildren2(cn: ChildrenH, p: Element, i: number, uc): number {
     })
     return i
 }
+
+function getchildren(h: HElement | HComp) {
+    return (evaluate(h.children) ?? []) // unlazify children property
+        .log("children")
+        //.flatMap(h => isfragment2(h) ? evaluate(evaluate(h.tag).children) : h)
+        //.flatMap(h => isfragment2(h) ? evaluate(evaluate(h.tag).children) : h)
+    //.flatMap(c => ((c as any).tag && isfragment((c as any).tag) ? evaluate(c?.tag?.children) : c))
+    //.filter(c => c !== null && c !== undefined) //as H[]
+}
+
 
 /** synchronizes children starting at the i-th element.
  *  returns the index of the last child synchronized */
