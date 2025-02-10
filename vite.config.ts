@@ -12,7 +12,7 @@ export default {
     ],
     build: {
         target: 'esnext', // !!
-        minify: true,
+        minify: false,
         rollupOptions: {
             output: {
                 entryFileNames: `app.js`,
