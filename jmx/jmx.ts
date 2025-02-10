@@ -62,7 +62,7 @@ let iswebcomponent = (h: HElement) => (h.tag as string).includes('-')
 
 const evaluate = <T>(expr: Expr<T>): T => expr instanceof Function ? evaluate(expr()) : expr
 
-let iscomp = (h: H): h is HCompFun => typeof ((h as any).tag) == "function"
+// let iscomp = (h: H): h is HCompFun => typeof ((h as any).tag) == "function"
 
 let isclasscomponent = (h: HTFC): h is HCompClass => (h.tag as any)?.prototype?.view
 
@@ -82,7 +82,7 @@ function evalComponent(h: HComp, n?: Node): H {
 }
 
 let isfragment = (h: any): h is HFragment => { return h.tag == undefined && h.children != undefined }
-let isfragment2 = (h: any): h is any => { return h.tag instanceof Function && h.children == undefined && h.props == undefined }
+//let isfragment2 = (h: any): h is any => { return h.tag instanceof Function && h.children == undefined && h.props == undefined }
 
 function sync(p: Element, i: number, h: H | undefined, uc: UpdateContext): number {
 
@@ -114,13 +114,7 @@ function sync(p: Element, i: number, h: H | undefined, uc: UpdateContext): numbe
         // element nodes
         case 'object':
 
-            if (isfragment(h)) {
-                console.log(h)
-                return syncchildren2(evaluate(h.children), p, i, uc)
-
-                throw "fraggle"
-                return i
-            }
+            if (isfragment(h)) return syncchildren2(evaluate(h.children), p, i, uc)
 
             const props = evaluate(h.props)
 
@@ -177,54 +171,20 @@ function sync(p: Element, i: number, h: H | undefined, uc: UpdateContext): numbe
 // }
 
 
-mount({ isfragment, isfragment2, getchildren, evaluate })
+// mount({ isfragment, isfragment2, evaluate })
 
 function syncchildren2(cn: ChildrenH, p: Element, i: number, uc): number {
-    cn.forEach(hc => {
-        let i0 = i
-        i = sync(p, i, hc, uc)
-        let cn = p.childNodes[i0] // this node might not exist before the sync call
-    })
+    cn.forEach(hc => i = sync(p, i, hc, uc))
     return i
 }
-
-function getchildren(h: HElement | HComp) {
-    return (evaluate(h.children) ?? []) // unlazify children property
-        .log("children")
-        //.flatMap(h => isfragment2(h) ? evaluate(evaluate(h.tag).children) : h)
-        //.flatMap(h => isfragment2(h) ? evaluate(evaluate(h.tag).children) : h)
-    //.flatMap(c => ((c as any).tag && isfragment((c as any).tag) ? evaluate(c?.tag?.children) : c))
-    //.filter(c => c !== null && c !== undefined) //as H[]
-}
-
 
 /** synchronizes children starting at the i-th element.
  *  returns the index of the last child synchronized */
 function syncchildren(p: Element, h: HElement | HComp, i: number, uc: UpdateContext): number {
-    // console.log('synchchildren', p.tagName, h, i)
-
-    getchildren(h).forEach(hc => {
-
+    evaluate(h.children)?.forEach(hc => {
         let i0 = i
         i = sync(p, i, hc, uc)
         let cn = p.childNodes[i0] // this node might not exist before the sync call
-
-        // life cycle calls -disabled for a moment
-        // if (iscomp(hc)) {
-        //     if (!cn.h) {
-        //         if (isclasscomponent(hc)) {
-        //             // if element is not yet set, the component was newly created
-        //             hc.i.element = cn
-        //             hc.i.mounted?.(cn)
-        //         } else {
-        //             let props = evaluate(hc.props)
-        //             if (props) {
-        //                 props.mounted?.(cn as Element)
-        //             }
-        //         }
-        //     }
-        // }
-
         if (cn && !cn.h) cn.h = hc as any // the node here might not exist before the call to sync // tbd, make this nicer
     })
 
