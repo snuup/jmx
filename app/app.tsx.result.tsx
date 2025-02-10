@@ -80,4 +80,4 @@ let App = {
   }]
 };
 let App4 = "hase";
-patch(document.body, "hasen");
+patch(document.body, App);

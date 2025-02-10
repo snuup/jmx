@@ -153,9 +153,9 @@ let App4 = "hase"
 
 //mount({ u: updateview, patch, App2, App3 })
 
-patch(document.body, "hasen")
+//patch(document.body, "hasen")
 
-//patch(document.body, App)
+patch(document.body, App)
 
 //let ub = () => updateview(document.body)
 //let p = x => patch(document.body, x)

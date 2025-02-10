@@ -318,4 +318,51 @@ describe("JMX dom tests", () => {
     });
     expect(document.body.innerHTML).toBe("bunny component");
   });
+  it("class component h is attached", () => {
+    class C extends JMXComp {
+      view() {
+        return /* @__PURE__ */{
+          kind: "element",
+          tag: "DIV"
+        };
+      }
+    }
+    patch(document.body,
+    /* @__PURE__ */
+    {
+      kind: "element",
+      tag: "BODY",
+      children: () => [
+      /* @__PURE__ */
+      {
+        kind: "component",
+        tag: C
+      }]
+    });
+    expect(document.querySelector("div")?.h).toBeDefined();
+  });
+  it.only("class component instance h.i is attached", () => {
+    class C extends JMXComp {
+      view() {
+        return /* @__PURE__ */{
+          kind: "element",
+          tag: "DIV"
+        };
+      }
+    }
+    patch(document.body,
+    /* @__PURE__ */
+    {
+      kind: "element",
+      tag: "BODY",
+      children: () => [
+      /* @__PURE__ */
+      {
+        kind: "component",
+        tag: C
+      }]
+    });
+    let h = document.querySelector("div")?.h;
+    expect(h.i).toBeDefined();
+  });
 });

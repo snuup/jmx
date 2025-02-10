@@ -160,4 +160,27 @@ describe('JMX dom tests', () => {
         patch(document.body, <body><C /></body>)
         expect(document.body.innerHTML).toBe('bunny component')
     })
+
+    it('class component h is attached', () => {
+        class C extends JMXComp {
+            view() {
+                return <div />
+            }
+        }
+
+        patch(document.body, <body><C /></body>)
+        expect(document.querySelector("div")?.h).toBeDefined()
+    })
+
+    it.only('class component instance h.i is attached', () => {
+        class C extends JMXComp {
+            view() {
+                return <div />
+            }
+        }
+
+        patch(document.body, <body><C /></body>)
+        let h = document.querySelector("div")?.h as HCompClass
+        expect(h.i).toBeDefined()
+    })
 })

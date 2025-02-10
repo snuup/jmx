@@ -107,4 +107,23 @@ describe("JMX dom tests", () => {
     patch(document.body, /* @__PURE__ */ jsx("body", null, /* @__PURE__ */ jsx(C, null)));
     expect(document.body.innerHTML).toBe("bunny component");
   });
+  it("class component h is attached", () => {
+    class C extends JMXComp {
+      view() {
+        return /* @__PURE__ */ jsx("div", null);
+      }
+    }
+    patch(document.body, /* @__PURE__ */ jsx("body", null, /* @__PURE__ */ jsx(C, null)));
+    expect(document.querySelector("div")?.h).toBeDefined();
+  });
+  it.only("class component instance h.i is attached", () => {
+    class C extends JMXComp {
+      view() {
+        return /* @__PURE__ */ jsx("div", null);
+      }
+    }
+    patch(document.body, /* @__PURE__ */ jsx("body", null, /* @__PURE__ */ jsx(C, null)));
+    let h = document.querySelector("div")?.h;
+    expect(h.i).toBeDefined();
+  });
 });

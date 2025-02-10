@@ -42,4 +42,4 @@ export class Map extends JMXComp {
 }
 let App = jsx("body", null, jsx(Map, { a: m.i, s: "s" }));
 let App4 = "hase";
-patch(document.body, "hasen");
+patch(document.body, App);

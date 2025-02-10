@@ -25,16 +25,17 @@ let isproperty = (name: string, value: any) => (
 )
 
 /** remove all children from n with index >= i */
-let evaluate = <T>(expr: Expr<T>): T => expr instanceof Function ? evaluate(expr()) : expr
+let evaluate = <T>(expr: Expr<T>): T => expr instanceof Function ? expr() : expr
 let removeexcesschildren = (n: Element, i: number) => { let c: ChildNode; while ((c = n.childNodes[i])) c.remove() }
 let iswebcomponent = (h: HElement) => (h.tag as string).includes('-')
 let isclasscomponent = (h: HTFC): h is HCompClass => (h.tag as any)?.prototype?.view
 let iselement = (h): h is HElement => h.kind == "element" // typeof h.tag == string
 let isfragment = (h: any): h is HFragment => { return h.tag == undefined && h.children != undefined }
+let istextnode = (n: Node): n is Text => n.nodeType == NodeType.TextNode
 
 function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext): number {
 
-    // console.log('%csync', "background:orange", p.tagName, i, h, 'html = ' + document.body.outerHTML)
+    console.log('%csync', "background:orange", p.tagName, i, h, 'html = ' + document.body.outerHTML)
 
     h = evaluate(h)
     if (h === null || h === undefined) return i // skip this element
@@ -65,11 +66,12 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
             /** synchronizes children starting at the i-th element.
               * returns the index of the last child synchronized */
             function syncchildren(p: Element, h: HElement | HComp | HFragment, i: number): number {
+                console.log("syncchildren", i)
                 evaluate(h.children)?.forEach(hc => {
                     let i0 = i
                     i = sync(p, i, hc, uc)
-                    let cn = p.childNodes[i0] // this node might not exist before the sync call
-                    if (cn && !cn.h) cn.h = hc as any // the node here might not exist before the call to sync // tbd, make this nicer
+                    //let cn = p.childNodes[i0] // this node might not exist before the sync call
+                    //if (cn && !cn.h && !istextnode(c)) cn.h = hc as any
                 })
                 return i
             }
@@ -95,7 +97,7 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
 
             if (iselement(h)) {
                 let n = syncelement(h.tag as string) // tbd: order of this line right and good?
-                if (!uc.patchElementOnly && !iswebcomponent(h as HElement)) {
+                if (!uc.patchElementOnly && !iswebcomponent(h as HElement)) { // tbd: make "island" attribute
                     const j = syncchildren(n, h, 0)
                     removeexcesschildren(n, j)
                 }
@@ -105,15 +107,20 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
             switch (typeof h.tag) {
 
                 case 'function':
-                    let hr
                     if (isclasscomponent(h)) {
-                        let i = (c?.h as HCompClass | undefined)?.i ?? rebind(new h.tag(props!)) // rebind is important for simple event handlers
-                        i.props = props
-                        hr = i.view() // inefficient: we compute view() although we do not use if then the component has an update function
+                        let ci = (c?.h as HCompClass | undefined)?.i ?? rebind(new h.tag(props!)) // rebind is important for simple event handlers
+                        ci.props = props
+                        let hr = ci.view() // inefficient: we compute view() although we do not use if then the component has an update function
+                        let j =  sync(p, i, hr, uc) //otherwise continue with the computed h
+                        let n = p.childNodes[i];
+                        n.h = h
+                        n.h.i = ci
+                        return j
                     } else {
-                        hr = h.tag(props, evaluate(h.children))
+                        let hr = h.tag(props, evaluate(h.children))
+                        return sync(p, i, hr, uc) //otherwise continue with the computed h
                     }
-                    return sync(p, i, hr, uc) //otherwise continue with the computed h
+
 
                 case 'object': // tbd: typing
                     return sync(p, i, h.tag, uc)
@@ -130,7 +137,6 @@ export function patch(e: Node, h: Expr<H>, uc: UpdateContext = {}) {
     const p = e.parentElement as HTMLElement
     const i = [].indexOf.call(p.childNodes, e) // tell typescript that parentElement is not null
     sync(p, i, h, uc)
-    e.h = h as any
 }
 
 // uses attached comps to patch elements
