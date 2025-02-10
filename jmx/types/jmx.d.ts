@@ -72,7 +72,7 @@ type H = // a hyperscript atom that describes a ...
     | HElement // a tag, like p, div with attributes and children
     | HComp // a dynamic component computing any other HNode
     | HFragment
-type HTFC = HElement | HCompFun | HCompClass
+type HTFC = HElement | HCompFun | HCompClass | HFragment
 
 // runtime api
 type UpdateContext = {

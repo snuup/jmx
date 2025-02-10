@@ -66,13 +66,7 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
             /** synchronizes children starting at the i-th element.
               * returns the index of the last child synchronized */
             function syncchildren(p: Element, h: HElement | HComp | HFragment, i: number): number {
-                console.log("syncchildren", i)
-                evaluate(h.children)?.forEach(hc => {
-                    let i0 = i
-                    i = sync(p, i, hc, uc)
-                    //let cn = p.childNodes[i0] // this node might not exist before the sync call
-                    //if (cn && !cn.h && !istextnode(c)) cn.h = hc as any
-                })
+                evaluate(h.children)?.forEach(hc => i = sync(p, i, hc, uc))
                 return i
             }
 
@@ -108,20 +102,18 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
             switch (typeof h.tag) {
 
                 case 'function':
+                    let j
+                    let hr: H
                     if (isclasscomponent(h)) {
-                        let ci = (c?.h as HCompClass | undefined)?.i ?? rebind(new h.tag(props!)) // rebind is important for simple event handlers
-                        ci.props = props
-                        let hr = ci.view() // inefficient: we compute view() although we do not use if then the component has an update function
-                        let j =  sync(p, i, hr, uc) //otherwise continue with the computed h
-                        p.childNodes[i]!.h = { ...h , i:ci}
-                        return j
+                        h.i = (c?.h as HCompClass | undefined)?.i ?? rebind(new h.tag(props!)) // rebind is important for simple event handlers
+                        h.i.props = props
+                        hr = h.i.view() // inefficient: we compute view() although we do not use if then the component has an update function
                     } else {
-                        let hr = h.tag(props, evaluate(h.children))
-                        let j = sync(p, i, hr, uc) //otherwise continue with the computed h
-                        p.childNodes[i]!.h = h
-                        return j
+                        hr = h.tag(props, evaluate(h.children))
                     }
-
+                    j = sync(p, i, hr, uc) //otherwise continue with the computed h
+                    p.childNodes[i]!.h = h
+                    return j
 
                 case 'object': // tbd: typing
                     return sync(p, i, h.tag, uc)
