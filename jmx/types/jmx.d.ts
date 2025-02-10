@@ -68,9 +68,10 @@ type HCompClass =
 type HComp = HCompFun | HCompClass
 type HTagComp = HElement | HComp
 type H = // a hyperscript atom that describes a ...
-    | HTExt
+    | HText
     | HElement // a tag, like p, div with attributes and children
     | HComp // a dynamic component computing any other HNode
+    | HFragment
 type HTFC = HElement | HCompFun | HCompClass
 
 // runtime api

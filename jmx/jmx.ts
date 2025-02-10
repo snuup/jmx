@@ -66,6 +66,21 @@ let iscomp = (h: H): h is HCompFun => typeof ((h as any).tag) == "function"
 
 let isclasscomponent = (h: HTFC): h is HCompClass => (h.tag as any)?.prototype?.view
 
+function evalComponent(h: HComp, n?: Node): H {
+
+    if(h.kind != "component") throw "evalComponent called with non-component"
+
+    let props = h.props?.eval()
+
+    if (isclasscomponent(h)) {
+        let i = (n?.h as HCompClass).i ??= rebind(new h.tag(props!)) // rebind is important for simple event handlers
+        i.props = props
+        return i.view() // inefficient: we compute view() although we do not use if then the component has an update function
+    } else {
+        return h.tag(props, evaluate(h.children))
+    }
+}
+
 function sync(p: Element, i: number, h: H | Func<H>, uc: UpdateContext): number {
 
     // console.log('%csync', "background:orange", p.tagName, i, h, 'html = ' + document.body.outerHTML)
@@ -73,7 +88,6 @@ function sync(p: Element, i: number, h: H | Func<H>, uc: UpdateContext): number 
     if (h === null || h === undefined) return i // skip this element
 
     h = evaluate(h)
-    const props = evaluate(h.props)
     const c = p.childNodes[i] // is often null, eg during fresh creation
 
     function synctextnode(text: string) {
@@ -82,32 +96,6 @@ function sync(p: Element, i: number, h: H | Func<H>, uc: UpdateContext): number 
         } else {
             const tn = document.createTextNode(text)
             c ? c.replaceWith(tn) : p.appendChild(tn)
-        }
-    }
-
-    function syncelement(tag: string): Element {
-
-        if ((<Element>c)?.tagName != tag) {
-            const n = document.createElement(tag)
-            c ? c.replaceWith(n) : p.appendChild(n)
-            setprops(n, props)
-            props?.mounted?.(n)
-            return n
-        } else {
-            setprops(<Element>c, props)
-            props?.update?.(uc)
-            return c as Element
-        }
-    }
-
-    function evalComponent(h: HComp, n: Node | undefined): H {
-
-        if (isclasscomponent(h)) {
-            let i = (n?.h as HCompClass).i ??= rebind(new h.tag(props!)) // rebind is important for simple event handlers
-            i.props = props
-            return i.view() // inefficient: we compute view() although we do not use if then the component has an update function
-        } else {
-            return h.tag(props, evaluate(h.children))
         }
     }
 
@@ -122,6 +110,23 @@ function sync(p: Element, i: number, h: H | Func<H>, uc: UpdateContext): number 
 
         // element nodes
         case 'object':
+
+            const props = evaluate(h.props)
+
+            function syncelement(tag: string): Element {
+
+                if ((<Element>c)?.tagName != tag) {
+                    const n = document.createElement(tag)
+                    c ? c.replaceWith(n) : p.appendChild(n)
+                    setprops(n, props)
+                    props?.mounted?.(n)
+                    return n
+                } else {
+                    setprops(<Element>c, props)
+                    props?.update?.(uc)
+                    return c as Element
+                }
+            }
 
             switch (typeof h.tag) {
 
@@ -236,3 +241,23 @@ export abstract class BaseComp<P extends Props> implements IClassComponent {
 
     abstract view()
 }
+
+let iscomponent = (h): h is HComp => h.kind == "component"
+let iselement = (h): h is HComp => h.kind == "element"
+let isfrag = (h): h is HFragment => h.kind == "<>"
+
+mount({ iscomponent, iselement, isfrag, evalComponent })
+
+let z: Expr<H>
+
+function eve(expr: Expr<H | undefined>) {
+    let h = evaluate(expr)
+    if (h == undefined) return h
+    if (iscomponent(h)) return evalComponent(h)
+    if (isfrag(h)) return evaluate(h.children)
+    return h
+}
+
+mount({ eve })
+
+mount({ eve })

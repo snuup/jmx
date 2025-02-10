@@ -34,12 +34,20 @@ export function mergePrototype(mixin, ...targets) {
     targets.forEach(t => Object.defineProperties(t, props))
 }
 
+const evaluate = <T>(expr: Expr<T>): T => expr instanceof Function ? evaluate(expr()) : expr
+
 mergePrototype(
     class extends Object {
         log(this: ThisType<any>, msg: string): ThisType<any> {
             console.log(msg, this)
             mount({ x: this })
             return this
+        }
+        eval() {
+            return evaluate(this)
+        }
+        eve() {
+            return globalThis["eve"](this)
         }
     },
     Object
