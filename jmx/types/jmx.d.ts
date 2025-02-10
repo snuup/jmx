@@ -3,7 +3,6 @@
 
 
 type Action<T> = (arg: T) => void
-type Action = () => void
 type Func<T> = () => T
 type Expr<T> = T | Func<T>
 
@@ -11,7 +10,7 @@ type Props =
     Record<string, any>
     & {
         mounted?: Action<Node>,
-        update?: Action<UpdateContext>
+        update?: Action<Node, UpdateContext>
     }
 
 type FComponent = (props: Props | undefined, children?: ChildrenH) => HElement // show an example for usage of children

@@ -1,4 +1,3 @@
 state for function components
 
-write a test that shows that class comp instance is not set
-fix that
+remove kind field from jsx

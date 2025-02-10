@@ -103,8 +103,8 @@ interface EventHandler<E extends Event> {
 export interface AdditionalElementAttributes {
     //key?: any // jmx
     //ref?: any
-    mounted?: (e: HTMLElement) => void
-    update?: (e: HTMLElement) => void
+    mounted?: (Node) => void
+    update?: (Node, UpdateContext) => void
     //fclick?: Function
     //fmousedown?: Function
     //fsubmit?: Function

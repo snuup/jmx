@@ -6,8 +6,8 @@ class TextComp extends JMXComp {
   view() {
     return "hase" + this.props.s + Date.now();
   }
-  mounted(e) {
-    console.log("TextComp mounted", e, this.element);
+  mounted() {
+    console.log("TextComp mounted", this.element);
   }
   update(uc) {
     console.log("TextComp update");
@@ -66,16 +66,32 @@ export class Map extends JMXComp {
     };
   }
 }
+let FunWithState = () => {
+  console.log("funny");
+  let state = 80;
+  let element;
+  return {
+    kind: "element",
+    tag: "DIV",
+    props: () => ({
+      mounted: e => element = e,
+      update: () => {
+        state++;
+      },
+      onclick: () => {
+        state++;
+        updateview(element);
+      }
+    }),
+    children: () => ["hoho, now i have state ", state]
+  };
+};
 let App = {
   kind: "element",
   tag: "BODY",
   children: () => [{
     kind: "component",
-    tag: Map,
-    props: () => ({
-      a: m.i,
-      s: "s"
-    })
+    tag: FunWithState
   }]
 };
 let App4 = "hase";

@@ -34,6 +34,11 @@ let setprops = (e: Element, newprops: Props = {}) => {
     for (let p in newprops) isproperty(p, newprops[p]) ? e[p] = newprops[p] : e.setAttribute(p, newprops[p])
 }
 
+/** syncs at position i of p. returns the number of the element past the last added element.
+ * if no element was added (eg when h=null) then it returns i
+ * if a fragment with 5 nodes was added, it returns i + 5
+ * when a single element or component is added, it is i+1 since they always create exactly 1 node
+*/
 function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext): number {
 
     // console.log('%csync', "background:orange", p.tagName, i, h, 'html = ' + document.body.outerHTML)
@@ -56,8 +61,7 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
 
         // element nodes
 
-        /** synchronizes children starting at the i-th element.
-             * returns the index of the last child synchronized */
+        /** synchronizes children starting at the i-th element. returns the index of the last child synchronized */
         function syncchildren(p: Element, h: HElement | HComp | HFragment, i: number): number {
             evaluate(h.children)?.forEach(hc => i = sync(p, i, hc, uc))
             return i
@@ -67,24 +71,22 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
 
         const props = evaluate(h.props)
 
-        function syncelement(tag: string): Element {
+        if (iselement(h)) {
 
-            if ((<Element>c)?.tagName != tag) {
-                const n = document.createElement(tag)
+            let n: Element
+
+            if ((<Element>c)?.tagName != h.tag) {
+                n = document.createElement(h.tag)
+                n.h = h
                 c ? c.replaceWith(n) : p.appendChild(n)
                 setprops(n, props)
                 props?.mounted?.(n)
-                return n
             } else {
-                setprops(<Element>c, props)
-                props?.update?.(uc)
-                return c as Element
+                n = c as Element
+                setprops(n, props)
+                if (props?.update?.(c, uc)) return i + 1
             }
-        }
 
-        if (iselement(h)) {
-            let n = syncelement(h.tag as string) // tbd: order of this line right and good?
-            n.h = h
             if (!uc.patchElementOnly && !iswebcomponent(h as HElement)) { // tbd: make "island" attribute
                 const j = syncchildren(n, h, 0)
                 removeexcesschildren(n, j)
@@ -98,9 +100,6 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
 
                 let isupdate = c?.h?.tag == h.tag
 
-                // console.log("isupdate", isupdate, c?.h)
-
-                let hr: H
                 let ci: IClassComponent | undefined
 
                 if (isclasscomponent(h)) {
@@ -109,15 +108,10 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
 
                     // if component instance returns truthy for update(), then syncing is susbstituted by the component
                     if (isupdate && ci.update(uc)) return i + 1
-
-                    // otherwise call view() and update the dom
-                    hr = ci.view()
-                }
-                else {
-                    hr = h.tag(props, evaluate(h.children))
                 }
 
                 // materialize the component
+                let hr = ci?.view() ?? (h.tag as FComponent)(props, evaluate(h.children))
                 let j = sync(p, i, hr, uc)
 
                 // attach h onto the materialized component node
@@ -125,9 +119,12 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
                 cn.h = h
                 if (ci) ci.element = cn
 
-                if(!isupdate){
+                if (!isupdate) {
                     if (ci) ci.mounted()
+                    else props?.mounted?.(cn)
                 }
+
+                if (j != i + 1) { console.error("can this happen?") }
 
                 return j
 

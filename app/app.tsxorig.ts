@@ -6,8 +6,8 @@ class TextComp extends JMXComp {
   view() {
     return "hase" + this.props.s + Date.now();
   }
-  mounted(e) {
-    console.log("TextComp mounted", e, this.element);
+  mounted() {
+    console.log("TextComp mounted", this.element);
   }
   update(uc) {
     console.log("TextComp update");
@@ -43,7 +43,27 @@ export class Map extends JMXComp {
     return jsx("div", { class: "map" }, this.props.a, " ", this.state, " ", m.i, jsx("button", { onclick: this.increment }, "increment"));
   }
 }
-let App = jsx("body", null, jsx(Map, { a: m.i, s: "s" }));
+let FunWithState = () => {
+  console.log("funny");
+  let state = 80;
+  let element;
+  return jsx(
+    "div",
+    {
+      mounted: (e) => element = e,
+      update: () => {
+        state++;
+      },
+      onclick: () => {
+        state++;
+        updateview(element);
+      }
+    },
+    "hoho, now i have state ",
+    state
+  );
+};
+let App = jsx("body", null, jsx(FunWithState, null));
 let App4 = "hase";
 mount({ u: updateview, patch });
 patch(document.body, jsx(App, null));

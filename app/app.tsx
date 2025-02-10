@@ -8,8 +8,8 @@ import { Numero } from './number'
 class TextComp extends JMXComp<{ a: number; s: string }> {
     view() { return "hase" + this.props.s + Date.now() }
 
-    mounted(e) {
-        console.log("TextComp mounted", e, this.element)
+    mounted() {
+        console.log("TextComp mounted", this.element)
     }
 
     update(uc) {
@@ -65,14 +65,35 @@ export class Map extends JMXComp<{ a: number; s: string }> {
     }
 }
 
+let FunWithState = () => {
+
+    console.log("funny")
+
+    let state = 80
+    let element
+
+    return <div
+        mounted={e => element = e}
+        update={() => { state++ }}
+        onclick={() => { state++; updateview(element) }}
+    >hoho, now i have state {state}</div>
+}
+
 let App = (
     <body>
+        <FunWithState />
         {/* <TextComp a={123} s='jaja-sss-1' />
         <TextComp a={123} s='jaja-sss-2' /> */}
 
         {/* <Numerotti n={m.i * 10} mounted={e => console.log("Numerotti mounted", e)} update={e => console.log("Numerotti update", e)} /> */}
 
-        <Map a={m.i} s='s' />
+        {/* <Map a={m.i} s='s' /> */}
+
+        {/* <div
+            mounted={(e) => { console.log("div mounted", e) }}
+            update={(n, uc) => { console.log("updatey", n, uc) }}
+        >hoho, am i mounted=</div> */}
+
 
         {/* <div>{m.i * 3}</div> */}
 
