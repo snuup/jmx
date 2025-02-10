@@ -44,7 +44,6 @@ export class Map extends JMXComp<{ a: number; s: string }> {
 
     override update(uc) {
         console.log("Map.update", this, uc)
-        return true
     }
 
     // core
@@ -69,25 +68,26 @@ let FunWithState = () => {
 
     console.log("funny")
 
-    let state = 80
+    let state = {
+        count: 50
+    }
     let element
 
     return <div
-        mounted={e => element = e}
-        update={() => { state++ }}
-        onclick={() => { state++; updateview(element) }}
+        mounted={e => { element = e; e.state = state }}
+        onclick={() => { element.state++; updateview(element) }}
     >hoho, now i have state {state}</div>
 }
 
 let App = (
     <body>
-        <FunWithState />
+        {/* <FunWithState /> */}
         {/* <TextComp a={123} s='jaja-sss-1' />
         <TextComp a={123} s='jaja-sss-2' /> */}
 
         {/* <Numerotti n={m.i * 10} mounted={e => console.log("Numerotti mounted", e)} update={e => console.log("Numerotti update", e)} /> */}
 
-        {/* <Map a={m.i} s='s' /> */}
+        <Map a={m.i} s='s' />
 
         {/* <div
             mounted={(e) => { console.log("div mounted", e) }}

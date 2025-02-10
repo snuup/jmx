@@ -39,7 +39,6 @@ export class Map extends JMXComp {
   }
   update(uc) {
     console.log("Map.update", this, uc);
-    return true;
   }
   // core
   increment() {
@@ -68,18 +67,20 @@ export class Map extends JMXComp {
 }
 let FunWithState = () => {
   console.log("funny");
-  let state = 80;
+  let state = {
+    count: 50
+  };
   let element;
   return {
     kind: "element",
     tag: "DIV",
     props: () => ({
-      mounted: e => element = e,
-      update: () => {
-        state++;
+      mounted: e => {
+        element = e;
+        e.state = state;
       },
       onclick: () => {
-        state++;
+        element.state++;
         updateview(element);
       }
     }),
@@ -91,7 +92,11 @@ let App = {
   tag: "BODY",
   children: () => [{
     kind: "component",
-    tag: FunWithState
+    tag: Map,
+    props: () => ({
+      a: m.i,
+      s: "s"
+    })
   }]
 };
 let App4 = "hase";

@@ -19,7 +19,7 @@ interface IClassComponent {
     element: Node
     props?: Record<string, any>
     view(): H
-    update(uc: UpdateContext): boolean
+    update(uc: UpdateContext): boolean | void
     mounted(): void
 }
 
@@ -84,7 +84,9 @@ interface Element {
     model: any
 }
 interface Node {
+    innerh?: HElement | HCompFun | HCompClass
     h?: HElement | HCompFun | HCompClass
+    props?: Props
     mounted?: (e: Element) => void
     update?: (e: Element) => void
 }

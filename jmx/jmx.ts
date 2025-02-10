@@ -57,6 +57,8 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
         }
     }
 
+    //debugger
+
     if (isobject(h)) {
 
         // element nodes
@@ -77,7 +79,6 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
 
             if ((<Element>c)?.tagName != h.tag) {
                 n = document.createElement(h.tag)
-                n.h = h
                 c ? c.replaceWith(n) : p.appendChild(n)
                 setprops(n, props)
                 props?.mounted?.(n)
@@ -86,6 +87,7 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
                 setprops(n, props)
                 if (props?.update?.(c, uc)) return i + 1
             }
+            n.h = h
 
             if (!uc.patchElementOnly && !iswebcomponent(h as HElement)) { // tbd: make "island" attribute
                 const j = syncchildren(n, h, 0)
@@ -108,6 +110,8 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
 
                     // if component instance returns truthy for update(), then syncing is susbstituted by the component
                     if (isupdate && ci.update(uc)) return i + 1
+                } else {
+                    if (isupdate && c.update?.(c as Element)) return i + 1
                 }
 
                 // materialize the component
@@ -116,13 +120,11 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
 
                 // attach h onto the materialized component node
                 let cn = p.childNodes[i]!
+                cn.innerh = cn.h
                 cn.h = h
+                cn.props = props
                 if (ci) ci.element = cn
-
-                if (!isupdate) {
-                    if (ci) ci.mounted()
-                    else props?.mounted?.(cn)
-                }
+                if (!isupdate) ci?.mounted()
 
                 if (j != i + 1) { console.error("can this happen?") }
 

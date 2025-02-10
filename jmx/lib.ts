@@ -7,7 +7,7 @@ export abstract class JMXComp<P extends Props = {}> implements IClassComponent {
 
     constructor(public props: P) { } // we do this for jsx. at runtime, we pass the props directly
     mounted() { }
-    update(uc: UpdateContext): boolean {
+    update(uc: UpdateContext): boolean | void {
         return false
     }
     updateview() {
