@@ -13,20 +13,9 @@ const enum NodeType { // vaporizes (but for that must be in this file, otherwise
 }
 
 function setprops(e: Element, newprops: Props = {}) {
-
-    let set = p => {
-        if (isproperty(p, newprops[p])) e[p] = newprops[p]
-        else e.setAttribute(p, newprops[p])
-    }
-
-    let rem = p => {
-        if (isproperty(p, oldprops[p])) e[p] = null // tbd: not sure if that is correct, should be rare border cases where this matters
-        else e.removeAttribute(p)
-    }
-
-    let oldprops = evaluate(e.h?.props) ?? {}
-    for (let p in oldprops) (!(p in newprops)) && rem(p)
-    for (let p in newprops) set(p)
+    let oldprops = evaluate(e.h?.props) ?? {} // tbd: should h always ba attached here? then we could remove the "?"
+    for (let p in oldprops) (!(p in newprops)) && isproperty(p, oldprops[p]) ? e[p] = null : e.removeAttribute(p) // tbd: not sure if that is correct, should be rare border cases where this matters
+    for (let p in newprops) isproperty(p, newprops[p]) ? e[p] = newprops[p] : e.setAttribute(p, newprops[p])
 }
 
 let isproperty = (name: string, value: any) => (
@@ -118,7 +107,7 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
                 case 'function':
                     let hr
                     if (isclasscomponent(h)) {
-                        let i = (c?.h as HCompClass).i ??= rebind(new h.tag(props!)) // rebind is important for simple event handlers
+                        let i = (c?.h as HCompClass | undefined)?.i ?? rebind(new h.tag(props!)) // rebind is important for simple event handlers
                         i.props = props
                         hr = i.view() // inefficient: we compute view() although we do not use if then the component has an update function
                     } else {

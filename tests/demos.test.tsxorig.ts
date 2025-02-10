@@ -1,5 +1,6 @@
 import { jsx, jsxf, patch } from "../jmx/jmx";
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, expect, beforeEach, it } from "vitest";
+import { JMXComp } from "../jmx/lib";
 beforeEach(() => {
   document.body.replaceChildren();
   document.body.getAttributeNames().forEach((a) => document.body.removeAttribute(a));
@@ -96,5 +97,14 @@ describe("JMX dom tests", () => {
     let D = () => /* @__PURE__ */ jsx("div", null);
     patch(document.body, /* @__PURE__ */ jsx("body", null, /* @__PURE__ */ jsx(D, null)));
     expect(document.body.innerHTML).toBe("<div></div>");
+  });
+  it("class component is constructed", () => {
+    class C extends JMXComp {
+      view() {
+        return "bunny component";
+      }
+    }
+    patch(document.body, /* @__PURE__ */ jsx("body", null, /* @__PURE__ */ jsx(C, null)));
+    expect(document.body.innerHTML).toBe("bunny component");
   });
 });

@@ -1,98 +1,82 @@
-function y(e, n = {}) {
-  let t = (o) => {
-      g(o, n[o]) ? (e[o] = n[o]) : e.setAttribute(o, n[o])
-    },
-    c = (o) => {
-      g(o, l[o]) ? (e[o] = null) : e.removeAttribute(o)
-    },
-    l = d(e.h?.props) ?? {}
-  for (let o in l) !(o in n) && c(o)
-  for (let o in n) t(o)
+function b(e, c = {}) {
+  let n = a(e.h?.props) ?? {}
+  for (let t in n) !(t in c) && y(t, n[t]) ? (e[t] = null) : e.removeAttribute(t)
+  for (let t in c) y(t, c[t]) ? (e[t] = c[t]) : e.setAttribute(t, c[t])
 }
-let g = (e, n) =>
-  ["value", "checked", "disabled", "className", "style", "href", "src", "selected", "readOnly", "tabIndex"].includes(
-    e
-  ) ||
-  n instanceof Object ||
-  n instanceof Function
-function O(e) {
-  let n = Object.getPrototypeOf(e),
-    t = Object.entries(Object.getOwnPropertyDescriptors(n))
-      .filter(([, c]) => c.value instanceof Function)
-      .filter(([c]) => c != "constructor")
-      .map(([c]) => c)
-  for (const c of t) e[c] = e[c].bind(e)
-  return e
-}
-let h = (e, n) => {
-    let t
-    for (; (t = e.childNodes[n]); ) t.remove()
+let y = (e, c) =>
+    ["value", "checked", "disabled", "className", "style", "href", "src", "selected", "readOnly", "tabIndex"].includes(
+      e
+    ) ||
+    c instanceof Object ||
+    c instanceof Function,
+  a = (e) => (e instanceof Function ? a(e()) : e),
+  h = (e, c) => {
+    let n
+    for (; (n = e.childNodes[c]); ) n.remove()
   },
-  j = (e) => e.tag.includes("-")
-const d = (e) => (e instanceof Function ? d(e()) : e)
-let N = (e) => e.tag?.prototype?.view,
+  j = (e) => e.tag.includes("-"),
+  N = (e) => e.tag?.prototype?.view,
   w = (e) => e.kind == "element",
   C = (e) => e.tag == null && e.children != null
-function m(e, n, t, c) {
-  if (((t = d(t)), t == null)) return n
-  const l = e.childNodes[n]
-  function o(a) {
-    if (l && l.nodeType == 3) l.textContent != a && (l.textContent = a)
+function u(e, c, n, t) {
+  if (((n = a(n)), n == null)) return c
+  const o = e.childNodes[c]
+  function g(s) {
+    if (o && o.nodeType == 3) o.textContent != s && (o.textContent = s)
     else {
-      const f = document.createTextNode(a)
-      l ? l.replaceWith(f) : e.appendChild(f)
+      const d = document.createTextNode(s)
+      o ? o.replaceWith(d) : e.appendChild(d)
     }
   }
-  switch (typeof t) {
+  switch (typeof n) {
     case "string":
     case "number":
     case "boolean":
-      return o(t), n + 1
+      return g(n), c + 1
     case "object":
-      let a = function (i, r, u) {
+      let s = function (i, l, f) {
           return (
-            d(r.children)?.forEach((b) => {
-              let v = u
-              u = m(i, u, b, c)
-              let p = i.childNodes[v]
-              p && !p.h && (p.h = b)
+            a(l.children)?.forEach((p) => {
+              let v = f
+              f = u(i, f, p, t)
+              let m = i.childNodes[v]
+              m && !m.h && (m.h = p)
             }),
-            u
+            f
           )
         },
-        f = function (i) {
-          if (l?.tagName != i) {
-            const r = document.createElement(i)
-            return l ? l.replaceWith(r) : e.appendChild(r), y(r, s), s?.mounted?.(r), r
-          } else return y(l, s), s?.update?.(c), l
+        d = function (i) {
+          if (o?.tagName != i) {
+            const l = document.createElement(i)
+            return o ? o.replaceWith(l) : e.appendChild(l), b(l, r), r?.mounted?.(l), l
+          } else return b(o, r), r?.update?.(t), o
         }
-      if (C(t)) return a(e, t, n)
-      const s = d(t.props)
-      if (w(t)) {
-        let i = f(t.tag)
-        if (!c.patchElementOnly && !j(t)) {
-          const r = a(i, t, 0)
-          h(i, r)
+      if (C(n)) return s(e, n, c)
+      const r = a(n.props)
+      if (w(n)) {
+        let i = d(n.tag)
+        if (!t.patchElementOnly && !j(n)) {
+          const l = s(i, n, 0)
+          h(i, l)
         }
-        return n + 1
+        return c + 1
       }
-      switch (typeof t.tag) {
+      switch (typeof n.tag) {
         case "function":
           let i
-          if (N(t)) {
-            let r = ((l?.h).i ??= O(new t.tag(s)))
-            ;(r.props = s), (i = r.view())
-          } else i = t.tag(s, d(t.children))
-          return m(e, n, i, c)
+          if (N(n)) {
+            let l = o?.h?.i ?? O(new n.tag(r))
+            ;(l.props = r), (i = l.view())
+          } else i = n.tag(r, a(n.children))
+          return u(e, c, i, t)
         case "object":
-          return m(e, n, t.tag, c)
+          return u(e, c, n.tag, t)
       }
   }
 }
-function E(e, n, t = {}) {
-  const c = e.parentElement,
-    l = [].indexOf.call(c.childNodes, e)
-  m(c, l, n, t), (e.h = n)
+function E(e, c, n = {}) {
+  const t = e.parentElement,
+    o = [].indexOf.call(t.childNodes, e)
+  u(t, o, c, n), (e.h = c)
 }
-let x = "hase"
-E(document.body, x)
+E(document.body, "hasen")

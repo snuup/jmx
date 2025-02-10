@@ -1,5 +1,6 @@
 import { jsx, jsxf, patch } from '../jmx/jmx'
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, expect, beforeEach, it } from 'vitest'
+import { JMXComp } from '../jmx/lib'
 
 beforeEach(() => {
     document.body.replaceChildren()
@@ -146,5 +147,17 @@ describe('JMX dom tests', () => {
 
         patch(document.body, <body><D /></body>)
         expect(document.body.innerHTML).toBe('<div></div>')
+    })
+
+    it('class component is constructed', () => {
+
+        class C extends JMXComp {
+            view() {
+                return 'bunny component'
+            }
+        }
+
+        patch(document.body, <body><C /></body>)
+        expect(document.body.innerHTML).toBe('bunny component')
     })
 })

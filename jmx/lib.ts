@@ -2,7 +2,7 @@ import { updateview } from './jmx'
 
 export let When = ({ cond }, { children }) => cond && { children }
 
-export abstract class BaseComp<P extends Props> implements IClassComponent {
+export abstract class JMXComp<P extends Props = {}> implements IClassComponent {
     element: Node
 
     constructor(public props: P) { } // we do this for jsx. at runtime, we pass the props directly
