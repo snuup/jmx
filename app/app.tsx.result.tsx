@@ -1,4 +1,5 @@
-import { jsx, patch } from "../jmx/jmx";
+import { mount } from "../base/common";
+import { jsx, patch, updateview } from "../jmx/jmx";
 import { JMXComp } from "../jmx/lib";
 import { m } from "./model";
 class TextComp extends JMXComp {
@@ -72,6 +73,14 @@ let App = {
   tag: "BODY",
   children: () => [{
     kind: "component",
+    tag: Numerotti,
+    props: () => ({
+      n: m.i * 10,
+      mounted: e => console.log("Numerotti mounted", e),
+      update: e => console.log("Numerotti update", e)
+    })
+  }, {
+    kind: "component",
     tag: Map,
     props: () => ({
       a: m.i,
@@ -80,4 +89,8 @@ let App = {
   }]
 };
 let App4 = "hase";
+mount({
+  u: updateview,
+  patch
+});
 patch(document.body, App);

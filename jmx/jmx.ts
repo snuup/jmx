@@ -97,6 +97,7 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
 
             if (iselement(h)) {
                 let n = syncelement(h.tag as string) // tbd: order of this line right and good?
+                n.h = h
                 if (!uc.patchElementOnly && !iswebcomponent(h as HElement)) { // tbd: make "island" attribute
                     const j = syncchildren(n, h, 0)
                     removeexcesschildren(n, j)
@@ -112,13 +113,13 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
                         ci.props = props
                         let hr = ci.view() // inefficient: we compute view() although we do not use if then the component has an update function
                         let j =  sync(p, i, hr, uc) //otherwise continue with the computed h
-                        let n = p.childNodes[i];
-                        n.h = h
-                        n.h.i = ci
+                        p.childNodes[i]!.h = { ...h , i:ci}
                         return j
                     } else {
                         let hr = h.tag(props, evaluate(h.children))
-                        return sync(p, i, hr, uc) //otherwise continue with the computed h
+                        let j = sync(p, i, hr, uc) //otherwise continue with the computed h
+                        p.childNodes[i]!.h = h
+                        return j
                     }
 
 

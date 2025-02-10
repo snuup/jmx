@@ -172,7 +172,7 @@ describe('JMX dom tests', () => {
         expect(document.querySelector("div")?.h).toBeDefined()
     })
 
-    it.only('class component instance h.i is attached', () => {
+    it('class component instance h.i is attached', () => {
         class C extends JMXComp {
             view() {
                 return <div />

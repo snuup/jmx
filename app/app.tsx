@@ -68,7 +68,7 @@ let App = (
         {/* <TextComp a={123} s='jaja-sss-1' />
         <TextComp a={123} s='jaja-sss-2' /> */}
 
-        {/* <Numerotti n={m.i * 10} mounted={e => console.log("Numerotti mounted", e)} update={e => console.log("Numerotti update", e)} /> */}
+        <Numerotti n={m.i * 10} mounted={e => console.log("Numerotti mounted", e)} update={e => console.log("Numerotti update", e)} />
 
         <Map a={m.i} s='s' />
 
@@ -151,7 +151,7 @@ let App = (
 // let App3 = <body><F /><div /></body>
 let App4 = "hase"
 
-//mount({ u: updateview, patch, App2, App3 })
+mount({ u: updateview, patch })
 
 //patch(document.body, "hasen")
 

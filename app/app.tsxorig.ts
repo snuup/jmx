@@ -1,4 +1,5 @@
-import { jsx, patch } from "../jmx/jmx";
+import { mount } from "../base/common";
+import { jsx, patch, updateview } from "../jmx/jmx";
 import { JMXComp } from "../jmx/lib";
 import { m } from "./model";
 class TextComp extends JMXComp {
@@ -40,6 +41,7 @@ export class Map extends JMXComp {
     return r;
   }
 }
-let App = jsx("body", null, jsx(Map, { a: m.i, s: "s" }));
+let App = jsx("body", null, jsx(Numerotti, { n: m.i * 10, mounted: (e) => console.log("Numerotti mounted", e), update: (e) => console.log("Numerotti update", e) }), jsx(Map, { a: m.i, s: "s" }));
 let App4 = "hase";
+mount({ u: updateview, patch });
 patch(document.body, App);
