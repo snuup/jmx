@@ -146,12 +146,13 @@ let FE = () => <>
 //     <a>2</a>
 // </>
 
-let App2 = <body><FE /><div /></body>
-let App3 = <body><F /><div /></body>
+// let App2 = <body><FE /><div /></body>
+// let App3 = <body><F /><div /></body>
+let App4 = "hase"
 
-mount({ u: updateview, patch, App2, App3 })
+//mount({ u: updateview, patch, App2, App3 })
 
-patch(document.body, App3)
+patch(document.body, App4)
 
 //patch(document.body, App)
 
