@@ -25,7 +25,7 @@ interface IClassComponent {
 }
 
 interface CComponent {
-    new(props: Props): IClassComponent
+    new(): IClassComponent // while a real component expresses its interface via props pass to the ctor, internally we assign props after construction with new()
 }
 
 type ChildrenH = (H | undefined)[]

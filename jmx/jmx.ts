@@ -12,119 +12,116 @@ const enum NodeType { // vaporizes (but for that must be in this file, otherwise
     TextNode = 3,
 }
 
-function setprops(e: Element, newprops: Props = {}) {
-    let oldprops = evaluate(e.h?.props) ?? {} // tbd: should h always ba attached here? then we could remove the "?"
-    for (let p in oldprops) (!(p in newprops)) && isproperty(p, oldprops[p]) ? e[p] = null : e.removeAttribute(p) // tbd: not sure if that is correct, should be rare border cases where this matters
-    for (let p in newprops) isproperty(p, newprops[p]) ? e[p] = newprops[p] : e.setAttribute(p, newprops[p])
-}
-
 let isproperty = (name: string, value: any) => (
     ['value', 'checked', 'disabled', 'className', 'style', 'href', 'src', 'selected', 'readOnly', 'tabIndex',].includes(name)
     || value instanceof Object
     || value instanceof Function
 )
 
+let setprops = (e: Element, newprops: Props = {}) => {
+    let oldprops = evaluate(e.h?.props) ?? {} // tbd: should h always ba attached here? then we could remove the "?"
+    for (let p in oldprops) (!(p in newprops)) && isproperty(p, oldprops[p]) ? e[p] = null : e.removeAttribute(p) // tbd: not sure if that is correct, should be rare border cases where this matters
+    for (let p in newprops) isproperty(p, newprops[p]) ? e[p] = newprops[p] : e.setAttribute(p, newprops[p])
+}
+
 let evaluate = <T>(expr: Expr<T>): T => expr instanceof Function ? expr() : expr
-/** remove all children from n with index >= i */
 let removeexcesschildren = (n: Element, i: number) => { let c: ChildNode; while ((c = n.childNodes[i])) c.remove() }
 let iswebcomponent = (h: HElement) => (h.tag as string).includes('-')
 let isclasscomponent = (h: HComp): h is HCompClass => (h.tag as any)?.prototype?.view
 let iselement = (h): h is HElement => h.kind == "element" // typeof h.tag == string
 let isfragment = (h: any): h is HFragment => { return h.tag == undefined && h.children != undefined }
-//let istextnode = (n: Node): n is Text => n.nodeType == NodeType.TextNode
-
-function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext): number {
-
-    // console.log('%csync', "background:orange", p.tagName, i, h, 'html = ' + document.body.outerHTML)
-
-    h = evaluate(h)
-    if (h === null || h === undefined) return i // skip this element. not that !!h would forbid to render the number 0 or the boolean value false
-
-    let c = p.childNodes[i] // is often null, eg during fresh creation
-
-    function synctextnode(text: string) {
-        if (c && c.nodeType == NodeType.TextNode) {
-            if (c.textContent != text) c.textContent = text// firefox updates even equal text, loosing an existing text selection
-        } else {
-            let tn = document.createTextNode(text)
-            c ? c.replaceWith(tn) : p.appendChild(tn)
-        }
-    }
-
-    switch (typeof h) {
-
-        // text nodes
-        case 'string':
-        case 'number':
-        case 'boolean':
-            synctextnode(h as string)
-            return i + 1
-
-        // element nodes
-        case 'object':
-
-            /** synchronizes children starting at the i-th element.
-              * returns the index of the last child synchronized */
-            function syncchildren(p: Element, h: HElement | HComp | HFragment, i: number): number {
-                evaluate(h.children)?.forEach(hc => i = sync(p, i, hc, uc))
-                return i
-            }
-
-            if (isfragment(h)) return syncchildren(p, h, i);
-
-            const props = evaluate(h.props)
-
-            function syncelement(tag: string): Element {
-
-                if ((<Element>c)?.tagName != tag) {
-                    const n = document.createElement(tag)
-                    c ? c.replaceWith(n) : p.appendChild(n)
-                    setprops(n, props)
-                    props?.mounted?.(n)
-                    return n
-                } else {
-                    setprops(<Element>c, props)
-                    props?.update?.(uc)
-                    return c as Element
-                }
-            }
-
-            if (iselement(h)) {
-                let n = syncelement(h.tag as string) // tbd: order of this line right and good?
-                n.h = h
-                if (!uc.patchElementOnly && !iswebcomponent(h as HElement)) { // tbd: make "island" attribute
-                    const j = syncchildren(n, h, 0)
-                    removeexcesschildren(n, j)
-                }
-                return i + 1
-            }
-
-            switch (typeof h.tag) {
-
-                case 'function':
-                    let j
-                    let hr: H
-                    if (isclasscomponent(h)) {
-                        h.i = (c?.h as HCompClass | undefined)?.i ?? rebind(new h.tag(props!)) // rebind is important for simple event handlers
-                        h.i.props = props
-                        hr = h.i.view() // inefficient: we compute view() although we do not use if then the component has an update function
-                    } else {
-                        hr = h.tag(props, evaluate(h.children))
-                    }
-                    j = sync(p, i, hr, uc) //otherwise continue with the computed h
-                    p.childNodes[i]!.h = h
-                    return j
-
-                case 'object': // tbd: typing
-                    return sync(p, i, h.tag, uc)
-            }
-    }
-}
+let iobject = (x: any): x is object => typeof x === "object"
 
 export function patch(e: Node, h: Expr<H>, uc: UpdateContext = {}) {
+
     const p = e.parentElement as HTMLElement
     const i = [].indexOf.call(p.childNodes, e) // tell typescript that parentElement is not null
-    sync(p, i, h, uc)
+    sync(p, i, h)
+
+    function sync(p: Element, i: number, h: Expr<H | undefined>): number {
+
+        // console.log('%csync', "background:orange", p.tagName, i, h, 'html = ' + document.body.outerHTML)
+
+        h = evaluate(h)
+        if (h === null || h === undefined) return i // skip this element. not that !!h would forbid to render the number 0 or the boolean value false
+
+        let c = p.childNodes[i] // is often null, eg during fresh creation
+
+        function synctextnode(text: string) {
+            if (c && c.nodeType == NodeType.TextNode) {
+                if (c.textContent != text) c.textContent = text// firefox updates even equal text, loosing an existing text selection
+            } else {
+                let tn = document.createTextNode(text)
+                c ? c.replaceWith(tn) : p.appendChild(tn)
+            }
+        }
+
+        switch (typeof h) {
+
+            // element nodes
+            case 'object':
+
+                /** synchronizes children starting at the i-th element.
+                  * returns the index of the last child synchronized */
+                function syncchildren(p: Element, h: HElement | HComp | HFragment, i: number): number {
+                    evaluate(h.children)?.forEach(hc => i = sync(p, i, hc))
+                    return i
+                }
+
+                if (isfragment(h)) return syncchildren(p, h, i)
+
+                const props = evaluate(h.props)
+
+                function syncelement(tag: string): Element {
+
+                    if ((<Element>c)?.tagName != tag) {
+                        const n = document.createElement(tag)
+                        c ? c.replaceWith(n) : p.appendChild(n)
+                        setprops(n, props)
+                        props?.mounted?.(n)
+                        return n
+                    } else {
+                        setprops(<Element>c, props)
+                        props?.update?.(uc)
+                        return c as Element
+                    }
+                }
+
+                if (iselement(h)) {
+                    let n = syncelement(h.tag as string) // tbd: order of this line right and good?
+                    n.h = h
+                    if (!uc.patchElementOnly && !iswebcomponent(h as HElement)) { // tbd: make "island" attribute
+                        const j = syncchildren(n, h, 0)
+                        removeexcesschildren(n, j)
+                    }
+                    return i + 1
+                }
+
+                switch (typeof h.tag) {
+
+                    case 'function':
+                        let j
+                        let hr: H
+                        if (isclasscomponent(h)) {
+                            (h.i ??= rebind(new h.tag())).props = props
+                            hr = h.i.view() // inefficient: we compute view() although we do not use if then the component has an update function
+                        } else {
+                            hr = h.tag(props, evaluate(h.children))
+                        }
+                        j = sync(p, i, hr) //otherwise continue with the computed h
+                        p.childNodes[i]!.h = h
+                        return j
+
+                    case 'object':
+                        return sync(p, i, h.tag) // tbd: type of h is not correct, h.tag == never
+                }
+
+            // text nodes
+            default:
+                synctextnode(h as string)
+                return i + 1
+        }
+    }
 }
 
 export function updateview(selector: string | Node = 'body', uc: UpdateContext = {}) {
