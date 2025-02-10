@@ -19,7 +19,6 @@ type FComponent = (props: Props | undefined, children?: ChildrenH) => HElement /
 interface IClassComponent {
     element: Node
     props?: Record<string, any>
-    //children: Children //tbd ??
     view(): H
     update(uc: UpdateContext): boolean
     mounted(n: Node): void
@@ -86,7 +85,7 @@ interface Element {
     model: any
 }
 interface Node {
-    h?: HTFC
+    h?: HElement | HCompFun | HCompClass
     mounted?: (e: Element) => void
     update?: (e: Element) => void
 }

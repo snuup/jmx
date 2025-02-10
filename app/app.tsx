@@ -32,6 +32,12 @@ export class Map extends JMXComp<{ a: number; s: string }> {
 
     // life
 
+    constructor(p) {
+        super(p)
+        console.log("ctor");
+
+    }
+
     override mounted(e) {
         console.log("Map mounted", e)
     }
@@ -51,15 +57,10 @@ export class Map extends JMXComp<{ a: number; s: string }> {
     // view
 
     view() {
-        console.log("Map view")
-
-        return <aside>map</aside>
-
-        let r = <div class='map'>
-            {this.props.a}{this.state}
-            <button onclick={this.increment} >increment</button>
+        return <div class='map'>
+            {this.props.a} {this.state} {m.i}
+            <button onclick={this.increment}>increment</button>
         </div>
-        return r
     }
 }
 
@@ -155,7 +156,7 @@ mount({ u: updateview, patch })
 
 //patch(document.body, "hasen")
 
-patch(document.body, App)
+patch(document.body, <body><Map a={11} s='hase' /></body>)
 
 //let ub = () => updateview(document.body)
 //let p = x => patch(document.body, x)

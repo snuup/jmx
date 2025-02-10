@@ -30,6 +30,10 @@ export let Numerotti = ({
 export class Map extends JMXComp {
   state = 500;
   // life
+  constructor(p) {
+    super(p);
+    console.log("ctor");
+  }
   mounted(e) {
     console.log("Map mounted", e);
   }
@@ -44,19 +48,13 @@ export class Map extends JMXComp {
   }
   // view
   view() {
-    console.log("Map view");
     return {
-      kind: "element",
-      tag: "ASIDE",
-      children: () => ["map"]
-    };
-    let r = {
       kind: "element",
       tag: "DIV",
       props: () => ({
         class: "map"
       }),
-      children: () => [this.props.a, this.state, {
+      children: () => [this.props.a, " ", this.state, " ", m.i, {
         kind: "element",
         tag: "BUTTON",
         props: () => ({
@@ -65,7 +63,6 @@ export class Map extends JMXComp {
         children: () => ["increment"]
       }]
     };
-    return r;
   }
 }
 let App = {
@@ -93,4 +90,15 @@ mount({
   u: updateview,
   patch
 });
-patch(document.body, App);
+patch(document.body, {
+  kind: "element",
+  tag: "BODY",
+  children: () => [{
+    kind: "component",
+    tag: Map,
+    props: () => ({
+      a: 11,
+      s: "hase"
+    })
+  }]
+});

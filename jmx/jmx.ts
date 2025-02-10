@@ -24,29 +24,29 @@ let isproperty = (name: string, value: any) => (
     || value instanceof Function
 )
 
-/** remove all children from n with index >= i */
 let evaluate = <T>(expr: Expr<T>): T => expr instanceof Function ? expr() : expr
+/** remove all children from n with index >= i */
 let removeexcesschildren = (n: Element, i: number) => { let c: ChildNode; while ((c = n.childNodes[i])) c.remove() }
 let iswebcomponent = (h: HElement) => (h.tag as string).includes('-')
-let isclasscomponent = (h: HTFC): h is HCompClass => (h.tag as any)?.prototype?.view
+let isclasscomponent = (h: HComp): h is HCompClass => (h.tag as any)?.prototype?.view
 let iselement = (h): h is HElement => h.kind == "element" // typeof h.tag == string
 let isfragment = (h: any): h is HFragment => { return h.tag == undefined && h.children != undefined }
-let istextnode = (n: Node): n is Text => n.nodeType == NodeType.TextNode
+//let istextnode = (n: Node): n is Text => n.nodeType == NodeType.TextNode
 
 function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext): number {
 
-    console.log('%csync', "background:orange", p.tagName, i, h, 'html = ' + document.body.outerHTML)
+    // console.log('%csync', "background:orange", p.tagName, i, h, 'html = ' + document.body.outerHTML)
 
     h = evaluate(h)
-    if (h === null || h === undefined) return i // skip this element
+    if (h === null || h === undefined) return i // skip this element. not that !!h would forbid to render the number 0 or the boolean value false
 
-    const c = p.childNodes[i] // is often null, eg during fresh creation
+    let c = p.childNodes[i] // is often null, eg during fresh creation
 
     function synctextnode(text: string) {
         if (c && c.nodeType == NodeType.TextNode) {
             if (c.textContent != text) c.textContent = text// firefox updates even equal text, loosing an existing text selection
         } else {
-            const tn = document.createTextNode(text)
+            let tn = document.createTextNode(text)
             c ? c.replaceWith(tn) : p.appendChild(tn)
         }
     }
@@ -57,7 +57,7 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
         case 'string':
         case 'number':
         case 'boolean':
-            synctextnode(h as string) //not sure if we need toString() here
+            synctextnode(h as string)
             return i + 1
 
         // element nodes
@@ -70,7 +70,7 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
                 return i
             }
 
-            if (isfragment(h)) return syncchildren(p, h, i)
+            if (isfragment(h)) return syncchildren(p, h, i);
 
             const props = evaluate(h.props)
 
@@ -121,29 +121,21 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
     }
 }
 
-export function jsx(): HElement { throw 'jmx plugin not configured' } // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it
-export function jsxf(): HElement { throw 'jmx plugin not configured' } // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it
-
-// patches given dom and comp
 export function patch(e: Node, h: Expr<H>, uc: UpdateContext = {}) {
-    //console.log("%cpatch", `background:orange;color:white;padding:2px;font-weight:bold`, e, h)
     const p = e.parentElement as HTMLElement
     const i = [].indexOf.call(p.childNodes, e) // tell typescript that parentElement is not null
     sync(p, i, h, uc)
 }
 
-// uses attached comps to patch elements
 export function updateview(selector: string | Node = 'body', uc: UpdateContext = {}) {
-    // console.log(`updateview(%c${selector}, ${patchElementOnly})`, "background:#d2f759;padding:2px")
     const ns = typeof selector == 'string' ? document.querySelectorAll(selector) : [selector]
     let n: Node | null
     for (n of ns) {
-        while (n && !n.h) n = n.parentElement
-        if (!n) continue
-
         if (uc.replace) (n as HTMLElement).replaceChildren()
-        if (!n.h) throw ['cannot update, because html was not created with jmx: no h exists on the node', n]
+        if (!n.h) throw ['jmx: no h exists on the node', n]
         patch(n, n.h, uc)
     }
 }
 
+export function jsx(): HElement { throw 'jmx plugin not configured' } // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it
+export function jsxf(): HElement { throw 'jmx plugin not configured' } // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it

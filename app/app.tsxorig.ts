@@ -21,6 +21,10 @@ export let Numerotti = ({ n }) => {
 export class Map extends JMXComp {
   state = 500;
   // life
+  constructor(p) {
+    super(p);
+    console.log("ctor");
+  }
   mounted(e) {
     console.log("Map mounted", e);
   }
@@ -35,13 +39,10 @@ export class Map extends JMXComp {
   }
   // view
   view() {
-    console.log("Map view");
-    return jsx("aside", null, "map");
-    let r = jsx("div", { class: "map" }, this.props.a, this.state, jsx("button", { onclick: this.increment }, "increment"));
-    return r;
+    return jsx("div", { class: "map" }, this.props.a, " ", this.state, " ", m.i, jsx("button", { onclick: this.increment }, "increment"));
   }
 }
 let App = jsx("body", null, jsx(Numerotti, { n: m.i * 10, mounted: (e) => console.log("Numerotti mounted", e), update: (e) => console.log("Numerotti update", e) }), jsx(Map, { a: m.i, s: "s" }));
 let App4 = "hase";
 mount({ u: updateview, patch });
-patch(document.body, App);
+patch(document.body, jsx("body", null, jsx(Map, { a: 11, s: "hase" })));
