@@ -32,13 +32,13 @@ export class Map extends JMXComp {
   // life
   constructor(p) {
     super(p);
-    console.log("ctor");
+    console.log("Map ctor");
   }
-  mounted(e) {
-    console.log("Map mounted", e);
+  mounted() {
+    console.log("Map.mounted", this);
   }
   update(uc) {
-    console.log("Map update", this, uc);
+    console.log("Map.update", this, uc);
     return true;
   }
   // core
@@ -48,6 +48,7 @@ export class Map extends JMXComp {
   }
   // view
   view() {
+    console.log("Map.view");
     return {
       kind: "element",
       tag: "DIV",
@@ -70,14 +71,6 @@ let App = {
   tag: "BODY",
   children: () => [{
     kind: "component",
-    tag: Numerotti,
-    props: () => ({
-      n: m.i * 10,
-      mounted: e => console.log("Numerotti mounted", e),
-      update: e => console.log("Numerotti update", e)
-    })
-  }, {
-    kind: "component",
     tag: Map,
     props: () => ({
       a: m.i,
@@ -91,14 +84,6 @@ mount({
   patch
 });
 patch(document.body, {
-  kind: "element",
-  tag: "BODY",
-  children: () => [{
-    kind: "component",
-    tag: Map,
-    props: () => ({
-      a: 11,
-      s: "hase"
-    })
-  }]
+  kind: "component",
+  tag: App
 });

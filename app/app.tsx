@@ -34,16 +34,16 @@ export class Map extends JMXComp<{ a: number; s: string }> {
 
     constructor(p) {
         super(p)
-        console.log("ctor");
+        console.log("Map ctor")
 
     }
 
-    override mounted(e) {
-        console.log("Map mounted", e)
+    override mounted() {
+        console.log("Map.mounted", this)
     }
 
     override update(uc) {
-        console.log("Map update", this, uc)
+        console.log("Map.update", this, uc)
         return true
     }
 
@@ -57,6 +57,7 @@ export class Map extends JMXComp<{ a: number; s: string }> {
     // view
 
     view() {
+        console.log("Map.view")
         return <div class='map'>
             {this.props.a} {this.state} {m.i}
             <button onclick={this.increment}>increment</button>
@@ -69,9 +70,11 @@ let App = (
         {/* <TextComp a={123} s='jaja-sss-1' />
         <TextComp a={123} s='jaja-sss-2' /> */}
 
-        <Numerotti n={m.i * 10} mounted={e => console.log("Numerotti mounted", e)} update={e => console.log("Numerotti update", e)} />
+        {/* <Numerotti n={m.i * 10} mounted={e => console.log("Numerotti mounted", e)} update={e => console.log("Numerotti update", e)} /> */}
 
         <Map a={m.i} s='s' />
+
+        {/* <div>{m.i * 3}</div> */}
 
         {/* <h2>
             <div>1</div>
@@ -156,7 +159,7 @@ mount({ u: updateview, patch })
 
 //patch(document.body, "hasen")
 
-patch(document.body, <body><Map a={11} s='hase' /></body>)
+patch(document.body, <App />)
 
 //let ub = () => updateview(document.body)
 //let p = x => patch(document.body, x)

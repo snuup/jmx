@@ -23,13 +23,13 @@ export class Map extends JMXComp {
   // life
   constructor(p) {
     super(p);
-    console.log("ctor");
+    console.log("Map ctor");
   }
-  mounted(e) {
-    console.log("Map mounted", e);
+  mounted() {
+    console.log("Map.mounted", this);
   }
   update(uc) {
-    console.log("Map update", this, uc);
+    console.log("Map.update", this, uc);
     return true;
   }
   // core
@@ -39,10 +39,11 @@ export class Map extends JMXComp {
   }
   // view
   view() {
+    console.log("Map.view");
     return jsx("div", { class: "map" }, this.props.a, " ", this.state, " ", m.i, jsx("button", { onclick: this.increment }, "increment"));
   }
 }
-let App = jsx("body", null, jsx(Numerotti, { n: m.i * 10, mounted: (e) => console.log("Numerotti mounted", e), update: (e) => console.log("Numerotti update", e) }), jsx(Map, { a: m.i, s: "s" }));
+let App = jsx("body", null, jsx(Map, { a: m.i, s: "s" }));
 let App4 = "hase";
 mount({ u: updateview, patch });
-patch(document.body, jsx("body", null, jsx(Map, { a: 11, s: "hase" })));
+patch(document.body, jsx(App, null));

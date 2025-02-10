@@ -21,7 +21,7 @@ interface IClassComponent {
     props?: Record<string, any>
     view(): H
     update(uc: UpdateContext): boolean
-    mounted(n: Node): void
+    mounted(): void
 }
 
 interface CComponent {
