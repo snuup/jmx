@@ -87,4 +87,14 @@ describe("JMX dom tests", () => {
     patch(document.body, /* @__PURE__ */ jsx("body", null, /* @__PURE__ */ jsx(F, null), /* @__PURE__ */ jsx(F, null)));
     expect(document.body.innerHTML).toBe("<b>1</b><b>2</b><b>3</b><b>1</b><b>2</b><b>3</b>");
   });
+  it("element as object", () => {
+    let D = /* @__PURE__ */ jsx("div", null);
+    patch(document.body, /* @__PURE__ */ jsx("body", null, /* @__PURE__ */ jsx(D, null)));
+    expect(document.body.innerHTML).toBe("<div></div>");
+  });
+  it("element as thunked object", () => {
+    let D = () => /* @__PURE__ */ jsx("div", null);
+    patch(document.body, /* @__PURE__ */ jsx("body", null, /* @__PURE__ */ jsx(D, null)));
+    expect(document.body.innerHTML).toBe("<div></div>");
+  });
 });

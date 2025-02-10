@@ -84,13 +84,13 @@ function evalComponent(h: HComp, n?: Node): H {
 let isfragment = (h: any): h is HFragment => { return h.tag == undefined && h.children != undefined }
 //let isfragment2 = (h: any): h is any => { return h.tag instanceof Function && h.children == undefined && h.props == undefined }
 
-function sync(p: Element, i: number, h: H | undefined, uc: UpdateContext): number {
+function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext): number {
 
     console.log('%csync', "background:orange", p.tagName, i, h, 'html = ' + document.body.outerHTML)
 
+    h = evaluate(h)
     if (h === null || h === undefined) return i // skip this element
 
-    h = evaluate(h)
     const c = p.childNodes[i] // is often null, eg during fresh creation
 
     function synctextnode(text: string) {
@@ -114,7 +114,19 @@ function sync(p: Element, i: number, h: H | undefined, uc: UpdateContext): numbe
         // element nodes
         case 'object':
 
-            if (isfragment(h)) return syncchildren2(evaluate(h.children), p, i, uc)
+            /** synchronizes children starting at the i-th element.
+              * returns the index of the last child synchronized */
+            function syncchildren(p: Element, h: HElement | HComp | HFragment, i: number): number {
+                evaluate(h.children)?.forEach(hc => {
+                    let i0 = i
+                    i = sync(p, i, hc, uc)
+                    let cn = p.childNodes[i0] // this node might not exist before the sync call
+                    if (cn && !cn.h) cn.h = hc as any // the node here might not exist before the call to sync // tbd, make this nicer
+                })
+                return i
+            }
+
+            if (isfragment(h)) return syncchildren(p, h, i)
 
             const props = evaluate(h.props)
 
@@ -138,57 +150,20 @@ function sync(p: Element, i: number, h: H | undefined, uc: UpdateContext): numbe
                 case 'function':
                     return sync(p, i, evalComponent(h as HComp, c), uc) //otherwise continue with the computed h
 
+                case 'object':
+                    return sync(p, i, h.tag, uc)
+
                 case 'string':
                     let n = syncelement(h.tag as string) // tbd: order of this line right and good?
                     if (!uc.patchElementOnly && !iswebcomponent(h as HElement)) {
-                        const j = syncchildren(n, h, 0, uc)
+                        const j = syncchildren(n, h, 0)
                         removeexcesschildren(n, j)
                     }
                     return i + 1
-
-                case 'object':
-                    switch (h.kind) {
-
-                        case "<>":
-                            console.log(h)
-                            throw "case <>"
-
-                        case "component":
-                            console.log(h)
-                            return sync(p, i, h.tag, uc)
-                    }
             }
     }
 
     throw "invalid execution - code is wrong"
-}
-
-
-
-// function evaluatefragment(c: HTag | HComp | HFragment) : H[] {
-//     if (c.tag && isfragment(c.tag) return evaluate(evaluate(c.tag).children)
-//         throw ""
-// }
-
-
-// mount({ isfragment, isfragment2, evaluate })
-
-function syncchildren2(cn: ChildrenH, p: Element, i: number, uc): number {
-    cn.forEach(hc => i = sync(p, i, hc, uc))
-    return i
-}
-
-/** synchronizes children starting at the i-th element.
- *  returns the index of the last child synchronized */
-function syncchildren(p: Element, h: HElement | HComp, i: number, uc: UpdateContext): number {
-    evaluate(h.children)?.forEach(hc => {
-        let i0 = i
-        i = sync(p, i, hc, uc)
-        let cn = p.childNodes[i0] // this node might not exist before the sync call
-        if (cn && !cn.h) cn.h = hc as any // the node here might not exist before the call to sync // tbd, make this nicer
-    })
-
-    return i
 }
 
 export function jsx(): HElement { throw 'jmx plugin not configured' } // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it

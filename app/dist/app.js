@@ -1,1 +1,192 @@
-function d(e){Object.assign(globalThis,e)}function w(e){Object.assign(globalThis,e)}function x(e,...t){let o=Object.getOwnPropertyDescriptors(e.prototype);delete o.constructor,t.forEach(n=>Object.defineProperties(n.prototype,o)),o=Object.getOwnPropertyDescriptors(e),Object.entries(o).forEach(([n,c])=>!c.writable&&delete o[n]),t.forEach(n=>Object.defineProperties(n,o))}x(class extends Object{log(e){return console.log(e,this),w({x:this}),this}},Object);function g(e,t={}){let o=r=>{m(r,t[r])?e[r]=t[r]:e.setAttribute(r,t[r])},n=r=>{m(r,c[r])?e[r]=null:e.removeAttribute(r)},c=s(e.h?.props)??{};for(let r in c)!(r in t)&&n(r);for(let r in t)o(r)}function m(e,t){return["value","checked","disabled","className","style","href","src","selected","readOnly","tabIndex"].includes(e)||t instanceof Object||t instanceof Function}function E(e){let t=Object.getPrototypeOf(e),o=Object.entries(Object.getOwnPropertyDescriptors(t)).filter(([,n])=>n.value instanceof Function).filter(([n])=>n!="constructor").map(([n])=>n);for(const n of o)e[n]=e[n].bind(e);return e}let N=(e,t)=>{console.log("removeexcesschildren",e.tagName,t);let o;for(;o=e.childNodes[t];)o.remove()},P=e=>e.tag.includes("-");const s=e=>e instanceof Function?s(e()):e;let C=e=>e.tag?.prototype?.view;function f(e,t,o,n){if(o==null)return t;o=s(o);const c=s(o.props),r=e.childNodes[t];function a(i){if(r&&r.nodeType==3)r.textContent!=i&&(r.textContent=i);else{const l=document.createTextNode(i);r?r.replaceWith(l):e.appendChild(l)}}function v(i){if(r?.tagName!=i){const l=document.createElement(i);return r?r.replaceWith(l):e.appendChild(l),g(l,c),c?.mounted?.(l),l}else return g(r,c),c?.update?.(n),r}function j(i,l){if(C(i)){let p=(l?.h).i??=E(new i.tag(c));return p.props=c,p.view()}else return i.tag(c,s(i.children))}switch(typeof o){case"string":case"number":case"boolean":return a(o),t+1;case"object":switch(typeof o.tag){case"function":return f(e,t,j(o,r),n);case"string":let i=v(o.tag);if(!n.patchElementOnly&&!P(o)){const l=k(i,o,0,n);N(i,l)}return t+1}}throw"invalid execution - code is wrong"}let h=e=>e.tag==null&&e.children!=null,b=e=>e.tag instanceof Function&&e.children==null&&e.props==null;function y(e){return(s(e.children)??[]).log("children").flatMap(t=>b(t)?s(s(t.tag).children):t).flatMap(t=>t.tag&&h(t.tag)?s(t?.tag?.children):t).filter(t=>t!=null)}d({isfragment:h,isfragment2:b,getchildren:y,evaluate:s});function k(e,t,o,n){return y(t).forEach(c=>{let r=o;o=f(e,o,c,n);let a=e.childNodes[r];a&&!a.h&&(a.h=c)}),o}function u(e,t,o={}){const n=e.parentElement,c=[].indexOf.call(n.childNodes,e);f(n,c,t,o),e.h=t}function D(e="body",t={}){const o=typeof e=="string"?document.querySelectorAll(e):[e];let n;for(n of o){for(;n&&!n.h;)n=n.parentElement;if(n){if(t.replace&&n.replaceChildren(),!n.h)throw["cannot update, because html was not created with jmx: no h exists on the node",n];u(n,n.h,t)}}}let F={i:10};d({m:F});let A={kind:"<>",children:()=>["aa","bb"]},O={kind:"element",tag:"BODY",children:()=>[{kind:"component",tag:A},{kind:"element",tag:"DIV"}]};d({u:D,patch:u,App3:O});u(document.body,O);
+function m(e) {
+	Object.assign(globalThis, e)
+}
+function D(e) {
+	Object.assign(globalThis, e)
+}
+function P(e, ...t) {
+	let n = Object.getOwnPropertyDescriptors(e.prototype)
+	delete n.constructor,
+		t.forEach(o => Object.defineProperties(o.prototype, n)),
+		(n = Object.getOwnPropertyDescriptors(e)),
+		Object.entries(n).forEach(([o, c]) => !c.writable && delete n[o]),
+		t.forEach(o => Object.defineProperties(o, n))
+}
+const w = e => (e instanceof Function ? w(e()) : e)
+P(
+	class extends Object {
+		log(e) {
+			return console.log(e, this), D({ x: this }), this
+		}
+		eval() {
+			return w(this)
+		}
+		eve() {
+			return globalThis.eve(this)
+		}
+	},
+	Object
+)
+function v(e, t = {}) {
+	let n = r => {
+			O(r, t[r]) ? (e[r] = t[r]) : e.setAttribute(r, t[r])
+		},
+		o = r => {
+			O(r, c[r]) ? (e[r] = null) : e.removeAttribute(r)
+		},
+		c = s(e.h?.props) ?? {}
+	for (let r in c) !(r in t) && o(r)
+	for (let r in t) n(r)
+}
+function O(e, t) {
+	return (
+		[
+			'value',
+			'checked',
+			'disabled',
+			'className',
+			'style',
+			'href',
+			'src',
+			'selected',
+			'readOnly',
+			'tabIndex',
+		].includes(e) ||
+		t instanceof Object ||
+		t instanceof Function
+	)
+}
+function x(e) {
+	let t = Object.getPrototypeOf(e),
+		n = Object.entries(Object.getOwnPropertyDescriptors(t))
+			.filter(([, o]) => o.value instanceof Function)
+			.filter(([o]) => o != 'constructor')
+			.map(([o]) => o)
+	for (const o of n) e[o] = e[o].bind(e)
+	return e
+}
+let F = (e, t) => {
+		console.log('removeexcesschildren', e.tagName, t)
+		let n
+		for (; (n = e.childNodes[t]); ) n.remove()
+	},
+	T = e => e.tag.includes('-')
+const s = e => (e instanceof Function ? s(e()) : e)
+let A = e => e.tag?.prototype?.view
+function b(e, t) {
+	if (e.kind != 'component') throw 'evalComponent called with non-component'
+	let n = e.props?.eval()
+	if (A(e)) {
+		let o = ((t?.h).i ??= x(new e.tag(n)))
+		return (o.props = n), o.view()
+	} else return e.tag(n, s(e.children))
+}
+let I = e => e.tag == null && e.children != null
+function p(e, t, n, o) {
+	if (
+		(console.log('%csync', 'background:orange', e.tagName, t, n, 'html = ' + document.body.outerHTML),
+		(n = s(n)),
+		n == null)
+	)
+		return t
+	const c = e.childNodes[t]
+	function r(a) {
+		if (c && c.nodeType == 3) c.textContent != a && (c.textContent = a)
+		else {
+			const d = document.createTextNode(a)
+			c ? c.replaceWith(d) : e.appendChild(d)
+		}
+	}
+	switch (typeof n) {
+		case 'string':
+		case 'number':
+		case 'boolean':
+			return r(n), t + 1
+		case 'object':
+			let a = function (l, i, f) {
+					return (
+						s(i.children)?.forEach(y => {
+							let C = f
+							f = p(l, f, y, o)
+							let g = l.childNodes[C]
+							g && !g.h && (g.h = y)
+						}),
+						f
+					)
+				},
+				d = function (l) {
+					if (c?.tagName != l) {
+						const i = document.createElement(l)
+						return c ? c.replaceWith(i) : e.appendChild(i), v(i, u), u?.mounted?.(i), i
+					} else return v(c, u), u?.update?.(o), c
+				}
+			if (I(n)) return a(e, n, t)
+			const u = s(n.props)
+			switch (typeof n.tag) {
+				case 'function':
+					return p(e, t, b(n, c), o)
+				case 'string':
+					let l = d(n.tag)
+					if (!o.patchElementOnly && !T(n)) {
+						const i = a(l, n, 0)
+						F(l, i)
+					}
+					return t + 1
+				case 'object':
+					switch (n.kind) {
+						case '<>':
+							throw (console.log(n), 'case <>')
+						case 'component':
+							return console.log(n), p(e, t, n.tag, o)
+					}
+			}
+	}
+	throw 'invalid execution - code is wrong'
+}
+function h(e, t, n = {}) {
+	const o = e.parentElement,
+		c = [].indexOf.call(o.childNodes, e)
+	p(o, c, t, n), (e.h = t)
+}
+function B(e = 'body', t = {}) {
+	const n = typeof e == 'string' ? document.querySelectorAll(e) : [e]
+	let o
+	for (o of n) {
+		for (; o && !o.h; ) o = o.parentElement
+		if (o) {
+			if ((t.replace && o.replaceChildren(), !o.h))
+				throw ['cannot update, because html was not created with jmx: no h exists on the node', o]
+			h(o, o.h, t)
+		}
+	}
+}
+let j = e => e.kind == 'component',
+	V = e => e.kind == 'element',
+	k = e => e.kind == '<>'
+m({ iscomponent: j, iselement: V, isfrag: k, evalComponent: b })
+function E(e) {
+	let t = s(e)
+	return t == null ? t : j(t) ? b(t) : k(t) ? s(t.children) : t
+}
+m({ eve: E })
+m({ eve: E })
+let W = { kind: '<>', children: () => ['aa', 'bb'] },
+	Y = () => ({ kind: '<>', children: () => ['aa', 'bb'] }),
+	$ = {
+		kind: 'element',
+		tag: 'BODY',
+		children: () => [
+			{ kind: 'component', tag: Y },
+			{ kind: 'element', tag: 'DIV' },
+		],
+	},
+	N = {
+		kind: 'element',
+		tag: 'BODY',
+		children: () => [
+			{ kind: 'component', tag: W },
+			{ kind: 'element', tag: 'DIV' },
+		],
+	}
+m({ u: B, patch: h, App2: $, App3: N })
+h(document.body, N)

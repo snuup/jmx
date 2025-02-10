@@ -131,4 +131,20 @@ describe('JMX dom tests', () => {
         patch(document.body, <body><F /><F /></body>)
         expect(document.body.innerHTML).toBe('<b>1</b><b>2</b><b>3</b><b>1</b><b>2</b><b>3</b>')
     })
+
+    it('element as object', () => {
+
+        let D = <div />
+
+        patch(document.body, <body><D /></body>)
+        expect(document.body.innerHTML).toBe('<div></div>')
+    })
+
+    it('element as thunked object', () => {
+
+        let D = () => <div />
+
+        patch(document.body, <body><D /></body>)
+        expect(document.body.innerHTML).toBe('<div></div>')
+    })
 })

@@ -257,4 +257,44 @@ describe("JMX dom tests", () => {
     });
     expect(document.body.innerHTML).toBe("<b>1</b><b>2</b><b>3</b><b>1</b><b>2</b><b>3</b>");
   });
+  it("element as object", () => {
+    let D =
+    /* @__PURE__ */
+    {
+      kind: "element",
+      tag: "DIV"
+    };
+    patch(document.body,
+    /* @__PURE__ */
+    {
+      kind: "element",
+      tag: "BODY",
+      children: () => [
+      /* @__PURE__ */
+      {
+        kind: "component",
+        tag: D
+      }]
+    });
+    expect(document.body.innerHTML).toBe("<div></div>");
+  });
+  it("element as thunked object", () => {
+    let D = () => (/* @__PURE__ */{
+      kind: "element",
+      tag: "DIV"
+    });
+    patch(document.body,
+    /* @__PURE__ */
+    {
+      kind: "element",
+      tag: "BODY",
+      children: () => [
+      /* @__PURE__ */
+      {
+        kind: "component",
+        tag: D
+      }]
+    });
+    expect(document.body.innerHTML).toBe("<div></div>");
+  });
 });
