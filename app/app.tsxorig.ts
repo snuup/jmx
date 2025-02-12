@@ -20,51 +20,48 @@ export let Numerotti = ({ n }) => {
 };
 export class Map extends JMXComp {
   state = 500;
+  h;
   // life
-  constructor(p) {
-    super(p);
-    console.log("Map ctor");
-  }
-  mounted() {
-    console.log("Map.mounted", this);
-  }
+  // constructor(p) {
+  //     super(p)
+  //     console.log("Map ctor")
+  // }
+  // override mounted() {
+  //     console.log("Map.mounted", this)
+  // }
   update(uc) {
     console.log("Map.update", this, uc);
+    return true;
   }
   // core
   increment() {
     this.state++;
-    this.updateview();
+    patch(this.element, this.h);
   }
   // view
   view() {
     console.log("Map.view");
-    return jsx("div", { class: "map" }, this.props.a, " ", this.state, " ", m.i, jsx("button", { onclick: this.increment }, "increment"));
+    return this.h = jsx("div", { class: "map" }, this.props.a, " ", this.state, " ", m.i, jsx("button", { onclick: this.increment }, "increment"));
   }
 }
-let FunWithState = () => {
-  console.log("funny");
-  let state = {
-    count: 50
-  };
-  let element;
-  return jsx(
-    "div",
-    {
-      mounted: (e) => {
-        element = e;
-        e.state = state;
-      },
-      onclick: () => {
-        element.state++;
-        updateview(element);
-      }
-    },
-    "hoho, now i have state ",
-    state
-  );
-};
-let App = jsx("body", null, jsx(Map, { a: m.i, s: "s" }));
+export class Counter extends JMXComp {
+  count = this.props.start;
+  h;
+  update(uc) {
+    console.log("Map.update", this, uc);
+    return true;
+  }
+  increment() {
+    this.count++;
+    let ch = this.element.h;
+    patch(this.element, this.h);
+  }
+  view() {
+    return this.h = jsx("div", { class: "map" }, this.props.name, ": ", this.count, jsx("button", { onclick: this.increment }, "increment"));
+  }
+}
+let Island = jsx("div", { update: () => true }, "island - ", m.i, " -.");
+let App = jsx("body", null, jsx(Counter, { name: "count-sheeps", start: m.i }));
 let App4 = "hase";
 mount({ u: updateview, patch });
 patch(document.body, jsx(App, null));

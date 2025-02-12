@@ -5,14 +5,13 @@ export let When = ({ cond }, { children }) => cond && { children }
 export abstract class JMXComp<P extends Props = {}> implements IClassComponent {
     element: Node
 
-    constructor(public props: P) { } // we do this for jsx. at runtime, we pass the props directly
+    constructor(public props: P) {
+        console.log("jmx comp ctor", props)
+
+    } // we do this for jsx. at runtime, we pass the props directly
     mounted() { }
-    update(uc: UpdateContext): boolean | void {
-        return false
-    }
-    updateview() {
-        updateview(this.element)
-    }
+    update(uc: UpdateContext): boolean | void { }
+    updateview() { updateview(this.element) }
 
     abstract view()
 }

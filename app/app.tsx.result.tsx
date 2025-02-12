@@ -29,26 +29,28 @@ export let Numerotti = ({
 };
 export class Map extends JMXComp {
   state = 500;
+  h;
   // life
-  constructor(p) {
-    super(p);
-    console.log("Map ctor");
-  }
-  mounted() {
-    console.log("Map.mounted", this);
-  }
+  // constructor(p) {
+  //     super(p)
+  //     console.log("Map ctor")
+  // }
+  // override mounted() {
+  //     console.log("Map.mounted", this)
+  // }
   update(uc) {
     console.log("Map.update", this, uc);
+    return true;
   }
   // core
   increment() {
     this.state++;
-    this.updateview();
+    patch(this.element, this.h);
   }
   // view
   view() {
     console.log("Map.view");
-    return {
+    return this.h = {
       kind: "element",
       tag: "DIV",
       props: () => ({
@@ -65,37 +67,53 @@ export class Map extends JMXComp {
     };
   }
 }
-let FunWithState = () => {
-  console.log("funny");
-  let state = {
-    count: 50
-  };
-  let element;
-  return {
-    kind: "element",
-    tag: "DIV",
-    props: () => ({
-      mounted: e => {
-        element = e;
-        e.state = state;
-      },
-      onclick: () => {
-        element.state++;
-        updateview(element);
-      }
-    }),
-    children: () => ["hoho, now i have state ", state]
-  };
+export class Counter extends JMXComp {
+  count = this.props.start;
+  h;
+  update(uc) {
+    console.log("Map.update", this, uc);
+    return true;
+  }
+  increment() {
+    this.count++;
+    let ch = this.element.h;
+    patch(this.element, this.h);
+  }
+  view() {
+    return this.h = {
+      kind: "element",
+      tag: "DIV",
+      props: () => ({
+        class: "map"
+      }),
+      children: () => [this.props.name, ": ", this.count, {
+        kind: "element",
+        tag: "BUTTON",
+        props: () => ({
+          onclick: this.increment
+        }),
+        children: () => ["increment"]
+      }]
+    };
+  }
+}
+let Island = {
+  kind: "element",
+  tag: "DIV",
+  props: () => ({
+    update: () => true
+  }),
+  children: () => ["island - ", m.i, " -."]
 };
 let App = {
   kind: "element",
   tag: "BODY",
   children: () => [{
     kind: "component",
-    tag: Map,
+    tag: Counter,
     props: () => ({
-      a: m.i,
-      s: "s"
+      name: "count-sheeps",
+      start: m.i
     })
   }]
 };

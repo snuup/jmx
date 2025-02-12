@@ -29,55 +29,83 @@ export let Numerotti: FComponent = ({ n }: { n: number }) => {
 export class Map extends JMXComp<{ a: number; s: string }> {
 
     state = 500
+    h: H
 
     // life
 
-    constructor(p) {
-        super(p)
-        console.log("Map ctor")
+    // constructor(p) {
+    //     super(p)
+    //     console.log("Map ctor")
 
-    }
+    // }
 
-    override mounted() {
-        console.log("Map.mounted", this)
-    }
+    // override mounted() {
+    //     console.log("Map.mounted", this)
+    // }
 
     override update(uc) {
         console.log("Map.update", this, uc)
+        return true
     }
 
     // core
 
     increment() {
         this.state++
-        this.updateview()
+        // this.updateview()
+        patch(this.element, this.h)
     }
 
     // view
 
     view() {
         console.log("Map.view")
-        return <div class='map'>
+        return this.h = <div class='map'>
             {this.props.a} {this.state} {m.i}
             <button onclick={this.increment}>increment</button>
         </div>
     }
 }
 
-let FunWithState = () => {
+// maybe assign comp + inner always <<<<<<<<<<<<<<<<<<<<<<<<
 
-    console.log("funny")
+export class Counter extends JMXComp<{ start: number; name: string }> {
 
-    let state = {
-        count: 50
+    count = this.props.start
+    h: H
+
+    override update(uc) {
+        console.log("Map.update", this, uc)
+        return true
     }
-    let element
 
-    return <div
-        mounted={e => { element = e; e.state = state }}
-        onclick={() => { element.state++; updateview(element) }}
-    >hoho, now i have state {state}</div>
+    increment() {
+        this.count++
+        let ch = this.element.h
+        patch(this.element, this.h)
+        //this.element.h = ch
+    }
+
+    view() {
+        return this.h = <div class='map'>
+            {this.props.name}: {this.count}
+            <button onclick={this.increment}>increment</button>
+        </div>
+    }
 }
+
+// this does not work nicely -its catastrophic
+// let FunWithState = () => {
+
+//     console.log("funny")
+
+//     return <div
+//         mounted={e => { console.log("mounted"); e.state = { count:13 } }}
+//         onclick={() => { element.state.count++; updateview(element) }}
+//     >hoho, now i have state {state.count}</div>
+// }
+
+let Island = <div update={() => true}>island - {m.i} -.</div>
 
 let App = (
     <body>
@@ -87,7 +115,12 @@ let App = (
 
         {/* <Numerotti n={m.i * 10} mounted={e => console.log("Numerotti mounted", e)} update={e => console.log("Numerotti update", e)} /> */}
 
-        <Map a={m.i} s='s' />
+        {/* <Map a={m.i} s='s' /> */}
+        <Counter name="count-sheeps" start={m.i} />
+
+        {/* <article update={() => true}>add something here {m.i}</article> */}
+
+        {/* <Island /> */}
 
         {/* <div
             mounted={(e) => { console.log("div mounted", e) }}

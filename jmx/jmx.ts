@@ -41,7 +41,7 @@ let setprops = (e: Element, newprops: Props = {}) => {
 */
 function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext): number {
 
-    // console.log('%csync', "background:orange", p.tagName, i, h, 'html = ' + document.body.outerHTML)
+    console.log('%csync', "background:orange", p.tagName, i, h, 'html = ' + document.body.outerHTML)
 
     h = evaluate(h)
     if (h === null || h === undefined) return i // skip this element. not that !!h would forbid to render the number 0 or the boolean value false
@@ -85,7 +85,10 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
             } else {
                 n = c as Element
                 setprops(n, props)
-                if (props?.update?.(c, uc)) return i + 1
+                if (props?.update?.(c, uc)) {
+                    console.log("no update for ", n)
+                    return i + 1
+                }
             }
             n.h = h
 
@@ -105,24 +108,25 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
                 let ci: IClassComponent | undefined
 
                 if (isclasscomponent(h)) {
-                    h.i = ci = (c?.h as HCompClass)?.i ?? rebind(new h.tag())
+                    h.i = ci = (c?.h as HCompClass)?.i ?? rebind(new h.tag(props))
                     ci.props = props
 
                     // if component instance returns truthy for update(), then syncing is susbstituted by the component
                     if (isupdate && ci.update(uc)) return i + 1
-                } else {
-                    if (isupdate && c.update?.(c as Element)) return i + 1
                 }
 
                 // materialize the component
+                // we run compoents view() and fun code often, we do not compare properties to avoid their computation
+                // this means that the inner hr (h resolved) is run often
                 let hr = ci?.view() ?? (h.tag as FComponent)(props, evaluate(h.children))
                 let j = sync(p, i, hr, uc)
 
                 // attach h onto the materialized component node
                 let cn = p.childNodes[i]!
-                cn.innerh = cn.h
+
+                // the inner element h function is overwritten by the component h.
                 cn.h = h
-                cn.props = props
+
                 if (ci) ci.element = cn
                 if (!isupdate) ci?.mounted()
 

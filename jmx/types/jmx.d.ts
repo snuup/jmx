@@ -8,10 +8,10 @@ type Expr<T> = T | Func<T>
 
 type Props =
     Record<string, any>
-    & {
-        mounted?: Action<Node>,
-        update?: Action<Node, UpdateContext>
-    }
+    // & {
+    //     mounted?: Action<Node>,
+    //     update?: Action<Node, UpdateContext>
+    // }
 
 type FComponent = (props: Props | undefined, children?: ChildrenH) => HElement // show an example for usage of children
 
@@ -24,7 +24,7 @@ interface IClassComponent {
 }
 
 interface CComponent {
-    new(): IClassComponent // while a real component expresses its interface via props pass to the ctor, internally we assign props after construction with new()
+    new(props): IClassComponent // while a real component expresses its interface via props pass to the ctor, internally we assign props after construction with new()
 }
 
 type ChildrenH = (H | undefined)[]
@@ -84,9 +84,5 @@ interface Element {
     model: any
 }
 interface Node {
-    innerh?: HElement | HCompFun | HCompClass
     h?: HElement | HCompFun | HCompClass
-    props?: Props
-    mounted?: (e: Element) => void
-    update?: (e: Element) => void
 }
