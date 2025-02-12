@@ -32,29 +32,20 @@ export class Map extends JMXComp<{ a: number; s: string }> {
     state = 500
     h: H
 
-    // life
-
-    // constructor(p) {
-    //     super(p)
-    //     console.log("Map ctor")
-
-    // }
-
     // override mounted() {
     //     console.log("Map.mounted", this)
     // }
 
     override update(uc) {
         console.log("Map.update", this, uc)
-        return true
+        return false
     }
 
     // core
 
     increment() {
         this.state++
-        // this.updateview()
-        patch(this.element, this.h)
+        this.updateview()
     }
 
     // view
@@ -162,7 +153,7 @@ let App = (
             <a>hop</a>
         </div> */}
 
-        {/* <Map a={55} s='s' /> */}
+        <Map a={55} s='s' />
         {/* <Numerotti n={m.i} />
 
         <Numerotti n={m.i * 100} />

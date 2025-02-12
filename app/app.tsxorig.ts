@@ -21,22 +21,17 @@ export let Numerotti = ({ n }) => {
 export class Map extends JMXComp {
   state = 500;
   h;
-  // life
-  // constructor(p) {
-  //     super(p)
-  //     console.log("Map ctor")
-  // }
   // override mounted() {
   //     console.log("Map.mounted", this)
   // }
   update(uc) {
     console.log("Map.update", this, uc);
-    return true;
+    return false;
   }
   // core
   increment() {
     this.state++;
-    patch(this.element, this.h);
+    this.updateview();
   }
   // view
   view() {
@@ -62,7 +57,7 @@ export class Counter extends JMXComp {
   }
 }
 let Island = jsx("div", { update: () => true }, "island - ", m.i, " -.");
-let App = jsx("body", null, jsx(Counter, { name: m.name, start: m.i }));
+let App = jsx("body", null, jsx(Counter, { name: m.name, start: m.i }), jsx(Map, { a: 55, s: "s" }));
 let App4 = "hase";
 mount({ u: updateview, patch });
 patch(document.body, jsx(App, null));

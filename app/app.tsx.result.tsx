@@ -30,22 +30,17 @@ export let Numerotti = ({
 export class Map extends JMXComp {
   state = 500;
   h;
-  // life
-  // constructor(p) {
-  //     super(p)
-  //     console.log("Map ctor")
-  // }
   // override mounted() {
   //     console.log("Map.mounted", this)
   // }
   update(uc) {
     console.log("Map.update", this, uc);
-    return true;
+    return false;
   }
   // core
   increment() {
     this.state++;
-    patch(this.element, this.h);
+    this.updateview();
   }
   // view
   view() {
@@ -129,6 +124,13 @@ let App = {
     props: () => ({
       name: m.name,
       start: m.i
+    })
+  }, {
+    kind: "component",
+    tag: Map,
+    props: () => ({
+      a: 55,
+      s: "s"
     })
   }]
 };
