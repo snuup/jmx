@@ -38,7 +38,7 @@ type HFragment =
     {
         kind: "<>"
         children: Children,
-        [string]: never // no other keys
+//        [string]: never // no other keys - tbd
     }
 type HElement =
     {
