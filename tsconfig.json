@@ -12,7 +12,8 @@
         "jsx": "react", /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */
         "jsxFactory": "jsx",
         "jsxFragmentFactory": "jsxf",
-        // "declaration": true,                   /* Generates corresponding '.d.ts' file. */
+        "declaration": true,                   /* Generates corresponding '.d.ts' file. */
+        "declarationDir": "./dist/types",
         // "declarationMap": true,                /* Generates a sourcemap for each corresponding '.d.ts' file. */
         "sourceMap": true, /* Generates corresponding '.map' file. */
         // "outFile": "./",                       /* Concatenate and emit output to single file. */
@@ -63,7 +64,9 @@
         "skipLibCheck": true, /* Skip type checking of declaration files. */
         "forceConsistentCasingInFileNames": true, /* Disallow inconsistently-cased references to the same file. */
         //"annotateForClosureCompiler": false
+        "emitDeclarationOnly": true
     },
+    "include": ["src/**/*", "jmx/types/**/*"]
     //"files": [
     //   "base/geotypes.d.ts"
     //   "main.tsx"
