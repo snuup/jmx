@@ -67,20 +67,35 @@ export class Map extends JMXComp {
     };
   }
 }
-export class Counter extends JMXComp {
-  count = this.props.start;
-  h;
-  update(uc) {
-    console.log("Map.update", this, uc);
-    return true;
-  }
-  increment() {
-    this.count++;
-    let ch = this.element.h;
+let FCounter = props => {
+  function increment() {
+    this.props.start++;
     patch(this.element, this.h);
   }
+  return {
+    kind: "element",
+    tag: "DIV",
+    props: () => ({
+      class: "map"
+    }),
+    children: () => [props.name, ": ", props.start, {
+      kind: "element",
+      tag: "BUTTON",
+      props: () => ({
+        onclick: increment
+      }),
+      children: () => ["increment"]
+    }]
+  };
+};
+export class Counter extends JMXComp {
+  count = this.props.start;
+  increment() {
+    this.count++;
+    this.updateview();
+  }
   view() {
-    return this.h = {
+    return {
       kind: "element",
       tag: "DIV",
       props: () => ({
@@ -112,7 +127,7 @@ let App = {
     kind: "component",
     tag: Counter,
     props: () => ({
-      name: "count-sheeps",
+      name: m.name,
       start: m.i
     })
   }]

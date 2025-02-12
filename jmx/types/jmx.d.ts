@@ -85,4 +85,5 @@ interface Element {
 }
 interface Node {
     h?: HElement | HCompFun | HCompClass
+    hr?: H
 }

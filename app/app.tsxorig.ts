@@ -44,24 +44,25 @@ export class Map extends JMXComp {
     return this.h = jsx("div", { class: "map" }, this.props.a, " ", this.state, " ", m.i, jsx("button", { onclick: this.increment }, "increment"));
   }
 }
-export class Counter extends JMXComp {
-  count = this.props.start;
-  h;
-  update(uc) {
-    console.log("Map.update", this, uc);
-    return true;
-  }
-  increment() {
-    this.count++;
-    let ch = this.element.h;
+let FCounter = (props) => {
+  function increment() {
+    this.props.start++;
     patch(this.element, this.h);
   }
+  return jsx("div", { class: "map" }, props.name, ": ", props.start, jsx("button", { onclick: increment }, "increment"));
+};
+export class Counter extends JMXComp {
+  count = this.props.start;
+  increment() {
+    this.count++;
+    this.updateview();
+  }
   view() {
-    return this.h = jsx("div", { class: "map" }, this.props.name, ": ", this.count, jsx("button", { onclick: this.increment }, "increment"));
+    return jsx("div", { class: "map" }, this.props.name, ": ", this.count, jsx("button", { onclick: this.increment }, "increment"));
   }
 }
 let Island = jsx("div", { update: () => true }, "island - ", m.i, " -.");
-let App = jsx("body", null, jsx(Counter, { name: "count-sheeps", start: m.i }));
+let App = jsx("body", null, jsx(Counter, { name: m.name, start: m.i }));
 let App4 = "hase";
 mount({ u: updateview, patch });
 patch(document.body, jsx(App, null));

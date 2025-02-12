@@ -1,7 +1,8 @@
+import { H } from 'vitest/dist/chunks/reporters.6vxQttCV';
 import { mount } from '../base/common'
 import { jsx, jsxf, patch, updateview } from '../jmx/jmx'
 import { JMXComp } from '../jmx/lib'
-import { m } from './model'
+import { m } from './model';
 import { Numero } from './number'
 //import { TextComp } from './map'
 
@@ -69,25 +70,32 @@ export class Map extends JMXComp<{ a: number; s: string }> {
 
 // maybe assign comp + inner always <<<<<<<<<<<<<<<<<<<<<<<<
 
+type F<Props> = (props: Props) => H
+
+let FCounter : F<{ start: number; name: string }> = (props) => {
+
+    function increment() {
+        this.props.start++
+        patch(this.element, this.h)
+    }
+
+    return <div class='map'>
+        {props.name}: {props.start}
+        <button onclick={increment}>increment</button>
+    </div>
+}
+
 export class Counter extends JMXComp<{ start: number; name: string }> {
 
     count = this.props.start
-    h: H
-
-    override update(uc) {
-        console.log("Map.update", this, uc)
-        return true
-    }
 
     increment() {
         this.count++
-        let ch = this.element.h
-        patch(this.element, this.h)
-        //this.element.h = ch
+        this.updateview()
     }
 
     view() {
-        return this.h = <div class='map'>
+        return <div class='map'>
             {this.props.name}: {this.count}
             <button onclick={this.increment}>increment</button>
         </div>
@@ -116,7 +124,14 @@ let App = (
         {/* <Numerotti n={m.i * 10} mounted={e => console.log("Numerotti mounted", e)} update={e => console.log("Numerotti update", e)} /> */}
 
         {/* <Map a={m.i} s='s' /> */}
-        <Counter name="count-sheeps" start={m.i} />
+        <Counter name={m.name} start={m.i} />
+
+        {/* <h2>header</h2>
+        <h3>liste</h3>
+        <div>anzahl = {m.i}</div>
+        <article>
+            <b>anzahl = {m.i}</b>
+        </article> */}
 
         {/* <article update={() => true}>add something here {m.i}</article> */}
 
@@ -126,7 +141,6 @@ let App = (
             mounted={(e) => { console.log("div mounted", e) }}
             update={(n, uc) => { console.log("updatey", n, uc) }}
         >hoho, am i mounted=</div> */}
-
 
         {/* <div>{m.i * 3}</div> */}
 
@@ -217,4 +231,3 @@ patch(document.body, <App />)
 
 //let ub = () => updateview(document.body)
 //let p = x => patch(document.body, x)
-

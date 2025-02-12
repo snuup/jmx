@@ -1,5 +1,3 @@
-import { JMXComp } from './lib'
-
 function rebind(o) {
     let proto = Object.getPrototypeOf(o)
     let names = Object.entries(Object.getOwnPropertyDescriptors(proto))
@@ -41,7 +39,7 @@ let setprops = (e: Element, newprops: Props = {}) => {
 */
 function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext): number {
 
-    console.log('%csync', "background:orange", p.tagName, i, h, 'html = ' + document.body.outerHTML)
+    // console.log('%csync', "background:orange", p.tagName, i, h, 'html = ' + document.body.outerHTML)
 
     h = evaluate(h)
     if (h === null || h === undefined) return i // skip this element. not that !!h would forbid to render the number 0 or the boolean value false
@@ -126,11 +124,10 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
 
                 // the inner element h function is overwritten by the component h.
                 cn.h = h
+                cn.hr = hr
 
                 if (ci) ci.element = cn
                 if (!isupdate) ci?.mounted()
-
-                if (j != i + 1) { console.error("can this happen?") }
 
                 return j
 
