@@ -3,3 +3,5 @@
 - updateview filters
 
 - readonly model in view
+
+- chalk - colored console
