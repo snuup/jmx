@@ -109,19 +109,24 @@ function sync(p, i, h, uc) {
     return i + 1;
 }
 function patch(e, h, uc = {}) {
+    if (!e)
+        return;
+    if (uc.replace)
+        e.replaceChildren();
     const p = e.parentElement;
     const i = [].indexOf.call(p.childNodes, e);
     requestAnimationFrame(() => sync(p, i, h, uc));
 }
-function updateview(selector = 'body', uc = {}) {
-    const ns = typeof selector == 'string' ? document.querySelectorAll(selector) : [selector];
-    let n;
-    for (n of ns) {
-        if (uc.replace)
-            n.replaceChildren();
-        if (!n.h)
-            throw ['jmx: no h exists on the node', n];
-        patch(n, n.h, uc);
+function updateview(...ucOrSelectors) {
+    {
+        let uc;
+        ucOrSelectors
+            .flatMap(x => (typeof x == 'string') ? [...document.querySelectorAll(x)] : (x instanceof Node) ? [x] : (uc = x, []))
+            .forEach(e => {
+            if (!e?.h)
+                throw 'jmx: no h exists on the node';
+            patch(e, e.h, uc);
+        });
     }
 }
 function jsx() { throw 'jmx plugin not configured'; }

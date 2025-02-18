@@ -1,4 +1,4 @@
-import { cc, jsx, patch, When } from "jmx"
+import { cc, JMXComp, jsx, patch, When } from "jmx"
 import { c } from './controller'
 import { m, type Todo } from './model'
 import 'todomvc-app-css/index.css'
@@ -55,7 +55,7 @@ let Item = ({ item: item }: { item: Todo }) => {
     </li>
 }
 
-let Main = () => <main class="main">
+let Main = <main class="main">
     <div class="toggle-all-container">
         <input id="toggle-all" class="toggle-all" type="checkbox" onchange={c.toggleAllItems} checked={m.allarecompleted} />
         <label for="toggle-all">Mark all as complete</label>

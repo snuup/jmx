@@ -1,8 +1,7 @@
-import { Props, IClassComponent, UpdateContext, H, FComponentT } from 'h'
+import { Props, IClassComponent, UpdateContext, H, FComponentT, Children } from 'h'
 import { updateview } from './jmx'
 
-//export const When :FComponentT<{ cond: any }> = ({ cond }, cn) => cond ? { cn:cn! } : void 0
-export const When = ({ cond }, cn) => cond ? { cn } : void 0;
+export const When = ({ cond }: { cond: boolean }, cn: Children) => cond ? { cn } : void 0;
 
 export abstract class JMXComp<P extends Props = {}> implements IClassComponent {
 
@@ -23,5 +22,5 @@ export abstract class JMXComp<P extends Props = {}> implements IClassComponent {
 }
 
 export function cc(...namesOrObjects: (string | any)[]): string {
-    return namesOrObjects.flatMap(n => (n.trim ? n : Object.keys(n).filter(k => n[k]))).join(' ') // n.trim detects strings
+    return namesOrObjects.flatMap(n => (n.trim ? n : Object.keys(n).filter(k => n[k]))).join(' ') // n.trim distinguishes strings from objects
 }

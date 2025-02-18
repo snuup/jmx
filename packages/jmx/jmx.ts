@@ -1,5 +1,5 @@
 /// <reference path="./h.ts" />
-import { rebind } from 'base'
+import { rebind } from './base'
 import { Expr, FComponent, H, HComp, HCompClass, HElement, HFragment, IClassComponent, Props, UpdateContext } from 'h'
 
 const enum NodeType { // vaporizes (but for that must be in this file, otherwise not)
@@ -129,23 +129,36 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
     return i + 1
 }
 
-export function patch(e: Node, h: Expr<H>, uc: UpdateContext = {}) {
+export function patch(e: Node | null, h: Expr<H>, uc: UpdateContext = {}) {
+    if (!e) return
+    if (uc.replace) (e as HTMLElement).replaceChildren()
     const p = e.parentElement as HTMLElement
     const i = [].indexOf.call<any, any, any>(p.childNodes, e)
     // always called deferred, because removing elements can trigger events and their handlers (like blur)
     requestAnimationFrame(() => sync(p, i, h, uc))
 }
 
-export function updateview(selector: string | Node = 'body', uc: UpdateContext = {}) {
-    const ns = typeof selector == 'string' ? document.querySelectorAll(selector) : [selector]
-    let n: Node | null
-    for (n of ns) {
-        if (uc.replace) (n as HTMLElement).replaceChildren()
-        if (!n.h) throw ['jmx: no h exists on the node', n]
-        patch(n, n.h, uc)
+
+// Overload signatures
+type Selector = string | Node | undefined | null
+type Selectors = Selector[]
+
+export function updateview(uc: UpdateContext, ...selectors: Selectors): void;
+export function updateview(...selectors: Selectors): void;
+
+// Implementation
+export function updateview(...ucOrSelectors: (UpdateContext | Selector)[]): void {
+    {
+        let uc: UpdateContext
+
+        ucOrSelectors
+        .flatMap(x => (typeof x == 'string') ? [...document.querySelectorAll(x)] : (x instanceof Node) ? [x] : (uc = x!, []))
+        .forEach(e => {
+            if (!e?.h) throw 'jmx: no h exists on the node';
+            patch(e, e.h, uc)
+        })
     }
 }
 
 export function jsx(): HElement { throw 'jmx plugin not configured' } // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it
 export function jsxf(): HElement { throw 'jmx plugin not configured' } // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it
-

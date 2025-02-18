@@ -12,19 +12,19 @@ export default {
     ],
     build: {
         target: 'esnext',
-        // minify: 0,
-        minify: 'terser',
-        terserOptions: {
-            compress: {
-                drop_console: true, // Remove console logs
-                passes: 2, // Increase the number of optimization passes
-            },
-            mangle: {
-                properties: {
-                    regex: /.*/, // Mangle properties starting with _
-                },
-            },
-        },
+        minify: 0,
+        // minify: 'terser',
+        // terserOptions: {
+        //     compress: {
+        //         drop_console: true, // Remove console logs
+        //         passes: 2, // Increase the number of optimization passes
+        //     },
+        //     mangle: {
+        //         properties: {
+        //             regex: /.*/, // Mangle properties starting with _
+        //         },
+        //     },
+        // },
         sourcemap: true,
         rollupOptions: {
             output: {

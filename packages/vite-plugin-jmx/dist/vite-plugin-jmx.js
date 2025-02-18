@@ -33937,8 +33937,33 @@ var generate = /*@__PURE__*/getDefaultExportFromCjs(libExports$1);
 
 var libExports = requireLib$4();
 
+var _isconstant = function isconstant(expression) {
+  if (libExports.isStringLiteral(expression) || libExports.isNumericLiteral(expression) || libExports.isBooleanLiteral(expression) || libExports.isNullLiteral(expression)) {
+    return true;
+  }
+  if (libExports.isObjectExpression(expression)) {
+    return expression.properties.every(function (prop) {
+      if (libExports.isObjectProperty(prop)) {
+        return libExports.isAssignmentPattern(prop.value) ? false : libExports.isExpression(prop.value) || libExports.isSpreadElement(prop.value) ? _isconstant(prop.value) : false;
+      }
+      if (libExports.isSpreadElement(prop)) {
+        return _isconstant(prop.argument);
+      }
+      return false;
+    });
+  }
+  if (libExports.isArrayExpression(expression)) {
+    return expression.elements.every(function (elem) {
+      return _isconstant(elem);
+    });
+  }
+  return false;
+};
 var lazify = function lazify(expression) {
   return libExports.arrowFunctionExpression([], expression);
+};
+var lazifyifnotconstant = function lazifyifnotconstant(e) {
+  return _isconstant(e) ? e : lazify(e);
 };
 function _transform(code, filename) {
   var ast = libExports$3.parse(code, {
@@ -33947,34 +33972,32 @@ function _transform(code, filename) {
   });
   traverse(ast, {
     CallExpression: function CallExpression(path) {
-      if (path.node.callee.name == "jsx") {
-        var args = path.node.arguments;
-        var a = args[0];
-        if (libExports.isIdentifier(a) && a.name == "jsxf") {
-          var cn = libExports.arrayExpression(args.slice(2));
-          path.replaceWith(libExports.objectExpression([libExports.objectProperty(libExports.identifier("cn"), lazify(cn))]));
-        } else {
-          var tagProperty;
-          var tag = args[0];
-          if (libExports.isStringLiteral(tag)) tag.value = tag.value.toUpperCase();
-          if (libExports.isIdentifier(tag) && tag.name == "jsx") ; else tagProperty = libExports.objectProperty(libExports.identifier("tag"), tag);
-          var propsProperty;
-          var props = args[1];
-          var nopros = libExports.isNullLiteral(props);
-          if (props && !nopros) {
-            props = lazify(props);
-            propsProperty = libExports.objectProperty(libExports.identifier("p"), props);
-          }
-          var childrenProperty;
-          var cna = args.slice(2);
-          if (cna.length) {
-            var _cn = libExports.arrayExpression(cna);
-            childrenProperty = libExports.objectProperty(libExports.identifier("cn"), lazify(_cn));
-          }
-          path.replaceWith(libExports.objectExpression([tagProperty, propsProperty, childrenProperty].filter(function (x) {
-            return !!x;
-          })));
+      if (path.node.callee.name != "jsx") return;
+      var args = path.node.arguments;
+      if (libExports.isIdentifier(args[0]) && args[0].name == "jsxf") {
+        var cn = libExports.arrayExpression(args.slice(2));
+        path.replaceWith(libExports.objectExpression([libExports.objectProperty(libExports.identifier("cn"), lazifyifnotconstant(cn))]));
+      } else {
+        var tagProperty;
+        var tag = args[0];
+        if (libExports.isStringLiteral(tag)) tag.value = tag.value.toUpperCase();
+        if (libExports.isIdentifier(tag) && tag.name == "jsx") ; else tagProperty = libExports.objectProperty(libExports.identifier("tag"), tag);
+        var propsProperty;
+        var props = args[1];
+        var nopros = libExports.isNullLiteral(props);
+        if (props && !nopros) {
+          props = lazifyifnotconstant(props);
+          propsProperty = libExports.objectProperty(libExports.identifier("p"), props);
         }
+        var childrenProperty;
+        var cna = args.slice(2);
+        if (cna.length) {
+          var _cn = libExports.arrayExpression(cna);
+          childrenProperty = libExports.objectProperty(libExports.identifier("cn"), lazifyifnotconstant(_cn));
+        }
+        path.replaceWith(libExports.objectExpression([tagProperty, propsProperty, childrenProperty].filter(function (x) {
+          return !!x;
+        })));
       }
     }
   });
@@ -33983,20 +34006,17 @@ function _transform(code, filename) {
   }, code);
 }
 var vitePluginJmx = (function (options) {
-  console.log("create vite jmx plugin ************** 2");
+  console.log("create vite jmx plugin", JSON.stringify(options));
   return {
     name: "vite-plugin-jmx",
     transform: function transform(raw, filename) {
       if (filename.endsWith(".tsx")) {
-        console.log("transform", filename);
-        (options === null || options === void 0 ? void 0 : options.debug) && fs.writeFileSync(filename + "orig.ts", "" + raw);
         var r = _transform(raw, filename);
-        (options === null || options === void 0 ? void 0 : options.debug) && fs.writeFileSync(filename + ".result.tsx", "" + r.code);
-        (options === null || options === void 0 ? void 0 : options.debug) && fs.writeFileSync(filename + ".result.tsx.map", "" + JSON.stringify(r.map));
-        return {
-          code: r.code,
-          map: r.map
-        };
+        if (options !== null && options !== void 0 && options.debug) {
+          fs.writeFileSync(filename + "orig.ts", "" + raw);
+          fs.writeFileSync(filename + ".result.tsx", "" + r.code);
+        }
+        return r;
       } else return null;
     }
   };

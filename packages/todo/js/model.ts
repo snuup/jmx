@@ -1,3 +1,5 @@
+import { mount } from "jmx"
+
 type Id = string
 
 export type Todo = {
@@ -9,9 +11,9 @@ export type Todo = {
 export const m = {
 
     items: [
-        // { id: "id1", text: "hasentext", completed: false },
-        // { id: "id2", text: "mausetext", completed: false },
-        // { id: "id3", text: "der osterhase kommt bald", completed: false }
+        { id: "id1", text: "hasentext", completed: false },
+        { id: "id2", text: "mausetext", completed: false },
+        { id: "id3", text: "der osterhase kommt bald", completed: false }
     ] as Todo[],
 
     // ui mode
@@ -36,4 +38,4 @@ export const m = {
     get anycompleted() { return this.items.some(t => t.completed) }
 }
 
-//mount({ m })
+mount({ m })

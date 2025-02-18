@@ -1,8 +1,8 @@
-import { Props, IClassComponent, UpdateContext, H } from 'h';
+import { Props, IClassComponent, UpdateContext, H, Children } from 'h';
 export declare const When: ({ cond }: {
-    cond: any;
-}, cn: any) => {
-    cn: any;
+    cond: boolean;
+}, cn: Children) => {
+    cn: Children;
 } | undefined;
 export declare abstract class JMXComp<P extends Props = {}> implements IClassComponent {
     props: P;

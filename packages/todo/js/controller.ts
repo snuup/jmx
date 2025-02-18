@@ -1,4 +1,4 @@
-import { updateview, rebind } from 'jmx'
+import { updateview, rebind, mount, loggedmethods } from 'jmx'
 import { m, Todo } from './model'
 
 type KeyboardEventInput = KeyboardEvent & { target: HTMLInputElement }
@@ -52,6 +52,7 @@ class Controller {
                 } else {
                     m.items = m.items.filter(x => x !== i)
                 }
+                debugger
                 this.endEdit()
                 break
 
@@ -63,7 +64,9 @@ class Controller {
 
     setCompleted(item: Todo, ev): void {
         item.completed = (ev.target as HTMLInputElement).checked
-        updateview(".todo-count, .footer")
+        let li = (ev.target as HTMLElement).closest("li")
+        updateview(".footer") // allow array of selectors
+        updateview(li!) // tbvd: accept null
     }
 
     toggleAllItems() { }
@@ -95,3 +98,5 @@ class Controller {
 
 export let c = new Controller()
 //export let c = loggedmethods(new Controller())
+
+mount({ updateview, c })
