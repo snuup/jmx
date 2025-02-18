@@ -1,6 +1,4 @@
-// components + state: maybe assign comp + inner always <<<<<<<<<<<<<<<<<<<<<<<<
-// to learn about that, class comps are better
+- colored console
+- examine old tastejs jmx
 
-state for function components
-
-remove kind field from jsx
+% simplify jsx -> arrays

@@ -1,0 +1,5 @@
+- jsx.d.ts - how to handle. how dies it react, vue?
+
+- updateview filters
+
+- readonly model in view
