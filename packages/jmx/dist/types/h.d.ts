@@ -45,7 +45,6 @@ export type UpdateContext = {
 declare global {
     interface Node {
         h?: HElement | HCompFun | HCompClass;
-        hr?: H;
     }
 }
 export {};

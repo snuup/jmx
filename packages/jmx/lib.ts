@@ -1,6 +1,8 @@
 import { Props, IClassComponent, UpdateContext, H, FComponentT, Children } from 'h'
 import { updateview } from './jmx'
 
+export type DeepReadonly<T> = { readonly [K in keyof T]: T[K] extends Record<string, unknown> ? DeepReadonly<T[K]> : T[K]; }
+
 export const When = ({ cond }: { cond: boolean }, cn: Children) => cond ? { cn } : void 0;
 
 export abstract class JMXComp<P extends Props = {}> implements IClassComponent {
@@ -17,7 +19,7 @@ export abstract class JMXComp<P extends Props = {}> implements IClassComponent {
     update(uc: UpdateContext): boolean | void { }
     abstract view(): H
 
-    // utility: update view() of this component
+    // utility: updates the component's view
     updateview() { updateview(this.element) }
 }
 

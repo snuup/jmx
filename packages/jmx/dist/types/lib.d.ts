@@ -1,4 +1,7 @@
 import { Props, IClassComponent, UpdateContext, H, Children } from 'h';
+export type DeepReadonly<T> = {
+    readonly [K in keyof T]: T[K] extends Record<string, unknown> ? DeepReadonly<T[K]> : T[K];
+};
 export declare const When: ({ cond }: {
     cond: boolean;
 }, cn: Children) => {

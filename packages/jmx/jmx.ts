@@ -1,6 +1,5 @@
-/// <reference path="./h.ts" />
 import { rebind } from './base'
-import { Expr, FComponent, H, HComp, HCompClass, HElement, HFragment, IClassComponent, Props, UpdateContext } from 'h'
+import { Expr, FComponent, H, HComp, HCompClass, HElement, HFragment, IClassComponent, Props, UpdateContext } from './h'
 
 const enum NodeType { // vaporizes (but for that must be in this file, otherwise not)
     TextNode = 3,

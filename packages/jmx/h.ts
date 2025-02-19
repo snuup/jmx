@@ -1,16 +1,11 @@
+// jmx internal types
 // the following types describe the js expression we get from tsx after conversion be our jmx plugin
+// they can be useful for users as well, components might return them.
 
-
-type Action<T> = (arg: T) => void
 type Func<T> = () => T
 export type Expr<T> = T | Func<T>
 
-export type Props =
-    Record<string, any>
-// & {
-//     mounted?: Action<Node>,
-//     update?: Action<Node, UpdateContext>
-// }
+export type Props = Record<string, any>
 
 export type FComponent = (props: Props | undefined, children?: ChildrenH) => HElement // show an example for usage of children
 
@@ -38,14 +33,11 @@ type HText =
 
 export type HFragment =
     {
-        //kind: "<>"
-        cn: Children,
-        //        [string]: never // no other keys - tbd
+        cn: Children
     }
 
 export type HElement =
     {
-        //kind: "element"
         tag: string,
         p?: Expr<Props>
         cn: Children
@@ -54,7 +46,6 @@ export type HElement =
 
 type HCompFun =
     {
-        //kind: "component"
         tag: FComponent,
         p?: Expr<Props>
         cn?: Children
@@ -62,7 +53,6 @@ type HCompFun =
 
 export type HCompClass =
     {
-        //kind: "component"
         tag: CComponent,
         p?: Expr<Props>
         cn: Children
@@ -81,17 +71,10 @@ export type H = // a hyperscript atom that describes a ...
 export type UpdateContext = {
     patchElementOnly?: boolean
     replace?: boolean
-    //[key: string]: any
 }
-
-// interface Element {
-//     events?: any // holds event listeners, so we can remove them
-//     model: any
-// }
 
 declare global {
     interface Node {
         h?: HElement | HCompFun | HCompClass
-        hr?: H
     }
 }
