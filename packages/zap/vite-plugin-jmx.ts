@@ -1,12 +1,11 @@
-
 import { parse } from "@babel/parser"
 import traverse from "@babel/traverse"
 import generate from "@babel/generator"
 import * as t from "@babel/types"
 import * as fs from "fs"
 
-console.log("vite-plugin-jmx traverse", traverse);
-console.log("vite-plugin-jmx traverse.default", traverse.default);
+//console.log("vite-plugin-jmx traverse", traverse);
+//console.log("vite-plugin-jmx traverse.default", traverse.default);
 
 let isconstant = (expression: t.Expression | t.SpreadElement): boolean => {
     if (t.isStringLiteral(expression) || t.isNumericLiteral(expression) || t.isBooleanLiteral(expression) || t.isNullLiteral(expression)) {
@@ -39,7 +38,7 @@ function transform(code: string, filename: string) {
 
     const ast = parse(code, { sourceType: "module", sourceFilename: filename })
 
-    console.log("traverse 2", traverse)
+//    console.log("traverse 2", traverse)
 
 
     traverse(ast, {
