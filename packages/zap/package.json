@@ -1,0 +1,20 @@
+{
+	"name": "zap",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"@babel/generator": "^7.26.9",
+		"@babel/parser": "^7.26.9",
+		"@babel/traverse": "^7.26.9",
+		"@types/node": "^22.13.4",
+		"jmx": "file:../jmx",
+		"jmx-plugin": "file:../vite-plugin-jmx"
+	},
+	"type": "module"
+}

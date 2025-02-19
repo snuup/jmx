@@ -33981,7 +33981,7 @@ function _transform(code, filename) {
         var tagProperty;
         var tag = args[0];
         if (libExports.isStringLiteral(tag)) tag.value = tag.value.toUpperCase();
-        if (libExports.isIdentifier(tag) && tag.name == "jsx") ; else tagProperty = libExports.objectProperty(libExports.identifier("tag"), tag);
+        if (!(libExports.isIdentifier(tag) && tag.name == "jsx")) tagProperty = libExports.objectProperty(libExports.identifier("tag"), tag);
         var propsProperty;
         var props = args[1];
         var nopros = libExports.isNullLiteral(props);
@@ -34013,7 +34013,7 @@ var vitePluginJmx = (function (options) {
       if (filename.endsWith(".tsx")) {
         var r = _transform(raw, filename);
         if (options !== null && options !== void 0 && options.debug) {
-          fs.writeFileSync(filename + "orig.ts", "" + raw);
+          fs.writeFileSync(filename + ".orig.ts", "" + raw);
           fs.writeFileSync(filename + ".result.tsx", "" + r.code);
         }
         return r;
