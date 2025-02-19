@@ -593,21 +593,6 @@ function requireMs() {
   var d = h * 24;
   var w = d * 7;
   var y = d * 365.25;
-
-  /**
-   * Parse or format the given `val`.
-   *
-   * Options:
-   *
-   *  - `long` verbose formatting [false]
-   *
-   * @param {String|Number} val
-   * @param {Object} [options]
-   * @throws {Error} throw an error if val is not a non-empty string or a number
-   * @return {String|Number}
-   * @api public
-   */
-
   ms = function ms(val, options) {
     options = options || {};
     var type = _typeof(val);
@@ -618,15 +603,6 @@ function requireMs() {
     }
     throw new Error('val is not a non-empty string or a valid number. val=' + JSON.stringify(val));
   };
-
-  /**
-   * Parse the given `str` and return milliseconds.
-   *
-   * @param {String} str
-   * @return {Number}
-   * @api private
-   */
-
   function parse(str) {
     str = String(str);
     if (str.length > 100) {
@@ -681,15 +657,6 @@ function requireMs() {
         return undefined;
     }
   }
-
-  /**
-   * Short format for `ms`.
-   *
-   * @param {Number} ms
-   * @return {String}
-   * @api private
-   */
-
   function fmtShort(ms) {
     var msAbs = Math.abs(ms);
     if (msAbs >= d) {
@@ -706,15 +673,6 @@ function requireMs() {
     }
     return ms + 'ms';
   }
-
-  /**
-   * Long format for `ms`.
-   *
-   * @param {Number} ms
-   * @return {String}
-   * @api private
-   */
-
   function fmtLong(ms) {
     var msAbs = Math.abs(ms);
     if (msAbs >= d) {
@@ -731,11 +689,6 @@ function requireMs() {
     }
     return ms + ' ms';
   }
-
-  /**
-   * Pluralization helper.
-   */
-
   function plural(ms, msAbs, n, name) {
     var isPlural = msAbs >= n * 1.5;
     return Math.round(ms / n) + ' ' + name + (isPlural ? 's' : '');
@@ -748,11 +701,6 @@ var hasRequiredCommon;
 function requireCommon() {
   if (hasRequiredCommon) return common;
   hasRequiredCommon = 1;
-  /**
-   * This is the common logic for both the Node.js and web browser
-   * implementations of `debug()`.
-   */
-
   function setup(env) {
     createDebug.debug = createDebug;
     createDebug["default"] = createDebug;
@@ -765,44 +713,18 @@ function requireCommon() {
     Object.keys(env).forEach(function (key) {
       createDebug[key] = env[key];
     });
-
-    /**
-    * The currently active debug mode names, and names to skip.
-    */
-
     createDebug.names = [];
     createDebug.skips = [];
-
-    /**
-    * Map of special "%n" handling functions, for the debug "format" argument.
-    *
-    * Valid key names are a single, lower or upper-case letter, i.e. "n" and "N".
-    */
     createDebug.formatters = {};
-
-    /**
-    * Selects a color for a debug namespace
-    * @param {String} namespace The namespace string for the debug instance to be colored
-    * @return {Number|String} An ANSI color code for the given namespace
-    * @api private
-    */
     function selectColor(namespace) {
       var hash = 0;
       for (var i = 0; i < namespace.length; i++) {
         hash = (hash << 5) - hash + namespace.charCodeAt(i);
-        hash |= 0; // Convert to 32bit integer
+        hash |= 0;
       }
       return createDebug.colors[Math.abs(hash) % createDebug.colors.length];
     }
     createDebug.selectColor = selectColor;
-
-    /**
-    * Create a debugger with the given `namespace`.
-    *
-    * @param {String} namespace
-    * @return {Function}
-    * @api public
-    */
     function createDebug(namespace) {
       var prevTime;
       var enableOverride = null;
@@ -812,13 +734,10 @@ function requireCommon() {
         for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
           args[_key] = arguments[_key];
         }
-        // Disabled?
         if (!debug.enabled) {
           return;
         }
         var self = debug;
-
-        // Set `diff` timestamp
         var curr = Number(new Date());
         var ms = curr - (prevTime || curr);
         self.diff = ms;
@@ -827,14 +746,10 @@ function requireCommon() {
         prevTime = curr;
         args[0] = createDebug.coerce(args[0]);
         if (typeof args[0] !== 'string') {
-          // Anything else let's inspect with %O
           args.unshift('%O');
         }
-
-        // Apply any `formatters` transformations
         var index = 0;
         args[0] = args[0].replace(/%([a-zA-Z%])/g, function (match, format) {
-          // If we encounter an escaped % then don't increase the array index
           if (match === '%%') {
             return '%';
           }
@@ -843,15 +758,11 @@ function requireCommon() {
           if (typeof formatter === 'function') {
             var val = args[index];
             match = formatter.call(self, val);
-
-            // Now we need to remove `args[index]` since it's inlined in the `format`
             args.splice(index, 1);
             index--;
           }
           return match;
         });
-
-        // Apply env-specific formatting (colors, etc.)
         createDebug.formatArgs.call(self, args);
         var logFn = self.log || createDebug.log;
         logFn.apply(self, args);
@@ -860,8 +771,7 @@ function requireCommon() {
       debug.useColors = createDebug.useColors();
       debug.color = createDebug.selectColor(namespace);
       debug.extend = extend;
-      debug.destroy = createDebug.destroy; // XXX Temporary. Will be removed in the next major release.
-
+      debug.destroy = createDebug.destroy;
       Object.defineProperty(debug, 'enabled', {
         enumerable: true,
         configurable: false,
@@ -879,8 +789,6 @@ function requireCommon() {
           enableOverride = v;
         }
       });
-
-      // Env-specific initialization logic for debug instances
       if (typeof createDebug.init === 'function') {
         createDebug.init(debug);
       }
@@ -891,14 +799,6 @@ function requireCommon() {
       newDebug.log = this.log;
       return newDebug;
     }
-
-    /**
-    * Enables a debug mode by namespaces. This can include modes
-    * separated by a colon and wildcards.
-    *
-    * @param {String} namespaces
-    * @api public
-    */
     function enable(namespaces) {
       createDebug.save(namespaces);
       createDebug.namespaces = namespaces;
@@ -922,15 +822,6 @@ function requireCommon() {
         _iterator.f();
       }
     }
-
-    /**
-     * Checks if the given string matches a namespace template, honoring
-     * asterisks as wildcards.
-     *
-     * @param {String} search
-     * @param {String} template
-     * @return {Boolean}
-     */
     function matchesTemplate(search, template) {
       var searchIndex = 0;
       var templateIndex = 0;
@@ -938,39 +829,27 @@ function requireCommon() {
       var matchIndex = 0;
       while (searchIndex < search.length) {
         if (templateIndex < template.length && (template[templateIndex] === search[searchIndex] || template[templateIndex] === '*')) {
-          // Match character or proceed with wildcard
           if (template[templateIndex] === '*') {
             starIndex = templateIndex;
             matchIndex = searchIndex;
-            templateIndex++; // Skip the '*'
+            templateIndex++;
           } else {
             searchIndex++;
             templateIndex++;
           }
         } else if (starIndex !== -1) {
-          // eslint-disable-line no-negated-condition
-          // Backtrack to the last '*' and try to match more characters
           templateIndex = starIndex + 1;
           matchIndex++;
           searchIndex = matchIndex;
         } else {
-          return false; // No match
+          return false;
         }
       }
-
-      // Handle trailing '*' in template
       while (templateIndex < template.length && template[templateIndex] === '*') {
         templateIndex++;
       }
       return templateIndex === template.length;
     }
-
-    /**
-    * Disable debug output.
-    *
-    * @return {String} namespaces
-    * @api public
-    */
     function disable() {
       var namespaces = [].concat(_toConsumableArray(createDebug.names), _toConsumableArray(createDebug.skips.map(function (namespace) {
         return '-' + namespace;
@@ -978,14 +857,6 @@ function requireCommon() {
       createDebug.enable('');
       return namespaces;
     }
-
-    /**
-    * Returns true if the given mode name is enabled, false otherwise.
-    *
-    * @param {String} name
-    * @return {Boolean}
-    * @api public
-    */
     function enabled(name) {
       var _iterator2 = _createForOfIteratorHelper(createDebug.skips),
         _step2;
@@ -1017,25 +888,12 @@ function requireCommon() {
       }
       return false;
     }
-
-    /**
-    * Coerce `val`.
-    *
-    * @param {Mixed} val
-    * @return {Mixed}
-    * @api private
-    */
     function coerce(val) {
       if (val instanceof Error) {
         return val.stack || val.message;
       }
       return val;
     }
-
-    /**
-    * XXX DO NOT USE. This is a temporary stub function.
-    * XXX It WILL be removed in the next major release.
-    */
     function destroy() {
       console.warn('Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.');
     }
@@ -1046,16 +904,11 @@ function requireCommon() {
   return common;
 }
 
-/* eslint-env browser */
 var hasRequiredBrowser;
 function requireBrowser() {
   if (hasRequiredBrowser) return browser$1.exports;
   hasRequiredBrowser = 1;
   (function (module, exports) {
-    /**
-     * This is the web browser implementation of `debug()`.
-     */
-
     exports.formatArgs = formatArgs;
     exports.save = save;
     exports.load = load;
@@ -1070,55 +923,17 @@ function requireBrowser() {
         }
       };
     }();
-
-    /**
-     * Colors.
-     */
-
     exports.colors = ['#0000CC', '#0000FF', '#0033CC', '#0033FF', '#0066CC', '#0066FF', '#0099CC', '#0099FF', '#00CC00', '#00CC33', '#00CC66', '#00CC99', '#00CCCC', '#00CCFF', '#3300CC', '#3300FF', '#3333CC', '#3333FF', '#3366CC', '#3366FF', '#3399CC', '#3399FF', '#33CC00', '#33CC33', '#33CC66', '#33CC99', '#33CCCC', '#33CCFF', '#6600CC', '#6600FF', '#6633CC', '#6633FF', '#66CC00', '#66CC33', '#9900CC', '#9900FF', '#9933CC', '#9933FF', '#99CC00', '#99CC33', '#CC0000', '#CC0033', '#CC0066', '#CC0099', '#CC00CC', '#CC00FF', '#CC3300', '#CC3333', '#CC3366', '#CC3399', '#CC33CC', '#CC33FF', '#CC6600', '#CC6633', '#CC9900', '#CC9933', '#CCCC00', '#CCCC33', '#FF0000', '#FF0033', '#FF0066', '#FF0099', '#FF00CC', '#FF00FF', '#FF3300', '#FF3333', '#FF3366', '#FF3399', '#FF33CC', '#FF33FF', '#FF6600', '#FF6633', '#FF9900', '#FF9933', '#FFCC00', '#FFCC33'];
-
-    /**
-     * Currently only WebKit-based Web Inspectors, Firefox >= v31,
-     * and the Firebug extension (any Firefox version) are known
-     * to support "%c" CSS customizations.
-     *
-     * TODO: add a `localStorage` variable to explicitly enable/disable colors
-     */
-
-    // eslint-disable-next-line complexity
     function useColors() {
-      // NB: In an Electron preload script, document will be defined but not fully
-      // initialized. Since we know we're in Chrome, we'll just detect this case
-      // explicitly
       if (typeof window !== 'undefined' && window.process && (window.process.type === 'renderer' || window.process.__nwjs)) {
         return true;
       }
-
-      // Internet Explorer and Edge do not support colors.
       if (typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)) {
         return false;
       }
       var m;
-
-      // Is webkit? http://stackoverflow.com/a/16459606/376773
-      // document is undefined in react-native: https://github.com/facebook/react-native/pull/1632
-      // eslint-disable-next-line no-return-assign
-      return typeof document !== 'undefined' && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance ||
-      // Is firebug? http://stackoverflow.com/a/398120/376773
-      typeof window !== 'undefined' && window.console && (window.console.firebug || window.console.exception && window.console.table) ||
-      // Is firefox >= v31?
-      // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-      typeof navigator !== 'undefined' && navigator.userAgent && (m = navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/)) && parseInt(m[1], 10) >= 31 ||
-      // Double check webkit in userAgent just in case we are in a worker
-      typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/);
+      return typeof document !== 'undefined' && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance || typeof window !== 'undefined' && window.console && (window.console.firebug || window.console.exception && window.console.table) || typeof navigator !== 'undefined' && navigator.userAgent && (m = navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/)) && parseInt(m[1], 10) >= 31 || typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/);
     }
-
-    /**
-     * Colorize log arguments if enabled.
-     *
-     * @api public
-     */
-
     function formatArgs(args) {
       args[0] = (this.useColors ? '%c' : '') + this.namespace + (this.useColors ? ' %c' : ' ') + args[0] + (this.useColors ? '%c ' : ' ') + '+' + module.exports.humanize(this.diff);
       if (!this.useColors) {
@@ -1126,10 +941,6 @@ function requireBrowser() {
       }
       var c = 'color: ' + this.color;
       args.splice(1, 0, c, 'color: inherit');
-
-      // The final "%c" is somewhat tricky, because there could be other
-      // arguments passed either before or after the %c, so we need to
-      // figure out the correct index to insert the CSS into
       var index = 0;
       var lastC = 0;
       args[0].replace(/%[a-zA-Z%]/g, function (match) {
@@ -1138,30 +949,12 @@ function requireBrowser() {
         }
         index++;
         if (match === '%c') {
-          // We only are interested in the *last* %c
-          // (the user may have provided their own)
           lastC = index;
         }
       });
       args.splice(lastC, 0, c);
     }
-
-    /**
-     * Invokes `console.debug()` when available.
-     * No-op when `console.debug` is not a "function".
-     * If `console.debug` is not available, falls back
-     * to `console.log`.
-     *
-     * @api public
-     */
     exports.log = console.debug || console.log || function () {};
-
-    /**
-     * Save `namespaces`.
-     *
-     * @param {String} namespaces
-     * @api private
-     */
     function save(namespaces) {
       try {
         if (namespaces) {
@@ -1169,62 +962,25 @@ function requireBrowser() {
         } else {
           exports.storage.removeItem('debug');
         }
-      } catch (error) {
-        // Swallow
-        // XXX (@Qix-) should we be logging these?
-      }
+      } catch (error) {}
     }
-
-    /**
-     * Load `namespaces`.
-     *
-     * @return {String} returns the previously persisted debug modes
-     * @api private
-     */
     function load() {
       var r;
       try {
         r = exports.storage.getItem('debug');
-      } catch (error) {
-        // Swallow
-        // XXX (@Qix-) should we be logging these?
-      }
-
-      // If debug isn't set in LS, and we're in Electron, try to load $DEBUG
+      } catch (error) {}
       if (!r && typeof process !== 'undefined' && 'env' in process) {
         r = process.env.DEBUG;
       }
       return r;
     }
-
-    /**
-     * Localstorage attempts to return the localstorage.
-     *
-     * This is necessary because safari throws
-     * when a user disables cookies/localstorage
-     * and you attempt to access it.
-     *
-     * @return {LocalStorage}
-     * @api private
-     */
-
     function localstorage() {
       try {
-        // TVMLKit (Apple TV JS Runtime) does not have a window object, just localStorage in the global context
-        // The Browser also has localStorage in the global context.
         return localStorage;
-      } catch (error) {
-        // Swallow
-        // XXX (@Qix-) should we be logging these?
-      }
+      } catch (error) {}
     }
     module.exports = requireCommon()(exports);
     var formatters = module.exports.formatters;
-
-    /**
-     * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
-     */
-
     formatters.j = function (v) {
       try {
         return JSON.stringify(v);
@@ -1280,9 +1036,6 @@ function requireSupportsColor() {
   return supportsColor;
 }
 
-/**
- * Module dependencies.
- */
 var hasRequiredNode$1;
 function requireNode$1() {
   if (hasRequiredNode$1) return node$2.exports;
@@ -1290,11 +1043,6 @@ function requireNode$1() {
   (function (module, exports) {
     var tty = require$$0$1;
     var util = require$$1;
-
-    /**
-     * This is the Node.js implementation of `debug()`.
-     */
-
     exports.init = init;
     exports.log = log;
     exports.formatArgs = formatArgs;
@@ -1302,38 +1050,19 @@ function requireNode$1() {
     exports.load = load;
     exports.useColors = useColors;
     exports.destroy = util.deprecate(function () {}, 'Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.');
-
-    /**
-     * Colors.
-     */
-
     exports.colors = [6, 2, 3, 4, 5, 1];
     try {
-      // Optional dependency (as in, doesn't need to be installed, NOT like optionalDependencies in package.json)
-      // eslint-disable-next-line import/no-extraneous-dependencies
       var supportsColor = requireSupportsColor();
       if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
         exports.colors = [20, 21, 26, 27, 32, 33, 38, 39, 40, 41, 42, 43, 44, 45, 56, 57, 62, 63, 68, 69, 74, 75, 76, 77, 78, 79, 80, 81, 92, 93, 98, 99, 112, 113, 128, 129, 134, 135, 148, 149, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 178, 179, 184, 185, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 214, 215, 220, 221];
       }
-    } catch (error) {
-      // Swallow - we only care if `supports-color` is available; it doesn't have to be.
-    }
-
-    /**
-     * Build up the default `inspectOpts` object from the environment variables.
-     *
-     *   $ DEBUG_COLORS=no DEBUG_DEPTH=10 DEBUG_SHOW_HIDDEN=enabled node script.js
-     */
-
+    } catch (error) {}
     exports.inspectOpts = Object.keys(process.env).filter(function (key) {
       return /^debug_/i.test(key);
     }).reduce(function (obj, key) {
-      // Camel-case
       var prop = key.substring(6).toLowerCase().replace(/_([a-z])/g, function (_, k) {
         return k.toUpperCase();
       });
-
-      // Coerce string value into JS value
       var val = process.env[key];
       if (/^(yes|on|true|enabled)$/i.test(val)) {
         val = true;
@@ -1347,21 +1076,9 @@ function requireNode$1() {
       obj[prop] = val;
       return obj;
     }, {});
-
-    /**
-     * Is stdout a TTY? Colored output is enabled when `true`.
-     */
-
     function useColors() {
       return 'colors' in exports.inspectOpts ? Boolean(exports.inspectOpts.colors) : tty.isatty(process.stderr.fd);
     }
-
-    /**
-     * Adds ANSI color escape codes if enabled.
-     *
-     * @api public
-     */
-
     function formatArgs(args) {
       var name = this.namespace,
         useColors = this.useColors;
@@ -1381,52 +1098,22 @@ function requireNode$1() {
       }
       return new Date().toISOString() + ' ';
     }
-
-    /**
-     * Invokes `util.formatWithOptions()` with the specified arguments and writes to stderr.
-     */
-
     function log() {
       for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
         args[_key] = arguments[_key];
       }
       return process.stderr.write(util.formatWithOptions.apply(util, [exports.inspectOpts].concat(args)) + '\n');
     }
-
-    /**
-     * Save `namespaces`.
-     *
-     * @param {String} namespaces
-     * @api private
-     */
     function save(namespaces) {
       if (namespaces) {
         process.env.DEBUG = namespaces;
       } else {
-        // If you set a process.env field to null or undefined, it gets cast to the
-        // string 'null' or 'undefined'. Just delete instead.
         delete process.env.DEBUG;
       }
     }
-
-    /**
-     * Load `namespaces`.
-     *
-     * @return {String} returns the previously persisted debug modes
-     * @api private
-     */
-
     function load() {
       return process.env.DEBUG;
     }
-
-    /**
-     * Init logic for `debug` instances.
-     *
-     * Create a new `inspectOpts` object in case `useColors` is set
-     * differently for a particular `debug` instance.
-     */
-
     function init(debug) {
       debug.inspectOpts = {};
       var keys = Object.keys(exports.inspectOpts);
@@ -1436,22 +1123,12 @@ function requireNode$1() {
     }
     module.exports = requireCommon()(exports);
     var formatters = module.exports.formatters;
-
-    /**
-     * Map %o to `util.inspect()`, all on a single line.
-     */
-
     formatters.o = function (v) {
       this.inspectOpts.colors = this.useColors;
       return util.inspect(v, this.inspectOpts).split('\n').map(function (str) {
         return str.trim();
       }).join(' ');
     };
-
-    /**
-     * Map %O to `util.inspect()`, allowing multiple lines if needed.
-     */
-
     formatters.O = function (v) {
       this.inspectOpts.colors = this.useColors;
       return util.inspect(v, this.inspectOpts);
@@ -1460,10 +1137,6 @@ function requireNode$1() {
   return node$2.exports;
 }
 
-/**
- * Detect Electron renderer / nwjs process, which is node, but we should
- * treat as a browser.
- */
 var hasRequiredSrc;
 function requireSrc() {
   if (hasRequiredSrc) return src.exports;
@@ -20858,14 +20531,6 @@ function requireSetArray_umd() {
       factory(exports) ;
     })(setArray_umd, function (exports) {
 
-      /**
-       * SetArray acts like a `Set` (allowing only one occurrence of a string `key`), but provides the
-       * index of the `key` in the backing array.
-       *
-       * This is designed to allow synchronizing a second array with the contents of the backing array,
-       * like how in a sourcemap `sourcesContent[i]` is the source content associated with `source[i]`,
-       * and there are never duplicates.
-       */
       var SetArray = /*#__PURE__*/_createClass(function SetArray() {
         _classCallCheck(this, SetArray);
         this._indexes = {
@@ -20873,25 +20538,13 @@ function requireSetArray_umd() {
         };
         this.array = [];
       });
-      /**
-       * Typescript doesn't allow friend access to private fields, so this just casts the set into a type
-       * with public access modifiers.
-       */
       function cast(set) {
         return set;
       }
-      /**
-       * Gets the index associated with `key` in the backing array, if it is already present.
-       */
       function get(setarr, key) {
         return cast(setarr)._indexes[key];
       }
-      /**
-       * Puts `key` into the backing array, if it is not already present. Returns
-       * the index of the `key` in the backing array.
-       */
       function put(setarr, key) {
-        // The key may or may not be present. If it is present, it's a number.
         var index = get(setarr, key);
         if (index !== undefined) return index;
         var _cast = cast(setarr),
@@ -20900,9 +20553,6 @@ function requireSetArray_umd() {
         var length = array.push(key);
         return indexes[key] = length - 1;
       }
-      /**
-       * Pops the last added item out of the SetArray.
-       */
       function pop(setarr) {
         var _cast2 = cast(setarr),
           array = _cast2.array,
@@ -20911,9 +20561,6 @@ function requireSetArray_umd() {
         var last = array.pop();
         indexes[last] = undefined;
       }
-      /**
-       * Removes the key, if it exists in the set.
-       */
       function remove(setarr, key) {
         var index = get(setarr, key);
         if (index === undefined) return;
@@ -20956,8 +20603,8 @@ function requireSourcemapCodec_umd() {
       var comma = ','.charCodeAt(0);
       var semicolon = ';'.charCodeAt(0);
       var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-      var intToChar = new Uint8Array(64); // 64 possible chars.
-      var charToInt = new Uint8Array(128); // z is 122 in ASCII
+      var intToChar = new Uint8Array(64);
+      var charToInt = new Uint8Array(128);
       for (var i = 0; i < chars.length; i++) {
         var c = chars.charCodeAt(i);
         intToChar[i] = c;
@@ -20996,8 +20643,7 @@ function requireSourcemapCodec_umd() {
         return reader.peek() !== comma;
       }
       var bufLength = 1024 * 16;
-      // Provide a fallback for older environments.
-      var td = typeof TextDecoder !== 'undefined' ? /* #__PURE__ */new TextDecoder() : typeof Buffer !== 'undefined' ? {
+      var td = typeof TextDecoder !== 'undefined' ? new TextDecoder() : typeof Buffer !== 'undefined' ? {
         decode: function decode(buf) {
           var out = Buffer.from(buf.buffer, buf.byteOffset, buf.byteLength);
           return out.toString();
@@ -21427,28 +21073,8 @@ function requireResolveUri_umd() {
       module.exports = factory() ;
     })(resolveUri_umd, function () {
 
-      // Matches the scheme of a URL, eg "http://"
       var schemeRegex = /^[\w+.-]+:\/\//;
-      /**
-       * Matches the parts of a URL:
-       * 1. Scheme, including ":", guaranteed.
-       * 2. User/password, including "@", optional.
-       * 3. Host, guaranteed.
-       * 4. Port, including ":", optional.
-       * 5. Path, including "/", optional.
-       * 6. Query, including "?", optional.
-       * 7. Hash, including "#", optional.
-       */
       var urlRegex = /^([\w+.-]+:)\/\/([^@/#?]*@)?([^:/#?]*)(:\d+)?(\/[^#?]*)?(\?[^#]*)?(#.*)?/;
-      /**
-       * File URLs are weird. They dont' need the regular `//` in the scheme, they may or may not start
-       * with a leading `/`, they can have a domain (but only if they don't start with a Windows drive).
-       *
-       * 1. Host, optional.
-       * 2. Path, which may include "/", guaranteed.
-       * 3. Query, including "?", optional.
-       * 4. Hash, including "#", optional.
-       */
       var fileRegex = /^file:(?:\/\/((?![a-z]:)[^/#?]*)?)?(\/?[^#?]*)(\?[^#]*)?(#.*)?/i;
       function isAbsoluteUrl(input) {
         return schemeRegex.test(input);
@@ -21483,21 +21109,21 @@ function requireResolveUri_umd() {
           path: path,
           query: query,
           hash: hash,
-          type: 7 /* Absolute */
+          type: 7
         };
       }
       function parseUrl(input) {
         if (isSchemeRelativeUrl(input)) {
           var _url = parseAbsoluteUrl('http:' + input);
           _url.scheme = '';
-          _url.type = 6 /* SchemeRelative */;
+          _url.type = 6;
           return _url;
         }
         if (isAbsolutePath(input)) {
           var _url2 = parseAbsoluteUrl('http://foo.com' + input);
           _url2.scheme = '';
           _url2.host = '';
-          _url2.type = 5 /* AbsolutePath */;
+          _url2.type = 5;
           return _url2;
         }
         if (isFileUrl(input)) return parseFileUrl(input);
@@ -21505,71 +21131,46 @@ function requireResolveUri_umd() {
         var url = parseAbsoluteUrl('http://foo.com/' + input);
         url.scheme = '';
         url.host = '';
-        url.type = input ? input.startsWith('?') ? 3 /* Query */ : input.startsWith('#') ? 2 /* Hash */ : 4 /* RelativePath */ : 1 /* Empty */;
+        url.type = input ? input.startsWith('?') ? 3 : input.startsWith('#') ? 2 : 4 : 1;
         return url;
       }
       function stripPathFilename(path) {
-        // If a path ends with a parent directory "..", then it's a relative path with excess parent
-        // paths. It's not a file, so we can't strip it.
         if (path.endsWith('/..')) return path;
         var index = path.lastIndexOf('/');
         return path.slice(0, index + 1);
       }
       function mergePaths(url, base) {
         normalizePath(base, base.type);
-        // If the path is just a "/", then it was an empty path to begin with (remember, we're a relative
-        // path).
         if (url.path === '/') {
           url.path = base.path;
         } else {
-          // Resolution happens relative to the base path's directory, not the file.
           url.path = stripPathFilename(base.path) + url.path;
         }
       }
-      /**
-       * The path can have empty directories "//", unneeded parents "foo/..", or current directory
-       * "foo/.". We need to normalize to a standard representation.
-       */
       function normalizePath(url, type) {
-        var rel = type <= 4 /* RelativePath */;
+        var rel = type <= 4;
         var pieces = url.path.split('/');
-        // We need to preserve the first piece always, so that we output a leading slash. The item at
-        // pieces[0] is an empty string.
         var pointer = 1;
-        // Positive is the number of real directories we've output, used for popping a parent directory.
-        // Eg, "foo/bar/.." will have a positive 2, and we can decrement to be left with just "foo".
         var positive = 0;
-        // We need to keep a trailing slash if we encounter an empty directory (eg, splitting "foo/" will
-        // generate `["foo", ""]` pieces). And, if we pop a parent directory. But once we encounter a
-        // real directory, we won't need to append, unless the other conditions happen again.
         var addTrailingSlash = false;
         for (var i = 1; i < pieces.length; i++) {
           var piece = pieces[i];
-          // An empty directory, could be a trailing slash, or just a double "//" in the path.
           if (!piece) {
             addTrailingSlash = true;
             continue;
           }
-          // If we encounter a real directory, then we don't need to append anymore.
           addTrailingSlash = false;
-          // A current directory, which we can always drop.
           if (piece === '.') continue;
-          // A parent directory, we need to see if there are any real directories we can pop. Else, we
-          // have an excess of parents, and we'll need to keep the "..".
           if (piece === '..') {
             if (positive) {
               addTrailingSlash = true;
               positive--;
               pointer--;
             } else if (rel) {
-              // If we're in a relativePath, then we need to keep the excess parents. Else, in an absolute
-              // URL, protocol relative URL, or an absolute path, we don't need to keep excess.
               pieces[pointer++] = piece;
             }
             continue;
           }
-          // We've encountered a real directory. Move it to the next insertion pointer, which accounts for
-          // any popped or dropped directories.
           pieces[pointer++] = piece;
           positive++;
         }
@@ -21582,35 +21183,26 @@ function requireResolveUri_umd() {
         }
         url.path = path;
       }
-      /**
-       * Attempts to resolve `input` URL/path relative to `base`.
-       */
       function resolve(input, base) {
         if (!input && !base) return '';
         var url = parseUrl(input);
         var inputType = url.type;
-        if (base && inputType !== 7 /* Absolute */) {
+        if (base && inputType !== 7) {
           var baseUrl = parseUrl(base);
           var baseType = baseUrl.type;
           switch (inputType) {
-            case 1 /* Empty */:
+            case 1:
               url.hash = baseUrl.hash;
-            // fall through
-            case 2 /* Hash */:
+            case 2:
               url.query = baseUrl.query;
-            // fall through
-            case 3 /* Query */:
-            case 4 /* RelativePath */:
+            case 3:
+            case 4:
               mergePaths(url, baseUrl);
-            // fall through
-            case 5 /* AbsolutePath */:
-              // The host, user, and port are joined, you can't copy one without the others.
+            case 5:
               url.user = baseUrl.user;
               url.host = baseUrl.host;
               url.port = baseUrl.port;
-            // fall through
-            case 6 /* SchemeRelative */:
-              // The input doesn't have a schema at least, so we need to copy at least that over.
+            case 6:
               url.scheme = baseUrl.scheme;
           }
           if (baseType > inputType) inputType = baseType;
@@ -21618,25 +21210,19 @@ function requireResolveUri_umd() {
         normalizePath(url, inputType);
         var queryHash = url.query + url.hash;
         switch (inputType) {
-          // This is impossible, because of the empty checks at the start of the function.
-          // case UrlType.Empty:
-          case 2 /* Hash */:
-          case 3 /* Query */:
+          case 2:
+          case 3:
             return queryHash;
-          case 4 /* RelativePath */:
+          case 4:
             {
-              // The first char is always a "/", and we need it to be relative.
               var path = url.path.slice(1);
               if (!path) return queryHash || '.';
               if (isRelative(base || input) && !isRelative(path)) {
-                // If base started with a leading ".", or there is no base and input started with a ".",
-                // then we need to ensure that the relative path starts with a ".". We don't know if
-                // relative starts with a "..", though, so check before prepending.
                 return './' + path + queryHash;
               }
               return path + queryHash;
             }
-          case 5 /* AbsolutePath */:
+          case 5:
             return url.path + queryHash;
           default:
             return url.scheme + '//' + url.user + url.host + url.port + url.path + queryHash;
@@ -21659,16 +21245,9 @@ function requireTraceMapping_umd() {
     })(traceMapping_umd, function (exports, sourcemapCodec, resolveUri) {
 
       function resolve(input, base) {
-        // The base is always treated as a directory, if it's not empty.
-        // https://github.com/mozilla/source-map/blob/8cb3ee57/lib/util.js#L327
-        // https://github.com/chromium/chromium/blob/da4adbb3/third_party/blink/renderer/devtools/front_end/sdk/SourceMap.js#L400-L401
         if (base && !base.endsWith('/')) base += '/';
         return resolveUri(input, base);
       }
-
-      /**
-       * Removes everything after the last "/", but leaves the slash.
-       */
       function stripFilename(path) {
         if (!path) return '';
         var index = path.lastIndexOf('/');
@@ -21684,8 +21263,6 @@ function requireTraceMapping_umd() {
       function maybeSort(mappings, owned) {
         var unsortedIndex = nextUnsortedSegmentLine(mappings, 0);
         if (unsortedIndex === mappings.length) return mappings;
-        // If we own the array (meaning we parsed it from JSON), then we're free to directly mutate it. If
-        // not, we do not want to modify the consumer's input array.
         if (!owned) mappings = mappings.slice();
         for (var i = unsortedIndex; i < mappings.length; i = nextUnsortedSegmentLine(mappings, i + 1)) {
           mappings[i] = sortSegments(mappings[i], owned);
@@ -21714,22 +21291,6 @@ function requireTraceMapping_umd() {
         return a[COLUMN] - b[COLUMN];
       }
       var found = false;
-      /**
-       * A binary search implementation that returns the index if a match is found.
-       * If no match is found, then the left-index (the index associated with the item that comes just
-       * before the desired index) is returned. To maintain proper sort order, a splice would happen at
-       * the next index:
-       *
-       * ```js
-       * const array = [1, 3];
-       * const needle = 2;
-       * const index = binarySearch(array, needle, (item, needle) => item - needle);
-       *
-       * assert.equal(index, 0);
-       * array.splice(index + 1, 0, needle);
-       * assert.deepEqual(array, [1, 2, 3]);
-       * ```
-       */
       function binarySearch(haystack, needle, low, high) {
         while (low <= high) {
           var mid = low + (high - low >> 1);
@@ -21766,10 +21327,6 @@ function requireTraceMapping_umd() {
           lastIndex: -1
         };
       }
-      /**
-       * This overly complicated beast is just to record the last tested line/column and the resulting
-       * index, allowing us to skip a few tests if mappings are monotonically increasing.
-       */
       function memoizedBinarySearch(haystack, needle, state, key) {
         var lastKey = state.lastKey,
           lastNeedle = state.lastNeedle,
@@ -21782,7 +21339,6 @@ function requireTraceMapping_umd() {
             return lastIndex;
           }
           if (needle >= lastNeedle) {
-            // lastIndex may be -1 if the previous needle was not found.
             low = lastIndex === -1 ? 0 : lastIndex;
           } else {
             high = lastIndex;
@@ -21792,9 +21348,6 @@ function requireTraceMapping_umd() {
         state.lastNeedle = needle;
         return state.lastIndex = binarySearch(haystack, needle, low, high);
       }
-
-      // Rebuilds the original source files, with mappings that are ordered by source line/column instead
-      // of generated line/column.
       function buildBySources(decoded, memos) {
         var sources = memos.map(buildNullArray);
         for (var i = 0; i < decoded.length; i++) {
@@ -21808,10 +21361,6 @@ function requireTraceMapping_umd() {
             var originalSource = sources[_sourceIndex];
             var originalLine = originalSource[sourceLine] || (originalSource[sourceLine] = []);
             var memo = memos[_sourceIndex];
-            // The binary search either found a match, or it found the left-index just before where the
-            // segment should go. Either way, we want to insert after that. And there may be multiple
-            // generated segments associated with an original location, so there may need to move several
-            // indexes before we find where we need to insert.
             var index = upperBound(originalLine, sourceColumn, memoizedBinarySearch(originalLine, sourceColumn, memo, sourceLine));
             memo.lastIndex = ++index;
             insert(originalLine, index, [sourceColumn, i, seg[COLUMN]]);
@@ -21825,11 +21374,6 @@ function requireTraceMapping_umd() {
         }
         array[index] = value;
       }
-      // Null arrays allow us to use ordered index keys without actually allocating contiguous memory like
-      // a real array. We use a null-prototype object to avoid prototype pollution and deoptimizations.
-      // Numeric properties on objects are magically sorted in ascending order by the engine regardless of
-      // the insertion order. So, by setting any numeric keys, even out of order, we'll get ascending
-      // order when iterating with for-in.
       function buildNullArray() {
         return {
           __proto__: null
@@ -21896,23 +21440,13 @@ function requireTraceMapping_umd() {
         if (ignores) for (var _i = 0; _i < ignores.length; _i++) ignoreList.push(ignores[_i] + sourcesOffset);
         for (var _i2 = 0; _i2 < decoded.length; _i2++) {
           var lineI = lineOffset + _i2;
-          // We can only add so many lines before we step into the range that the next section's map
-          // controls. When we get to the last line, then we'll start checking the segments to see if
-          // they've crossed into the column range. But it may not have any columns that overstep, so we
-          // still need to check that we don't overstep lines, too.
           if (lineI > stopLine) return;
-          // The out line may already exist in mappings (if we're continuing the line started by a
-          // previous section). Or, we may have jumped ahead several lines to start this section.
           var out = getLine(mappings, lineI);
-          // On the 0th loop, the section's column offset shifts us forward. On all other lines (since the
-          // map can be multiple lines), it doesn't.
           var cOffset = _i2 === 0 ? columnOffset : 0;
           var line = decoded[_i2];
           for (var j = 0; j < line.length; j++) {
             var seg = line[j];
             var column = cOffset + seg[COLUMN];
-            // If this segment steps into the column range that the next section's map controls, we need
-            // to stop early.
             if (lineI === stopLine && column >= stopColumn) return;
             if (seg.length === 1) {
               out.push([column]);
@@ -21970,46 +21504,25 @@ function requireTraceMapping_umd() {
         this._bySources = undefined;
         this._bySourceMemos = undefined;
       });
-      /**
-       * Typescript doesn't allow friend access to private fields, so this just casts the map into a type
-       * with public access modifiers.
-       */
       function cast(map) {
         return map;
       }
-      /**
-       * Returns the encoded (VLQ string) form of the SourceMap's mappings field.
-       */
       function encodedMappings(map) {
         var _a;
         var _b;
         return (_a = (_b = cast(map))._encoded) !== null && _a !== void 0 ? _a : _b._encoded = sourcemapCodec.encode(cast(map)._decoded);
       }
-      /**
-       * Returns the decoded (array of lines of segments) form of the SourceMap's mappings field.
-       */
       function decodedMappings(map) {
         var _a;
         return (_a = cast(map))._decoded || (_a._decoded = sourcemapCodec.decode(cast(map)._encoded));
       }
-      /**
-       * A low-level API to find the segment associated with a generated line/column (think, from a
-       * stack trace). Line and column here are 0-based, unlike `originalPositionFor`.
-       */
       function traceSegment(map, line, column) {
         var decoded = decodedMappings(map);
-        // It's common for parent source maps to have pointers to lines that have no
-        // mapping (like a "//# sourceMappingURL=") at the end of the child file.
         if (line >= decoded.length) return null;
         var segments = decoded[line];
         var index = traceSegmentInternal(segments, cast(map)._decodedMemo, line, column, GREATEST_LOWER_BOUND);
         return index === -1 ? null : segments[index];
       }
-      /**
-       * A higher-level API to find the source/line/column associated with a generated line/column
-       * (think, from a stack trace). Line is 1-based, but column is 0-based, due to legacy behavior in
-       * `source-map` library.
-       */
       function originalPositionFor(map, needle) {
         var line = needle.line,
           column = needle.column,
@@ -22018,8 +21531,6 @@ function requireTraceMapping_umd() {
         if (line < 0) throw new Error(LINE_GTR_ZERO);
         if (column < 0) throw new Error(COL_GTR_EQ_ZERO);
         var decoded = decodedMappings(map);
-        // It's common for parent source maps to have pointers to lines that have no
-        // mapping (like a "//# sourceMappingURL=") at the end of the child file.
         if (line >= decoded.length) return OMapping(null, null, null, null);
         var segments = decoded[line];
         var index = traceSegmentInternal(segments, cast(map)._decodedMemo, line, column, bias || GREATEST_LOWER_BOUND);
@@ -22030,9 +21541,6 @@ function requireTraceMapping_umd() {
           resolvedSources = map.resolvedSources;
         return OMapping(resolvedSources[segment[SOURCES_INDEX]], segment[SOURCE_LINE] + 1, segment[SOURCE_COLUMN], segment.length === 5 ? names[segment[NAMES_INDEX]] : null);
       }
-      /**
-       * Finds the generated line/column position of the provided source/line/column source position.
-       */
       function generatedPositionFor(map, needle) {
         var source = needle.source,
           line = needle.line,
@@ -22040,20 +21548,13 @@ function requireTraceMapping_umd() {
           bias = needle.bias;
         return generatedPosition(map, source, line, column, bias || GREATEST_LOWER_BOUND, false);
       }
-      /**
-       * Finds all generated line/column positions of the provided source/line/column source position.
-       */
       function allGeneratedPositionsFor(map, needle) {
         var source = needle.source,
           line = needle.line,
           column = needle.column,
           bias = needle.bias;
-        // SourceMapConsumer uses LEAST_UPPER_BOUND for some reason, so we follow suit.
         return generatedPosition(map, source, line, column, bias || LEAST_UPPER_BOUND, true);
       }
-      /**
-       * Iterates each mapping in generated position order.
-       */
       function eachMapping(map, cb) {
         var decoded = decodedMappings(map);
         var names = map.names,
@@ -22092,44 +21593,26 @@ function requireTraceMapping_umd() {
         if (index === -1) index = resolvedSources.indexOf(source);
         return index;
       }
-      /**
-       * Retrieves the source content for a particular source, if its found. Returns null if not.
-       */
       function sourceContentFor(map, source) {
         var sourcesContent = map.sourcesContent;
         if (sourcesContent == null) return null;
         var index = sourceIndex(map, source);
         return index === -1 ? null : sourcesContent[index];
       }
-      /**
-       * Determines if the source is marked to ignore by the source map.
-       */
       function isIgnored(map, source) {
         var ignoreList = map.ignoreList;
         if (ignoreList == null) return false;
         var index = sourceIndex(map, source);
         return index === -1 ? false : ignoreList.includes(index);
       }
-      /**
-       * A helper that skips sorting of the input map's mappings array, which can be expensive for larger
-       * maps.
-       */
       function presortedDecodedMap(map, mapUrl) {
         var tracer = new TraceMap(clone(map, []), mapUrl);
         cast(tracer)._decoded = map.mappings;
         return tracer;
       }
-      /**
-       * Returns a sourcemap object (with decoded mappings) suitable for passing to a library that expects
-       * a sourcemap, or to JSON.stringify.
-       */
       function decodedMap(map) {
         return clone(map, decodedMappings(map));
       }
-      /**
-       * Returns a sourcemap object (with encoded mappings) suitable for passing to a library that expects
-       * a sourcemap, or to JSON.stringify.
-       */
       function encodedMap(map) {
         return clone(map, encodedMappings(map));
       }
@@ -22169,19 +21652,9 @@ function requireTraceMapping_umd() {
       }
       function sliceGeneratedPositions(segments, memo, line, column, bias) {
         var min = traceSegmentInternal(segments, memo, line, column, GREATEST_LOWER_BOUND);
-        // We ignored the bias when tracing the segment so that we're guarnateed to find the first (in
-        // insertion order) segment that matched. Even if we did respect the bias when tracing, we would
-        // still need to call `lowerBound()` to find the first segment, which is slower than just looking
-        // for the GREATEST_LOWER_BOUND to begin with. The only difference that matters for us is when the
-        // binary search didn't match, in which case GREATEST_LOWER_BOUND just needs to increment to
-        // match LEAST_UPPER_BOUND.
         if (!found && bias === LEAST_UPPER_BOUND) min++;
         if (min === -1 || min === segments.length) return [];
-        // We may have found the segment that started at an earlier column. If this is the case, then we
-        // need to slice all generated segments that match _that_ column, because all such segments span
-        // to our desired column.
         var matchedColumn = found ? column : segments[min][COLUMN];
-        // The binary search is not guaranteed to find the lower bound when a match wasn't found.
         if (!found) min = lowerBound(segments, matchedColumn, min);
         var max = upperBound(segments, matchedColumn, min);
         var result = [];
@@ -22248,9 +21721,6 @@ function requireGenMapping_umd() {
       var SOURCE_COLUMN = 3;
       var NAMES_INDEX = 4;
       var NO_NAME = -1;
-      /**
-       * Provides the state to generate a sourcemap.
-       */
       var GenMapping = /*#__PURE__*/_createClass(function GenMapping() {
         var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
           file = _ref.file,
@@ -22264,10 +21734,6 @@ function requireGenMapping_umd() {
         this.sourceRoot = sourceRoot;
         this._ignoreList = new setArray.SetArray();
       });
-      /**
-       * Typescript doesn't allow friend access to private fields, so this just casts the map into a type
-       * with public access modifiers.
-       */
       function cast(map) {
         return map;
       }
@@ -22277,25 +21743,12 @@ function requireGenMapping_umd() {
       function addMapping(map, mapping) {
         return addMappingInternal(false, map, mapping);
       }
-      /**
-       * Same as `addSegment`, but will only add the segment if it generates useful information in the
-       * resulting map. This only works correctly if segments are added **in order**, meaning you should
-       * not add a segment with a lower generated line/column than one that came before.
-       */
       var maybeAddSegment = function maybeAddSegment(map, genLine, genColumn, source, sourceLine, sourceColumn, name, content) {
         return addSegmentInternal(true, map, genLine, genColumn, source, sourceLine, sourceColumn, name, content);
       };
-      /**
-       * Same as `addMapping`, but will only add the mapping if it generates useful information in the
-       * resulting map. This only works correctly if mappings are added **in order**, meaning you should
-       * not add a mapping with a lower generated line/column than one that came before.
-       */
       var maybeAddMapping = function maybeAddMapping(map, mapping) {
         return addMappingInternal(true, map, mapping);
       };
-      /**
-       * Adds/removes the content of the source file to the source map.
-       */
       function setSourceContent(map, source, content) {
         var _cast = cast(map),
           sources = _cast._sources,
@@ -22313,10 +21766,6 @@ function requireGenMapping_umd() {
         if (index === sourcesContent.length) sourcesContent[index] = null;
         if (ignore) setArray.put(ignoreList, index);else setArray.remove(ignoreList, index);
       }
-      /**
-       * Returns a sourcemap object (with decoded mappings) suitable for passing to a library that expects
-       * a sourcemap, or to JSON.stringify.
-       */
       function toDecodedMap(map) {
         var _cast3 = cast(map),
           mappings = _cast3._mappings,
@@ -22336,19 +21785,12 @@ function requireGenMapping_umd() {
           ignoreList: ignoreList.array
         };
       }
-      /**
-       * Returns a sourcemap object (with encoded mappings) suitable for passing to a library that expects
-       * a sourcemap, or to JSON.stringify.
-       */
       function toEncodedMap(map) {
         var decoded = toDecodedMap(map);
         return Object.assign(Object.assign({}, decoded), {
           mappings: sourcemapCodec.encode(decoded.mappings)
         });
       }
-      /**
-       * Constructs a new GenMapping, using the already present mappings of the input.
-       */
       function fromMap(input) {
         var map = new traceMapping.TraceMap(input);
         var gen = new GenMapping({
@@ -22364,10 +21806,6 @@ function requireGenMapping_umd() {
         if (map.ignoreList) putAll(cast(gen)._ignoreList, map.ignoreList);
         return gen;
       }
-      /**
-       * Returns an array of high-level mapping objects for every recorded segment, which could then be
-       * passed to the `source-map` library.
-       */
       function allMappings(map) {
         var out = [];
         var _cast4 = cast(map),
@@ -22403,7 +21841,6 @@ function requireGenMapping_umd() {
         }
         return out;
       }
-      // This split declaration is only so that terser can elminiate the static initialization block.
       function addSegmentInternal(skipable, map, genLine, genColumn, source, sourceLine, sourceColumn, name, content) {
         var _cast5 = cast(map),
           mappings = _cast5._mappings,
@@ -22456,23 +21893,14 @@ function requireGenMapping_umd() {
         for (var i = 0; i < array.length; i++) setArray.put(setarr, array[i]);
       }
       function skipSourceless(line, index) {
-        // The start of a line is already sourceless, so adding a sourceless segment to the beginning
-        // doesn't generate any useful information.
         if (index === 0) return true;
         var prev = line[index - 1];
-        // If the previous segment is also sourceless, then adding another sourceless segment doesn't
-        // genrate any new information. Else, this segment will end the source/named segment and point to
-        // a sourceless position, which is useful.
         return prev.length === 1;
       }
       function skipSource(line, index, sourcesIndex, sourceLine, sourceColumn, namesIndex) {
-        // A source/named segment at the start of a line gives position at that genColumn
         if (index === 0) return false;
         var prev = line[index - 1];
-        // If the previous segment is sourceless, then we're transitioning to a source.
         if (prev.length === 1) return false;
-        // If the previous segment maps to the exact same source position, then this segment doesn't
-        // provide any new position information.
         return sourcesIndex === prev[SOURCES_INDEX] && sourceLine === prev[SOURCE_LINE] && sourceColumn === prev[SOURCE_COLUMN] && namesIndex === (prev.length === 5 ? prev[NAMES_INDEX] : NO_NAME);
       }
       function addMappingInternal(skipable, map, mapping) {
@@ -25184,7 +24612,6 @@ function requireJsesc() {
     return typeof Buffer === 'function' && Buffer.isBuffer(value);
   };
   var isObject = function isObject(value) {
-    // This is a very simple check, but it’s good enough for what we need.
     return toString.call(value) == '[object Object]';
   };
   var isString = function isString(value) {
@@ -25205,10 +24632,6 @@ function requireJsesc() {
   var isSet = function isSet(value) {
     return toString.call(value) == '[object Set]';
   };
-
-  /*--------------------------------------------------------------------------*/
-
-  // https://mathiasbynens.be/notes/javascript-escapes#single
   var singleEscapes = {
     '\\': '\\\\',
     '\b': '\\b',
@@ -25216,8 +24639,6 @@ function requireJsesc() {
     '\n': '\\n',
     '\r': '\\r',
     '\t': '\\t'
-    // `\v` is omitted intentionally, because in IE < 9, '\v' == 'v'.
-    // '\v': '\\x0B'
   };
   var regexSingleEscape = /[\\\b\f\n\r\t]/;
   var regexDigit = /[0-9]/;
@@ -25230,7 +24651,6 @@ function requireJsesc() {
       ++options.indentLevel;
       indent = options.indent.repeat(options.indentLevel);
     };
-    // Handle options
     var defaults = {
       'escapeEverything': false,
       'minimal': false,
@@ -25322,11 +24742,6 @@ function requireJsesc() {
         return '[' + newLine + result.join(',' + newLine) + newLine + (compact ? '' : oldIndent) + ']';
       } else if (isNumber(argument) || isBigInt(argument)) {
         if (json) {
-          // Some number values (e.g. `Infinity`) cannot be represented in JSON.
-          // `BigInt` values less than `-Number.MAX_VALUE` or greater than
-          // `Number.MAX_VALUE` cannot be represented in JSON so they will become
-          // `-Infinity` or `Infinity`, respectively, and then become `null` when
-          // stringified.
           return JSON.stringify(Number(argument));
         }
         var _result;
@@ -25349,22 +24764,15 @@ function requireJsesc() {
         return _result;
       } else if (isBigInt(argument)) {
         if (json) {
-          // `BigInt` values less than `-Number.MAX_VALUE` or greater than
-          // `Number.MAX_VALUE` will become `-Infinity` or `Infinity`,
-          // respectively, and cannot be represented in JSON.
           return JSON.stringify(Number(argument));
         }
         return argument + 'n';
       } else if (!isObject(argument)) {
         if (json) {
-          // For some values (e.g. `undefined`, `function` objects),
-          // `JSON.stringify(value)` returns `undefined` (which isn’t valid
-          // JSON) instead of `'null'`.
           return JSON.stringify(argument) || 'null';
         }
         return String(argument);
       } else {
-        // it’s an object
         result = [];
         options.wrap = true;
         increaseIndentation();
@@ -25385,7 +24793,6 @@ function requireJsesc() {
         var first = pair.charCodeAt(0);
         var second = pair.charCodeAt(1);
         if (options.es6) {
-          // https://mathiasbynens.be/notes/javascript-encoding#surrogate-formulae
           var codePoint = (first - 0xD800) * 0x400 + second - 0xDC00 + 0x10000;
           var _hex = hexadecimal(codePoint, lowercaseHex);
           return "\\u{" + _hex + '}';
@@ -25405,7 +24812,6 @@ function requireJsesc() {
         return quoteChar;
       }
       if (regexSingleEscape.test(_char)) {
-        // no need for a `hasOwnProperty` check here
         return singleEscapes[_char];
       }
       if (options.minimal && !regexWhitespace.test(_char)) {
@@ -25421,7 +24827,6 @@ function requireJsesc() {
       result = result.replace(/\$\{/g, '\\${');
     }
     if (options.isScriptContext) {
-      // https://mathiasbynens.be/notes/etago
       result = result.replace(/<\/(script|style)/gi, '<\\/$1').replace(/<!--/g, json ? "\\u003C!--" : '\\x3C!--');
     }
     if (options.wrap) {
@@ -29324,15 +28729,9 @@ var hasRequiredJsTokens;
 function requireJsTokens() {
   if (hasRequiredJsTokens) return jsTokens;
   hasRequiredJsTokens = 1;
-  // Copyright 2014, 2015, 2016, 2017, 2018 Simon Lydell
-  // License: MIT. (See LICENSE.)
-
   Object.defineProperty(jsTokens, "__esModule", {
     value: true
   });
-
-  // This regex comes from regex.coffee, and is inserted here by generate-index.js
-  // (run `npm run build`).
   jsTokens["default"] = /((['"])(?:(?!\2|\\).|\\(?:\r\n|[\s\S]))*(\2)?|`(?:[^`\\$]|\\[\s\S]|\$(?!\{)|\$\{(?:[^{}]|\{[^}]*\}?)*\}?)*(`)?)|(\/\/.*)|(\/\*(?:[^*]|\*(?!\/))*(\*\/)?)|(\/(?!\*)(?:\[(?:(?![\]\\]).|\\.)*\]|(?![\/\]\\]).|\\.)+\/(?:(?!\s*(?:\b|[\u0080-\uFFFF$\\'"~({]|[+\-!](?!=)|\.?\d))|[gmiyus]{1,6}\b(?![\u0080-\uFFFF$\\]|\s*(?:[+\-*%&|^<>!=?({]|\/(?![\/*])))))|(0[xX][\da-fA-F]+|0[oO][0-7]+|0[bB][01]+|(?:\d*\.\d+|\d+\.?)(?:[eE][+-]?\d+)?)|((?!\d)(?:(?!\s)[$\w\u0080-\uFFFF]|\\u[\da-fA-F]{4}|\\u\{[\da-fA-F]+\})+)|(--|\+\+|&&|\|\||=>|\.{3}|(?:[+\-\/%&|^]|\*{1,2}|<{1,2}|>{1,3}|!=?|={1,2})=?|[?~.,:;[\](){}])|(\s+)|(^$|[\s\S])/g;
   jsTokens.matchToToken = function (match) {
     var token = {

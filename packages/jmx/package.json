@@ -7,11 +7,6 @@
         "dist",
         "jmx"
     ],
-    "devDependencies": {
-        "@rollup/plugin-typescript": "^12.1.2",
-        "rollup-plugin-cleanup": "^3.2.1",
-        "tslib": "^2.8.1"
-    },
     "scripts": {
         "build": "rollup -c"
     },
