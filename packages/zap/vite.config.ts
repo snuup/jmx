@@ -1,4 +1,13 @@
-import jmxplugin from './/vite-plugin-jmx'
+// import jmxplugin from './vite-plugin-jmx'
+
+// import traverse from "@babel/traverse"
+// import generate from "@babel/generator"
+// import * as t from "@babel/types"
+// import * as fs from "fs"
+
+import jmxplugin from './vite-plugin-jmx'
+
+//console.log("vite-plugin-jmx traverse", traverse.name);
 
 export default {
     esbuild: {
@@ -7,6 +16,7 @@ export default {
     },
     plugins: [
         jmxplugin({ debug: 1 }),
+//        commonjs()
     ],
     build: {
         target: 'esnext',

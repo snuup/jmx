@@ -13,8 +13,7 @@
 		"@babel/parser": "^7.26.9",
 		"@babel/traverse": "^7.26.9",
 		"@types/node": "^22.13.4",
-		"jmx": "file:../jmx",
-		"jmx-plugin": "file:../vite-plugin-jmx"
+		"jmx": "file:../jmx"
 	},
 	"type": "module"
 }
