@@ -1,5 +1,5 @@
 import typescript from "@rollup/plugin-typescript"
-import noderesolve from "@rollup/plugin-node-resolve"
+import resolve from "@rollup/plugin-node-resolve"
 import commonjs from "@rollup/plugin-commonjs"
 import clean from "rollup-plugin-cleanup"
 
@@ -13,7 +13,9 @@ export default {
         }
     ],
     plugins: [
-        noderesolve(),
+        resolve({
+            extensions: [".js", ".ts", ".d.ts"]
+        }),
         commonjs(), // Convert CommonJS modules to ES modules
         typescript({
             //tsconfig: "./tsconfig.json", // Explicitly point to your tsconfig
@@ -21,11 +23,6 @@ export default {
         }),
         clean({
             targetFiles: ['dist']
-        }),
-        // alias({
-        //     entries: [
-        //         { find: "jmx", replacement: "./jmx" }, // Map "jmx" to "./jmx"
-        //     ],
-        // }),
+        })
     ]
 }
