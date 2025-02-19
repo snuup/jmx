@@ -28,9 +28,7 @@ let isconstant = (expression: t.Expression | t.SpreadElement): boolean => {
 
 let lazify = (expression) => t.arrowFunctionExpression([], expression)
 let lazifyifnotconstant = (e) => isconstant(e) ? e : lazify(e)
-//let markit = (expression) => t.arrowFunctionExpression([t.identifier("hase")], expression)
-
-//let makekind = kind => t.objectProperty(t.identifier("kind"), t.stringLiteral(kind))
+//let markit = (expression) => t.arrowFunctionExpression([t.identifier("hase")], expression) // debug utility
 
 function transform(code: string, filename: string) {
 
@@ -48,28 +46,22 @@ function transform(code: string, filename: string) {
 
                 console.log("fragmento");
 
-
                 // fragment
                 // let F = jsx(jsxf, null, "aa", "bb");
                 //     args = (jsxf, null, "aa", "bb");
 
                 let cn = t.arrayExpression(args.slice(2))
 
-                path.replaceWith(t.objectExpression([
-                    //makekind("<>"),
-                    t.objectProperty(t.identifier("cn"), lazifyifnotconstant(cn))
-                ]))
+                path.replaceWith(t.objectExpression([t.objectProperty(t.identifier("cn"), lazifyifnotconstant(cn))]))
             }
             else {
 
                 // element
                 // let App3 = jsx("body", null, jsx(F, null), jsx("div", null));
 
-                let tagProperty
                 const tag = args[0]
-                if (t.isStringLiteral(tag)) tag.value = tag.value.toUpperCase()
-                if (!(t.isIdentifier(tag) && tag.name == "jsx")) tagProperty = t.objectProperty(t.identifier("tag"), tag) // else is a fragment that has no tag
-                else console.log("fragmento 2");
+                if (t.isStringLiteral(tag)) tag.value = tag.value.toUpperCase() // unless it is a component, tags are uppercase
+                let tagProperty = t.objectProperty(t.identifier("tag"), tag)
 
                 let propsProperty
                 let props = args[1]
@@ -93,7 +85,6 @@ function transform(code: string, filename: string) {
                 }
 
                 path.replaceWith(t.objectExpression([
-                    //makekind(t.isStringLiteral(a) ? "element" : "component"),
                     tagProperty,
                     propsProperty,
                     childrenProperty].filter(x => !!x)))

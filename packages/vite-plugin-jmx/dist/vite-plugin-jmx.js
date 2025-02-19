@@ -33975,13 +33975,13 @@ function _transform(code, filename) {
       if (path.node.callee.name != "jsx") return;
       var args = path.node.arguments;
       if (libExports.isIdentifier(args[0]) && args[0].name == "jsxf") {
+        console.log("fragmento");
         var cn = libExports.arrayExpression(args.slice(2));
         path.replaceWith(libExports.objectExpression([libExports.objectProperty(libExports.identifier("cn"), lazifyifnotconstant(cn))]));
       } else {
-        var tagProperty;
         var tag = args[0];
         if (libExports.isStringLiteral(tag)) tag.value = tag.value.toUpperCase();
-        if (!(libExports.isIdentifier(tag) && tag.name == "jsx")) tagProperty = libExports.objectProperty(libExports.identifier("tag"), tag);
+        var tagProperty = libExports.objectProperty(libExports.identifier("tag"), tag);
         var propsProperty;
         var props = args[1];
         var nopros = libExports.isNullLiteral(props);
