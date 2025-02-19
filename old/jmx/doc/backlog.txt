@@ -1,6 +1,0 @@
-// components + state: maybe assign comp + inner always <<<<<<<<<<<<<<<<<<<<<<<<
-// to learn about that, class comps are better
-
-state for function components
-
-remove kind field from jsx
