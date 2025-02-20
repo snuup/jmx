@@ -105,7 +105,6 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
                     state = p.childNodes[i]?.state
                     if (state?.update) {
                         console.log('update.fstate', state.update)
-                        debugger
                         updateview({ root: c as HTMLElement }, state.update as string) // if not an action
                         return i + 1
                     }

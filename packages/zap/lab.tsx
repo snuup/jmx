@@ -1,14 +1,16 @@
 import { FComponentState, HTMLAttributes, IntrinsicElementAttributes, jsx, jsxf, mount, patch, UpdateContext, updateview } from "../jmx"
 
-//type FCounter<P, S> = (this: S & {element: HTMLElement}, p: P) => H;
-
 let Counter: FComponentState<{ name: string }, { count: number }> = function ({ name }) {
+
+    console.log('Counter.ctor', name);
+
     this.count = 144
-    this.update = "b"
+    this.update = "counter"
     return <counter>
         <i>{name}</i>
         <b>{this.count}</b>
         <button onclick={() => { this.count++; updateview({ root: this.element }, "b") }}>clicks</button>
+        <button onclick={() => { this.count++; updateview(this.element) }}>clicks 2</button>
     </counter>
 }
 //Counter.state = { count: 72 }
