@@ -1,5 +1,5 @@
 import { rebind } from './base'
-import { Expr, FComponent, H, HComp, HCompClass, HElement, HFragment, IClassComponent, Props, UpdateContext } from './h'
+import { Expr, FComponent, H, HComp, HCompClass, HCompFun, HElement, HFragment, IClassComponent, Props, UpdateContext } from './h'
 
 const enum NodeType { // vaporizes (but for that must be in this file, otherwise not)
     TextNode = 3,
@@ -104,7 +104,10 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
                 // materialize the component
                 // we run compoents view() and fun code often, we do not compare properties to avoid their computation
                 // this means that the inner hr (h resolved) is run often
-                let hr = ci?.view() ?? (h.tag as FComponent)(props, evaluate(h.cn))
+                //console.log(c, (p.childNodes[i]?.h as HCompFun)?.state)
+
+                let state = p.childNodes[i]?.state
+                let hr = ci?.view() ?? (h.tag as FComponent).bind(state ??= {})(props, evaluate(h.cn))
 
                 // a component can return undefined or null if it has no elements to show
                 if (hr === undefined || hr == null) return i
@@ -113,6 +116,8 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
 
                 let cn = p.childNodes[i]!
                 cn.h = h    // attach h onto the materialized component node
+                Object.assign(cn, { h, state, update: updateview(cn) })
+                if(state) state.update = () => updateview(cn)
 
                 if (ci) ci.element = cn
                 if (!isupdate) ci?.mounted()

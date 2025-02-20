@@ -1,16 +1,27 @@
-import { H, jsx, jsxf, patch } from "../jmx"
+import { Action, H, HTMLAttributes, IntrinsicElementAttributes, jsx, jsxf, mount, patch, updateview } from "../jmx"
 
-type FCounter<T, P> = (this: T, p: P) => H;
+type FCounter<P, S> = (this: S & {update: Action}, p: P) => H;
 
-let Counter: FCounter<{ count: number }, { name: string }> = function ({ name }) {
-    this.count = 456
-    return <div>
-        <h3>{name}</h3>
+let Counter: FCounter<{ name: string }, { count: number }> = function ({ name }) {
+    this.count ??= 100
+    return <counter>
+        <i>{name}</i>
         <b>{this.count}</b>
-        <br/>
-        <br/>
-        <button onclick={() => this.count++}>clicks</button>
-    </div>
+        <button onclick={() => { this.count++; this.update() }}>clicks</button>
+    </counter>
 }
 
-patch(document.body, <body><Counter name="hasen" /></body>)
+// update
+// state init
+
+patch(document.body, <body><Counter name="here the counterotti:" /></body>)
+
+mount({ updateview })
+
+declare global {
+    namespace JSX {
+        interface IntrinsicElements extends IntrinsicElementAttributes {
+            counter: HTMLAttributes
+        }
+    }
+}

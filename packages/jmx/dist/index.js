@@ -90,12 +90,16 @@ function sync(p, i, h, uc) {
                     if (isupdate && ci.update(uc))
                         return i + 1;
                 }
-                let hr = ci?.view() ?? h.tag(props, evaluate(h.cn));
+                let state = p.childNodes[i]?.state;
+                let hr = ci?.view() ?? h.tag.bind(state ??= {})(props, evaluate(h.cn));
                 if (hr === undefined || hr == null)
                     return i;
                 let j = sync(p, i, hr, uc);
                 let cn = p.childNodes[i];
                 cn.h = h;
+                Object.assign(cn, { h, state, update: updateview(cn) });
+                if (state)
+                    state.update = () => updateview(cn);
                 if (ci)
                     ci.element = cn;
                 if (!isupdate)

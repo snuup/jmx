@@ -2,7 +2,8 @@
 // the following types describe the js expression we get from tsx after conversion be our jmx plugin
 // they can be useful for users as well, components might return them.
 
-type Func<T> = () => T
+export type Action = () => void
+export type Func<T> = () => T
 export type Expr<T> = T | Func<T>
 
 export type Props = Record<string, any>
@@ -44,7 +45,7 @@ export type HElement =
         i?: any
     }
 
-type HCompFun =
+export type HCompFun =
     {
         tag: FComponent,
         p?: Expr<Props>
@@ -76,5 +77,6 @@ export type UpdateContext = {
 declare global {
     interface Node {
         h?: HElement | HCompFun | HCompClass
+        state?: Record<string, any>
     }
 }

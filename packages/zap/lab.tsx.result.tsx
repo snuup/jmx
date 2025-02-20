@@ -1,24 +1,23 @@
-import { jsx, patch } from "../jmx";
+import { jsx, mount, patch, updateview } from "../jmx";
 let Counter = function ({
   name
 }) {
-  this.count = 456;
+  this.count ??= 100;
   return {
-    tag: "DIV",
+    tag: "COUNTER",
     cn: () => [{
-      tag: "H3",
+      tag: "I",
       cn: () => [name]
     }, {
       tag: "B",
       cn: () => [this.count]
     }, {
-      tag: "BR"
-    }, {
-      tag: "BR"
-    }, {
       tag: "BUTTON",
       p: () => ({
-        onclick: () => this.count++
+        onclick: () => {
+          this.count++;
+          this.update();
+        }
       }),
       cn: ["clicks"]
     }]
@@ -29,7 +28,10 @@ patch(document.body, {
   cn: () => [{
     tag: Counter,
     p: {
-      name: "hasen"
+      name: "here the counterotti:"
     }
   }]
+});
+mount({
+  updateview
 });

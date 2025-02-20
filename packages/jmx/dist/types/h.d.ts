@@ -1,4 +1,5 @@
-type Func<T> = () => T;
+export type Action = () => void;
+export type Func<T> = () => T;
 export type Expr<T> = T | Func<T>;
 export type Props = Record<string, any>;
 export type FComponent = (props: Props | undefined, children?: ChildrenH) => HElement;
@@ -25,7 +26,7 @@ export type HElement = {
     cn: Children;
     i?: any;
 };
-type HCompFun = {
+export type HCompFun = {
     tag: FComponent;
     p?: Expr<Props>;
     cn?: Children;
@@ -45,6 +46,7 @@ export type UpdateContext = {
 declare global {
     interface Node {
         h?: HElement | HCompFun | HCompClass;
+        state?: Record<string, any>;
     }
 }
 export {};
