@@ -2,7 +2,8 @@ import { jsx, mount, patch, updateview } from "../jmx";
 let Counter = function ({
   name
 }) {
-  this.count ??= 100;
+  this.count = 144;
+  this.update = "b";
   return {
     tag: "COUNTER",
     cn: () => [{
@@ -16,7 +17,9 @@ let Counter = function ({
       p: () => ({
         onclick: () => {
           this.count++;
-          this.update();
+          updateview({
+            root: this.element
+          }, "b");
         }
       }),
       cn: ["clicks"]
@@ -32,6 +35,11 @@ patch(document.body, {
     }
   }]
 });
+let updateall = () => updateview(document.body);
+let updatecounter = () => updateview("counter");
 mount({
-  updateview
+  updateview,
+  Counter,
+  updateall,
+  updatecounter
 });

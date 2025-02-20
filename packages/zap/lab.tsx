@@ -1,22 +1,24 @@
-import { Action, H, HTMLAttributes, IntrinsicElementAttributes, jsx, jsxf, mount, patch, updateview } from "../jmx"
+import { FComponentState, HTMLAttributes, IntrinsicElementAttributes, jsx, jsxf, mount, patch, UpdateContext, updateview } from "../jmx"
 
-type FCounter<P, S> = (this: S & {update: Action}, p: P) => H;
+//type FCounter<P, S> = (this: S & {element: HTMLElement}, p: P) => H;
 
-let Counter: FCounter<{ name: string }, { count: number }> = function ({ name }) {
-    this.count ??= 100
+let Counter: FComponentState<{ name: string }, { count: number }> = function ({ name }) {
+    this.count = 144
+    this.update = "b"
     return <counter>
         <i>{name}</i>
         <b>{this.count}</b>
-        <button onclick={() => { this.count++; this.update() }}>clicks</button>
+        <button onclick={() => { this.count++; updateview({ root: this.element }, "b") }}>clicks</button>
     </counter>
 }
-
-// update
-// state init
+//Counter.state = { count: 72 }
 
 patch(document.body, <body><Counter name="here the counterotti:" /></body>)
 
-mount({ updateview })
+let updateall = () => updateview(document.body)
+let updatecounter = () => updateview("counter")
+
+mount({ updateview, Counter, updateall, updatecounter })
 
 declare global {
     namespace JSX {

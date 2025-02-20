@@ -2,7 +2,19 @@ export type Action = () => void;
 export type Func<T> = () => T;
 export type Expr<T> = T | Func<T>;
 export type Props = Record<string, any>;
-export type FComponent = (props: Props | undefined, children?: ChildrenH) => HElement;
+export interface FComponent {
+    (props: Props | undefined, children?: ChildrenH): HElement;
+    state?: Record<string, any>;
+}
+export type Selector = string | Node | undefined | null;
+export type Selectors = Selector[];
+export interface FComponentState<P, S> {
+    (this: S & {
+        element: HTMLElement;
+        update: Action | Selectors | Selector;
+    }, p: P): H;
+    state?: S;
+}
 export type FComponentT<P> = (pcn: P, cn?: Children) => H | void;
 export interface IClassComponent {
     element: Node;
@@ -42,6 +54,7 @@ export type H = HText | HElement | HComp | HFragment;
 export type UpdateContext = {
     patchElementOnly?: boolean;
     replace?: boolean;
+    root?: HTMLElement;
 };
 declare global {
     interface Node {
