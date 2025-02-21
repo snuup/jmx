@@ -1,5 +1,6 @@
 {
-  "name": "jmx",
+  "name": "@jmx",
+  "author": "snup",
   "version": "0.0.7",
   "devDependencies": {
     "@rollup/plugin-typescript": "^12.1.2",

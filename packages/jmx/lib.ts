@@ -1,4 +1,4 @@
-import { Props, IClassComponent, UpdateContext, H, FComponentT, Children } from 'h'
+import { Props, IClassComponent, UpdateContext, H, Children } from 'h'
 import { updateview } from './jmx'
 
 export type DeepReadonly<T> = { readonly [K in keyof T]: T[K] extends Record<string, unknown> ? DeepReadonly<T[K]> : T[K]; }

@@ -7,14 +7,20 @@ export function rebind(o: Record<string, any>) {
 
 export function mount(o: Record<string, any>) { Object.assign(globalThis, o) }
 
-export const loggedmethods = <T extends Record<string, any>>(o: T) => new Proxy(o, {
+export const loggedmethodsex = <T extends Record<string, any>>(o: T, logger: (name: string, args: any[], result: any) => void) => new Proxy(o, {
     get(target, name: string, receiver) {
         if (typeof target[name] === "function") {
             return function (this: T, ...args: any[]) {
-                console.log("%c" + name.toString(), "background:#585059;color:white;padding:2px;font-weight:bold", args)
-                return target[name].apply(this, args)
+
+                let r = target[name].apply(this, args)
+                logger(name, args, r)
+
+
+                return r
             }
         }
         return Reflect.get(target, name, receiver)
     },
 })
+
+export const loggedmethods = (o: any) => loggedmethodsex(o, (name, args, result) => console.log("%c" + name, "background:#585059;color:white;padding:2px;font-weight:bold", args, result))

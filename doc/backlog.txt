@@ -1,4 +1,0 @@
-- colored console
-- examine old tastejs jmx
-
-% simplify jsx -> arrays
