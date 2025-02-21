@@ -1,5 +1,5 @@
 {
-	"name": "jmx",
+	"name": "@snupo/jmx",
 	"author": "snup",
 	"version": "0.0.15",
 	"publishConfig": {
