@@ -2,12 +2,27 @@
 // the following types describe the js expression we get from tsx after conversion be our jmx plugin
 // they can be useful for users as well, components might return them.
 
-type Func<T> = () => T
+export type Action = () => void
+export type Func<T> = () => T
 export type Expr<T> = T | Func<T>
 
 export type Props = Record<string, any>
 
-export type FComponent = (props: Props | undefined, children?: ChildrenH) => HElement // show an example for usage of children
+export interface FComponent{
+    (props: Props | undefined, children?: ChildrenH): HElement // show an example for usage of children
+    state?: Record<string, any>
+}
+
+export type Selector = string | Node | undefined | null
+export type Selectors = Selector[]
+
+export interface FComponentState<P, S> {
+    (this: S & {
+        element: HTMLElement;
+        update: Action | Selectors | Selector
+    }, p: P): H;
+    state?: S;
+}
 
 export type FComponentT<P> = (pcn: P, cn?: Children) => H | void
 
@@ -44,7 +59,7 @@ export type HElement =
         i?: any
     }
 
-type HCompFun =
+export type HCompFun =
     {
         tag: FComponent,
         p?: Expr<Props>
@@ -71,10 +86,12 @@ export type H = // a hyperscript atom that describes a ...
 export type UpdateContext = {
     patchElementOnly?: boolean
     replace?: boolean
+    root?: HTMLElement
 }
 
 declare global {
     interface Node {
         h?: HElement | HCompFun | HCompClass
+        state?: Record<string, any>
     }
 }

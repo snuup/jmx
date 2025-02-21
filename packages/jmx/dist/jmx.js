@@ -1,22 +1,4 @@
-function rebind(o) {
-    Object.entries(Object.getOwnPropertyDescriptors(Object.getPrototypeOf(o)))
-        .filter(([name, p]) => name != 'constructor' && p.value instanceof Function)
-        .forEach(([name]) => o[name] = o[name].bind(o));
-    return o;
-}
-function mount(o) { Object.assign(globalThis, o); }
-const loggedmethods = (o) => new Proxy(o, {
-    get(target, name, receiver) {
-        if (typeof target[name] === "function") {
-            return function (...args) {
-                console.log("%c" + name.toString(), "background:#585059;color:white;padding:2px;font-weight:bold", args);
-                return target[name].apply(this, args);
-            };
-        }
-        return Reflect.get(target, name, receiver);
-    },
-});
-
+import { rebind } from './base';
 let evaluate = (expr) => expr instanceof Function ? expr() : expr;
 let removeexcesschildren = (n, i) => { let c; while ((c = n.childNodes[i])) {
     c.remove();
@@ -37,7 +19,6 @@ let setprops = (e, newprops = {}) => {
         isproperty(p, newprops[p]) ? e[p] = newprops[p] : e.setAttribute(p, newprops[p]);
 };
 function sync(p, i, h, uc) {
-    console.log('%csync', "background:orange", p.tagName, i, h, 'html = ' + document.body.outerHTML);
     h = evaluate(h);
     if (h === null || h === undefined)
         return i;
@@ -95,10 +76,6 @@ function sync(p, i, h, uc) {
                 let hr = ci?.view() ?? h.tag.bind(state ??= ('state' in h.tag ? h.tag.state : {}))(props, evaluate(h.cn));
                 if (hr === undefined || hr == null)
                     return i;
-                if (isupdate && state?.update) {
-                    console.log('update', state.update);
-                    return i + 1;
-                }
                 let j = sync(p, i, hr, uc);
                 let cn = p.childNodes[i];
                 cn.h = h;
@@ -117,7 +94,7 @@ function sync(p, i, h, uc) {
     synctextnode(h);
     return i + 1;
 }
-function patch(e, h, uc = {}) {
+export function patch(e, h, uc = {}) {
     if (!e)
         return;
     if (uc.replace)
@@ -126,11 +103,11 @@ function patch(e, h, uc = {}) {
     const i = [].indexOf.call(p.childNodes, e);
     requestAnimationFrame(() => sync(p, i, h, uc));
 }
-function updateview(...ucOrSelectors) {
+export function updateview(...ucOrSelectors) {
     {
         let uc;
         ucOrSelectors
-            .flatMap(x => (typeof x == 'string') ? [...(uc.root ?? document).querySelectorAll(x)] : (x instanceof Node) ? [x] : (uc = x, []))
+            .flatMap(x => (typeof x == 'string') ? [...document.querySelectorAll(x)] : (x instanceof Node) ? [x] : (uc = x, []))
             .forEach(e => {
             if (!e?.h)
                 throw 'jmx: no h exists on the node';
@@ -138,23 +115,6 @@ function updateview(...ucOrSelectors) {
         });
     }
 }
-function jsx() { throw 'jmx plugin not configured'; }
-function jsxf() { throw 'jmx plugin not configured'; }
-
-const When = ({ cond }, cn) => cond ? { cn } : void 0;
-class JMXComp {
-    props;
-    element;
-    constructor(props) {
-        this.props = props;
-    }
-    mounted() { }
-    update(uc) { }
-    updateview() { updateview(this.element); }
-}
-function cc(...namesOrObjects) {
-    return namesOrObjects.flatMap(n => (n.trim ? n : Object.keys(n).filter(k => n[k]))).join(' ');
-}
-
-export { JMXComp, When, cc, jsx, jsxf, loggedmethods, mount, patch, rebind, updateview };
-//# sourceMappingURL=index.js.map
+export function jsx() { throw 'jmx plugin not configured'; }
+export function jsxf() { throw 'jmx plugin not configured'; }
+//# sourceMappingURL=jmx.js.map

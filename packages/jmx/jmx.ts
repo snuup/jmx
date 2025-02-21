@@ -1,5 +1,5 @@
-import { rebind } from './base'
-import { Expr, FComponent, H, HComp, HCompClass, HElement, HFragment, IClassComponent, Props, UpdateContext } from './h'
+import { mount, rebind } from './base'
+import { Expr, FComponent, H, HComp, HCompClass, HCompFun, HElement, HFragment, IClassComponent, Props, Selector, Selectors, UpdateContext } from './h'
 
 const enum NodeType { // vaporizes (but for that must be in this file, otherwise not)
     TextNode = 3,
@@ -32,7 +32,7 @@ let setprops = (e: Element, newprops: Props = {}) => {
 */
 function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext): number {
 
-    // console.log('%csync', "background:orange", p.tagName, i, h, 'html = ' + document.body.outerHTML)
+    console.log('%csync', "background:orange", p.tagName, i, h, 'html = ' + document.body.outerHTML)
 
     h = evaluate(h)
     if (h === null || h === undefined) return i // skip this element. not that !!h would forbid to render the number 0 or the boolean value false
@@ -90,6 +90,7 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
             case 'function':
 
                 let isupdate = c?.h?.tag == h.tag
+                let state
 
                 let ci: IClassComponent | undefined
 
@@ -100,11 +101,20 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
                     // if component instance returns truthy for update(), then syncing is susbstituted by the component
                     if (isupdate && ci.update(uc)) return i + 1
                 }
+                else {
+                    state = p.childNodes[i]?.state
+                    if (state?.update) {
+                        console.log('update.fstate', state.update)
+                        updateview({ root: c as HTMLElement }, state.update as string) // if not an action
+                        return i + 1
+                    }
+                }
 
                 // materialize the component
                 // we run compoents view() and fun code often, we do not compare properties to avoid their computation
                 // this means that the inner hr (h resolved) is run often
-                let hr = ci?.view() ?? (h.tag as FComponent)(props, evaluate(h.cn))
+
+                let hr = ci?.view() ?? (h.tag as FComponent).bind(state ??= (h.tag.state ?? {}))(props, evaluate(h.cn))
 
                 // a component can return undefined or null if it has no elements to show
                 if (hr === undefined || hr == null) return i
@@ -113,6 +123,8 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
 
                 let cn = p.childNodes[i]!
                 cn.h = h    // attach h onto the materialized component node
+                Object.assign(cn, { h, state })
+                if (state) state.element ??= cn
 
                 if (ci) ci.element = cn
                 if (!isupdate) ci?.mounted()
@@ -139,8 +151,7 @@ export function patch(e: Node | null, h: Expr<H>, uc: UpdateContext = {}) {
 
 
 // Overload signatures
-type Selector = string | Node | undefined | null
-type Selectors = Selector[]
+
 
 export function updateview(uc: UpdateContext, ...selectors: Selectors): void;
 export function updateview(...selectors: Selectors): void;
@@ -148,16 +159,20 @@ export function updateview(...selectors: Selectors): void;
 // Implementation
 export function updateview(...ucOrSelectors: (UpdateContext | Selector)[]): void {
     {
+        console.log('updateview', ucOrSelectors);
+
         let uc: UpdateContext
 
         ucOrSelectors
-        .flatMap(x => (typeof x == 'string') ? [...document.querySelectorAll(x)] : (x instanceof Node) ? [x] : (uc = x!, []))
-        .forEach(e => {
-            if (!e?.h) throw 'jmx: no h exists on the node';
-            patch(e, e.h, uc)
-        })
+            .flatMap(x => (typeof x == 'string') ? [...(uc?.root ?? document).querySelectorAll(x)] : (x instanceof Node) ? [x] : (uc = x!, []))
+            .forEach(e => {
+                if (!e?.h) throw 'jmx: no h exists on the node';
+                patch(e, e.h, uc)
+            })
     }
 }
 
 export function jsx(): HElement { throw 'jmx plugin not configured' } // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it
 export function jsxf(): HElement { throw 'jmx plugin not configured' } // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it
+
+mount({ updateview })
