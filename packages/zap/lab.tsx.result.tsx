@@ -4,12 +4,12 @@ let Counter = function ({
 }) {
   console.log("Counter.ctor", name);
   this.count = 144;
-  this.update = "counter";
+  this.update = "i, b";
   return {
     tag: "COUNTER",
     cn: () => [{
       tag: "I",
-      cn: () => [name]
+      cn: () => [name, " - ", Date.now]
     }, {
       tag: "B",
       cn: () => [this.count]
@@ -36,13 +36,16 @@ let Counter = function ({
     }]
   };
 };
+let m = {
+  name: "cuuuu"
+};
 patch(document.body, {
   tag: "BODY",
   cn: () => [{
     tag: Counter,
-    p: {
-      name: "here the counterotti:"
-    }
+    p: () => ({
+      name: m.name
+    })
   }]
 });
 let updateall = () => updateview(document.body);

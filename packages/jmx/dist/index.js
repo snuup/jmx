@@ -5,17 +5,19 @@ function rebind(o) {
     return o;
 }
 function mount(o) { Object.assign(globalThis, o); }
-const loggedmethods = (o) => new Proxy(o, {
+const loggedmethodsex = (o, logger) => new Proxy(o, {
     get(target, name, receiver) {
         if (typeof target[name] === "function") {
             return function (...args) {
-                console.log("%c" + name.toString(), "background:#585059;color:white;padding:2px;font-weight:bold", args);
-                return target[name].apply(this, args);
+                let r = target[name].apply(this, args);
+                logger(name, args, r);
+                return r;
             };
         }
         return Reflect.get(target, name, receiver);
     },
 });
+const loggedmethods = (o) => loggedmethodsex(o, (name, args, result) => console.log("%c" + name, "background:#585059;color:white;padding:2px;font-weight:bold", args, result));
 
 let evaluate = (expr) => expr instanceof Function ? expr() : expr;
 let removeexcesschildren = (n, i) => { let c; while ((c = n.childNodes[i])) {
@@ -37,7 +39,7 @@ let setprops = (e, newprops = {}) => {
         isproperty(p, newprops[p]) ? e[p] = newprops[p] : e.setAttribute(p, newprops[p]);
 };
 function sync(p, i, h, uc) {
-    console.log('%csync', "background:orange", p.tagName, i, h, 'html = ' + document.body.outerHTML);
+    console.log('%csync', "background:orange", p.tagName, i, h);
     h = evaluate(h);
     if (h === null || h === undefined)
         return i;
@@ -84,6 +86,7 @@ function sync(p, i, h, uc) {
         switch (typeof h.tag) {
             case 'function':
                 let isupdate = c?.h?.tag == h.tag;
+                let state;
                 let ci;
                 if (isclasscomponent(h)) {
                     h.i = ci = c?.h?.i ?? rebind(new h.tag(props));
@@ -91,14 +94,17 @@ function sync(p, i, h, uc) {
                     if (isupdate && ci.update(uc))
                         return i + 1;
                 }
-                let state = p.childNodes[i]?.state;
-                let hr = ci?.view() ?? h.tag.bind(state ??= ('state' in h.tag ? h.tag.state : {}))(props, evaluate(h.cn));
+                else {
+                    state = p.childNodes[i]?.state;
+                    if (state?.update) {
+                        console.log('update.fstate', state.update);
+                        updateview({ root: c }, state.update);
+                        return i + 1;
+                    }
+                }
+                let hr = ci?.view() ?? h.tag.bind(state ??= (h.tag.state ?? {}))(props, evaluate(h.cn));
                 if (hr === undefined || hr == null)
                     return i;
-                if (isupdate && state?.update) {
-                    console.log('update', state.update);
-                    return i + 1;
-                }
                 let j = sync(p, i, hr, uc);
                 let cn = p.childNodes[i];
                 cn.h = h;
@@ -128,9 +134,10 @@ function patch(e, h, uc = {}) {
 }
 function updateview(...ucOrSelectors) {
     {
+        console.log('updateview', ucOrSelectors);
         let uc;
         ucOrSelectors
-            .flatMap(x => (typeof x == 'string') ? [...(uc.root ?? document).querySelectorAll(x)] : (x instanceof Node) ? [x] : (uc = x, []))
+            .flatMap(x => (typeof x == 'string') ? [...(uc?.root ?? document).querySelectorAll(x)] : (x instanceof Node) ? [x] : (uc = x, []))
             .forEach(e => {
             if (!e?.h)
                 throw 'jmx: no h exists on the node';
@@ -140,6 +147,7 @@ function updateview(...ucOrSelectors) {
 }
 function jsx() { throw 'jmx plugin not configured'; }
 function jsxf() { throw 'jmx plugin not configured'; }
+mount({ updateview });
 
 const When = ({ cond }, cn) => cond ? { cn } : void 0;
 class JMXComp {
@@ -156,5 +164,5 @@ function cc(...namesOrObjects) {
     return namesOrObjects.flatMap(n => (n.trim ? n : Object.keys(n).filter(k => n[k]))).join(' ');
 }
 
-export { JMXComp, When, cc, jsx, jsxf, loggedmethods, mount, patch, rebind, updateview };
+export { JMXComp, When, cc, jsx, jsxf, loggedmethods, loggedmethodsex, mount, patch, rebind, updateview };
 //# sourceMappingURL=index.js.map

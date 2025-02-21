@@ -1,13 +1,10 @@
 import { FComponentState, HTMLAttributes, IntrinsicElementAttributes, jsx, jsxf, mount, patch, UpdateContext, updateview } from "../jmx"
 
 let Counter: FComponentState<{ name: string }, { count: number }> = function ({ name }) {
-
-    console.log('Counter.ctor', name);
-
-    this.count = 144
-    this.update = "counter"
+    this.count = 50
+    this.update = "i, b"
     return <counter>
-        <i>{name}</i>
+        <i>{name} - {Date.now}</i>
         <b>{this.count}</b>
         <button onclick={() => { this.count++; updateview({ root: this.element }, "b") }}>clicks</button>
         <button onclick={() => { this.count++; updateview(this.element) }}>clicks 2</button>
@@ -15,7 +12,11 @@ let Counter: FComponentState<{ name: string }, { count: number }> = function ({ 
 }
 //Counter.state = { count: 72 }
 
-patch(document.body, <body><Counter name="here the counterotti:" /></body>)
+let m = {
+    name: "cuuuu"
+}
+
+patch(document.body, <body><Counter name={m.name} /></body>)
 
 let updateall = () => updateview(document.body)
 let updatecounter = () => updateview("counter")
