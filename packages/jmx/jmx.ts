@@ -32,7 +32,7 @@ let setprops = (e: Element, newprops: Props = {}) => {
 */
 function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext): number {
 
-    console.log('%csync', "background:orange", p.tagName, i, h)
+    // console.log('%csync', "background:orange", p.tagName, i, h)
 
     h = evaluate(h)
     if (h === null || h === undefined) return i // skip this element. not that !!h would forbid to render the number 0 or the boolean value false
@@ -155,11 +155,11 @@ export function patch(e: Node | null, h: Expr<H>, uc: UpdateContext = {}) {
 // Overload signatures
 
 
-export function updateview(uc: UpdateContext, ...selectors: Selectors): void;
-export function updateview(...selectors: Selectors): void;
+//export function updateview(uc: UpdateContext, ...selectors: Selectors): void;
+//export function updateview(...selectors: Selectors): void;
 
 // Implementation
-export function updateview(...ucOrSelectors: (UpdateContext | Selector)[]): void {
+export function updateview(...ucOrSelectors: (Selector)[]): void {
     {
         console.log('updateview', ucOrSelectors);
 

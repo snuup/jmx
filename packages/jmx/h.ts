@@ -13,7 +13,7 @@ export interface FComponent{
     state?: Record<string, any>
 }
 
-export type Selector = string | Node | undefined | null
+export type Selector = string | Node | undefined | null | UpdateContext
 export type Selectors = Selector[]
 
 export interface FComponentState<P, S> {
@@ -87,6 +87,7 @@ export type UpdateContext = {
     patchElementOnly?: boolean
     replace?: boolean
     root?: HTMLElement
+    [key: string]: any // expandos
 }
 
 declare global {
