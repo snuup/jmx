@@ -9,12 +9,12 @@ import { mount } from '../jmx/base'
 
 let Counter: FComponentState<{ name: string }, { count: number }> = function ({ name }) {
     this.count = 50
-    //this.update = this.element
+    this.uc = [{ patchElementOnly: true }]
     return <counter class={this.count.toString()}>
         <i>{name} - {Date.now}</i>
         <b>{this.count}</b>
-        <button onclick={() => { this.count++; this.update("b") }}>b</button>
         <button onclick={() => { this.count++; this.update("i") }}>i</button>
+        <button onclick={() => { this.count++; this.update("b") }}>b</button>
         <button onclick={() => { this.count++; this.update(this.element) }}>this.element</button>
         <button onclick={() => { this.count++; this.update("i", "b") }}>i + b</button>
         <button onclick={() => { this.count++; this.update({ patchElementOnly: true }) }}>patchelementonly</button>
@@ -38,7 +38,10 @@ let A = <div>
 </div>
 
 // patch(document.body, <body><A /></body>)
-patch(document.body, <body><Counter name={m.name} /></body>)
+patch(document.body, <body>
+    <Counter name={m.name} />
+    <Counter name={m.name + " no2"} />
+    </body>)
 
 let updateall = () => updateview(document.body)
 let updatecounter = () => updateview("counter")

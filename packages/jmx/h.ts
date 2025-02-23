@@ -20,6 +20,7 @@ export interface FComponentState<P, S> {
     (this: S & {
         element: HTMLElement;
         update: (...ss: Selectors) => void //Action | Selectors | Selector
+        uc?: Selector | Selectors
     }, p: P): H;
     state?: S;
 }

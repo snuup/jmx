@@ -4,6 +4,9 @@ let Counter = function ({
   name
 }) {
   this.count = 50;
+  this.uc = [{
+    patchElementOnly: true
+  }];
   return {
     tag: "COUNTER",
     p: () => ({
@@ -20,19 +23,19 @@ let Counter = function ({
       p: () => ({
         onclick: () => {
           this.count++;
-          this.update("b");
+          this.update("i");
         }
       }),
-      cn: ["b"]
+      cn: ["i"]
     }, {
       tag: "BUTTON",
       p: () => ({
         onclick: () => {
           this.count++;
-          this.update("i");
+          this.update("b");
         }
       }),
-      cn: ["i"]
+      cn: ["b"]
     }, {
       tag: "BUTTON",
       p: () => ({
@@ -99,6 +102,11 @@ patch(document.body, {
     tag: Counter,
     p: () => ({
       name: m.name
+    })
+  }, {
+    tag: Counter,
+    p: () => ({
+      name: m.name + " no2"
     })
   }]
 });

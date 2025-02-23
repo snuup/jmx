@@ -32,7 +32,7 @@ let setprops = (e: Element, newprops: Props = {}) => {
 */
 function sync(p: Element, i: number, h: Expr<H | undefined>, uc: IUpdateContext): number {
 
-    console.log('%csync', "background:orange", p.tagName, i, h)
+    // console.log('%csync', "background:orange", p.tagName, i, h)
 
     h = evaluate(h)
     if (h === null || h === undefined) return i // skip this element. not that !!h would forbid to render the number 0 or the boolean value false
@@ -92,7 +92,7 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: IUpdateContext)
                 // tbd: code review this part
 
                 let isupdate = c?.h?.tag == h.tag
-                let state
+                let state : FunCompState
 
                 let ci: IClassComponent | undefined
 
@@ -104,10 +104,16 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: IUpdateContext)
                     if (isupdate && ci.update(uc)) return i + 1
                 }
                 else {
-                    state = p.childNodes[i]?.state
+                    state = p.childNodes[i]?.state as any
                     if (uc.functionnode?.h == h) {
                         return sync(p, i, c.hr, uc)
                     }
+                    if(state?.uc) {
+                        //console.log("yeah")
+                        state.updateglobal()
+                        return i + 1
+                    }
+                    //console.log("state >>>", state)
                 }
 
                 // materialize the component
@@ -143,7 +149,7 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: IUpdateContext)
 
 export function patch(e: Node | null, h: Expr<H>, uc: IUpdateContext = {}) {
     if (!e) return
-    console.log("patch", e, uc, h)
+    //console.log("patch", e, uc, h)
     if (uc.replace) (e as HTMLElement).replaceChildren()
     const p = e.parentElement as HTMLElement
     const i = [].indexOf.call<any, any, any>(p.childNodes, e)
@@ -171,9 +177,9 @@ export function patch2(e: Node | null, h: Expr<H>, uc: IUpdateContext = {}) {
         requestAnimationFrame(() => {
 
             // Your animation logic here
-            console.log("Animation frame starts")
+            //console.log("Animation frame starts")
             sync(p, i, h, uc)
-            console.log("Animation frame done")
+            //console.log("Animation frame done")
 
             // Resolve the promise after the frame completes
             resolve()
@@ -198,12 +204,12 @@ let isselector = (x: any): x is Selector => typeof x === "string" || x instanceo
 // Implementation
 export function updateview(...us: Selectors): void {
     {
-        console.log('updateview', us)
+        // console.log('updateview', us)
 
         //default parameter
         if (!us.length) us = [document.body]
 
-        let uc = {} as IUpdateContext
+        let uc: IUpdateContext
 
         let u0 = us[0]
         if (!isselector(u0)) {
@@ -251,10 +257,11 @@ mount({ updateview })
 class FunCompState {
 
     element!: HTMLElement// | undefined
+    uc?: IUpdateContext
 
     update(...us: Selectors) {
 
-        console.log("fun update")
+        // console.log("fun update")
 
         // update()
         if (!us.length) {
@@ -262,7 +269,7 @@ class FunCompState {
             return
         }
 
-        let uc = {} as IUpdateContext
+        let uc: IUpdateContext
         let usx: Selector[]
         let u0 = us[0]
         if (!isselector(u0)) {
@@ -271,6 +278,7 @@ class FunCompState {
             usx = ss
         }
         else {
+            uc = {}
             usx = us as Selector[]
         }
         uc.root = this.element
@@ -286,5 +294,10 @@ class FunCompState {
         //     console.log("else - non full fun comp update")
         //     updateview({ root: this.element }, ...ss)
         // }
+    }
+
+    updateglobal() {
+        if(this.uc == "*") this.uc = this.element //adjust *, because setting this.element does not work
+        this.update(...this.uc)
     }
 }
