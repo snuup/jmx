@@ -178,4 +178,36 @@ describe('JMX dom tests', () => {
         let h = document.querySelector("div")?.h as HCompClass
         expect(h.i).toBeDefined()
     })
+
+    it('fragments in context', () => {
+
+        let F = <>
+            <b>1</b>
+        </>
+
+        let A = <div>
+            <F />
+            <article></article>
+            <aside></aside>
+        </div>
+
+        patch(document.body, <body><A /></body>)
+        expect(document.body.innerHTML).toBe('<div><b>1</b><article></article><aside></aside></div>')
+    })
+
+    it('fragments in context2', () => {
+
+        let F = () => <>
+            <b>1</b>
+        </>
+
+        let A = <div>
+            <F />
+            <article></article>
+            <aside></aside>
+        </div>
+
+        patch(document.body, <body><A /></body>)
+        expect(document.body.innerHTML).toBe('<div><b>1</b><article></article><aside></aside></div>')
+    })
 })

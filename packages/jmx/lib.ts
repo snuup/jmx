@@ -1,4 +1,4 @@
-import { Props, IClassComponent, UpdateContext, H, Children } from 'h'
+import { Props, IClassComponent, IUpdateContext, H, Children } from 'h'
 import { updateview } from './jmx'
 
 export type DeepReadonly<T> = { readonly [K in keyof T]: T[K] extends Record<string, unknown> ? DeepReadonly<T[K]> : T[K]; }
@@ -16,7 +16,7 @@ export abstract class JMXComp<P extends Props = {}> implements IClassComponent {
 
     // overrides
     mounted() { }
-    update(uc: UpdateContext): boolean | void { }
+    update(uc: IUpdateContext): boolean | void { }
     abstract view(): H
 
     // utility: updates the component's view

@@ -1,12 +1,14 @@
-import { jsx, mount, patch, updateview } from "../jmx";
+import { jsx, jsxf, updateview, patch } from "../jmx/jmx";
+import { mount } from "../jmx/base";
 let Counter = function ({
   name
 }) {
-  console.log("Counter.ctor", name);
-  this.count = 144;
-  this.update = "i, b";
+  this.count = 50;
   return {
     tag: "COUNTER",
+    p: () => ({
+      class: this.count.toString()
+    }),
     cn: () => [{
       tag: "I",
       cn: () => [name, " - ", Date.now]
@@ -18,26 +20,78 @@ let Counter = function ({
       p: () => ({
         onclick: () => {
           this.count++;
-          updateview({
-            root: this.element
-          }, "b");
+          this.update("b");
         }
       }),
-      cn: ["clicks"]
+      cn: ["b"]
     }, {
       tag: "BUTTON",
       p: () => ({
         onclick: () => {
           this.count++;
-          updateview(this.element);
+          this.update("i");
         }
       }),
-      cn: ["clicks 2"]
+      cn: ["i"]
+    }, {
+      tag: "BUTTON",
+      p: () => ({
+        onclick: () => {
+          this.count++;
+          this.update(this.element);
+        }
+      }),
+      cn: ["this.element"]
+    }, {
+      tag: "BUTTON",
+      p: () => ({
+        onclick: () => {
+          this.count++;
+          this.update("i", "b");
+        }
+      }),
+      cn: ["i + b"]
+    }, {
+      tag: "BUTTON",
+      p: () => ({
+        onclick: () => {
+          this.count++;
+          this.update({
+            patchElementOnly: true
+          });
+        }
+      }),
+      cn: ["patchelementonly"]
+    }, {
+      tag: "BUTTON",
+      p: () => ({
+        onclick: () => {
+          this.count++;
+          this.update();
+        }
+      }),
+      cn: ["empty"]
     }]
   };
 };
 let m = {
   name: "cuuuu"
+};
+let F = {
+  cn: () => [{
+    tag: "B",
+    cn: ["1"]
+  }]
+};
+let A = {
+  tag: "DIV",
+  cn: () => [{
+    tag: F
+  }, {
+    tag: "ARTICLE"
+  }, {
+    tag: "ASIDE"
+  }]
 };
 patch(document.body, {
   tag: "BODY",

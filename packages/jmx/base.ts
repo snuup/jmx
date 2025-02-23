@@ -23,4 +23,4 @@ export const loggedmethodsex = <T extends Record<string, any>>(o: T, logger: (na
     },
 })
 
-export const loggedmethods = (o: any) => loggedmethodsex(o, (name, args, result) => console.log("%c" + name, "background:#585059;color:white;padding:2px;font-weight:bold", args, result))
+export const loggedmethods = <T extends Record<string, any>>(o: T ): T => loggedmethodsex(o, (name, args, result) => console.log("%c" + name, "background:#585059;color:white;padding:2px;font-weight:bold", args, result))

@@ -1,5 +1,5 @@
 import { mount, rebind } from './base'
-import { Expr, FComponent, H, HComp, HCompClass, HCompFun, HElement, HFragment, IClassComponent, Props, Selector, Selectors, UpdateContext } from './h'
+import { Expr, FComponent, H, HComp, HCompClass, HCompFun, HElement, HFragment, IClassComponent, Props, Selector, Selectors, IUpdateContext } from './h'
 
 const enum NodeType { // vaporizes (but for that must be in this file, otherwise not)
     TextNode = 3,
@@ -30,9 +30,9 @@ let setprops = (e: Element, newprops: Props = {}) => {
  * if a fragment with 5 nodes was added, it returns i + 5
  * when a single element or component is added, it is i+1 since they always create exactly 1 node
 */
-function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext): number {
+function sync(p: Element, i: number, h: Expr<H | undefined>, uc: IUpdateContext): number {
 
-    // console.log('%csync', "background:orange", p.tagName, i, h)
+    console.log('%csync', "background:orange", p.tagName, i, h)
 
     h = evaluate(h)
     if (h === null || h === undefined) return i // skip this element. not that !!h would forbid to render the number 0 or the boolean value false
@@ -105,10 +105,8 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
                 }
                 else {
                     state = p.childNodes[i]?.state
-                    if (state?.update) {
-                        console.log('update.fstate', state.update)
-                        updateview({ root: c as HTMLElement }, state.update as string) // if not an action
-                        return i + 1
+                    if (uc.functionnode?.h == h) {
+                        return sync(p, i, c.hr, uc)
                     }
                 }
 
@@ -116,7 +114,7 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
                 // we run compoents view() and fun code often, we do not compare properties to avoid their computation
                 // this means that the inner hr (h resolved) is run often
 
-                let hr = ci?.view() ?? (h.tag as FComponent).bind(state ??= (h.tag.state ?? {}))(props, evaluate(h.cn))
+                let hr = ci?.view() ?? (h.tag as FComponent).bind(state ??= (h.tag.state ?? new FunCompState()))(props, evaluate(h.cn))
 
                 // a component can return undefined or null if it has no elements to show
                 if (hr === undefined || hr == null) return i
@@ -125,6 +123,7 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
 
                 let cn = p.childNodes[i]!
                 cn.h = h    // attach h onto the materialized component node
+                cn.hr = hr as any // tbd - nested functions !?
                 Object.assign(cn, { h, state })
                 if (state) state.element ??= cn
 
@@ -142,13 +141,45 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
     return i + 1
 }
 
-export function patch(e: Node | null, h: Expr<H>, uc: UpdateContext = {}) {
+export function patch(e: Node | null, h: Expr<H>, uc: IUpdateContext = {}) {
     if (!e) return
+    console.log("patch", e, uc, h)
     if (uc.replace) (e as HTMLElement).replaceChildren()
     const p = e.parentElement as HTMLElement
     const i = [].indexOf.call<any, any, any>(p.childNodes, e)
     // always called deferred, because removing elements can trigger events and their handlers (like blur)
     requestAnimationFrame(() => sync(p, i, h, uc))
+}
+
+export function patch3(e: Node | null, h: Expr<H>, uc: IUpdateContext = {}) {
+    if (!e) return
+    if (uc.replace) (e as HTMLElement).replaceChildren()
+    const p = e.parentElement as HTMLElement
+    const i = [].indexOf.call<any, any, any>(p.childNodes, e)
+    // always called deferred, because removing elements can trigger events and their handlers (like blur)
+    sync(p, i, h, uc)
+}
+
+export function patch2(e: Node | null, h: Expr<H>, uc: IUpdateContext = {}) {
+    if (!e) return
+    if (uc.replace) (e as HTMLElement).replaceChildren()
+    const p = e.parentElement as HTMLElement
+    const i = [].indexOf.call<any, any, any>(p.childNodes, e)
+    // always called deferred, because removing elements can trigger events and their handlers (like blur)
+    return new Promise<void>((resolve) => {
+
+        requestAnimationFrame(() => {
+
+            // Your animation logic here
+            console.log("Animation frame starts")
+            sync(p, i, h, uc)
+            console.log("Animation frame done")
+
+            // Resolve the promise after the frame completes
+            resolve()
+        })
+    })
+
 }
 
 
@@ -158,19 +189,57 @@ export function patch(e: Node | null, h: Expr<H>, uc: UpdateContext = {}) {
 //export function updateview(uc: UpdateContext, ...selectors: Selectors): void;
 //export function updateview(...selectors: Selectors): void;
 
+// class UpdateContext implements IUpdateContext {
+
+// }
+
+let isselector = (x: any): x is Selector => typeof x === "string" || x instanceof Node
+
 // Implementation
-export function updateview(...ucOrSelectors: (Selector)[]): void {
+export function updateview(...us: Selectors): void {
     {
-        console.log('updateview', ucOrSelectors);
+        console.log('updateview', us)
 
-        let uc: UpdateContext
+        //default parameter
+        if (!us.length) us = [document.body]
 
-        ucOrSelectors
-            .flatMap(x => (typeof x == 'string') ? [...(uc?.root ?? document).querySelectorAll(x)] : (x instanceof Node) ? [x] : (uc = x!, []))
+        let uc = {} as IUpdateContext
+
+        let u0 = us[0]
+        if (!isselector(u0)) {
+            uc = u0!
+            us = us.slice(1) as any
+        }
+
+        (us as Selector[])
+            .flatMap(x => (typeof x == 'string') ? [...(uc?.root ?? document).querySelectorAll(x)] : [x])
             .forEach(e => {
-                if (!e?.h) throw 'jmx: no h exists on the node';
+                if (!e?.h) throw 'jmx: no h exists on the node'
                 patch(e, e.h, uc)
             })
+
+        // let nodes = [] as Element[]
+
+        // for (let us of us) {
+
+        //     if (!us) continue
+
+        //     if (typeof us == "string") {
+        //         nodes = [...(uc?.root ?? document).querySelectorAll(us)]
+        //     }
+        //     else if (us instanceof Node) {
+        //         nodes = [us as HTMLElement]
+        //     }
+        //     else {
+        //         uc = us
+        //     }
+
+        //     for (let n of nodes) {
+        //         if (!n?.h) throw 'jmx: no h exists on the node'
+        //         patch(n, n.h, uc)
+
+        //     }
+        // }
     }
 }
 
@@ -178,3 +247,44 @@ export function jsx(): HElement { throw 'jmx plugin not configured' } // dumy fu
 export function jsxf(): HElement { throw 'jmx plugin not configured' } // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it
 
 mount({ updateview })
+
+class FunCompState {
+
+    element!: HTMLElement// | undefined
+
+    update(...us: Selectors) {
+
+        console.log("fun update")
+
+        // update()
+        if (!us.length) {
+            updateview({ functionnode: this.element }, this.element)
+            return
+        }
+
+        let uc = {} as IUpdateContext
+        let usx: Selector[]
+        let u0 = us[0]
+        if (!isselector(u0)) {
+            uc = u0!
+            const [_, ...ss] = us // as Selector[]
+            usx = ss
+        }
+        else {
+            usx = us as Selector[]
+        }
+        uc.root = this.element
+        uc.functionnode = this.element
+
+        if (!usx.length) usx = [this.element]
+
+        updateview(uc, ...usx)
+        // if (ss[0] == this.element) {
+        //     patch3(this.element, this.element.hr!)
+        // }
+        // else {
+        //     console.log("else - non full fun comp update")
+        //     updateview({ root: this.element }, ...ss)
+        // }
+    }
+}

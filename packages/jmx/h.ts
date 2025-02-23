@@ -13,24 +13,34 @@ export interface FComponent{
     state?: Record<string, any>
 }
 
-export type Selector = string | Node | undefined | null | UpdateContext
-export type Selectors = Selector[]
+export type Selector = string | Node
+export type Selectors = [(IUpdateContext | Selector)?, ...Selector[]]
 
 export interface FComponentState<P, S> {
     (this: S & {
         element: HTMLElement;
-        update: Action | Selectors | Selector
+        update: (...ss: Selectors) => void //Action | Selectors | Selector
     }, p: P): H;
     state?: S;
 }
 
 export type FComponentT<P> = (pcn: P, cn?: Children) => H | void
 
+// runtime api
+export interface IUpdateContext {
+    patchElementOnly?: boolean
+    replace?: boolean
+    root?: HTMLElement
+    functionnode?: HTMLElement
+    [key: string]: any // expandos
+}
+
+
 export interface IClassComponent {
     element: Node
     props?: Record<string, any>
     view(): H
-    update(uc: UpdateContext): boolean | void
+    update(uc: IUpdateContext): boolean | void
     mounted(): void
 }
 
@@ -82,17 +92,11 @@ export type H = // a hyperscript atom that describes a ...
     | HComp // a dynamic component computing any other HNode
     | HFragment
 
-// runtime api
-export type UpdateContext = {
-    patchElementOnly?: boolean
-    replace?: boolean
-    root?: HTMLElement
-    [key: string]: any // expandos
-}
 
 declare global {
     interface Node {
         h?: HElement | HCompFun | HCompClass
+        hr?: HElement
         state?: Record<string, any>
     }
 }
