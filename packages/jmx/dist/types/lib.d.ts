@@ -9,8 +9,9 @@ export declare const When: ({ cond }: {
 } | undefined;
 export declare abstract class JMXComp<P extends Props = {}> implements IClassComponent {
     props: P;
-    element: Node;
+    element: HTMLElement;
     constructor(props: P);
+    init(): void;
     mounted(): void;
     update(uc: IUpdateContext): boolean | void;
     abstract view(): H;

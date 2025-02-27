@@ -19,10 +19,19 @@ let isproperty = (name: string, value: any) => (
     || value instanceof Function
 )
 
+let clean = (o: Record<string, any>) => { for (let k in o) o[k] === undefined && delete o[k] }
+
 let setprops = (e: Element, newprops: Props = {}) => {
     let oldprops = evaluate(e.h?.p) ?? {}
+    clean(newprops)
     for (let p in oldprops) (!(p in newprops)) && isproperty(p, oldprops[p]) ? (e as any)[p] = null : e.removeAttribute(p)
     for (let p in newprops) isproperty(p, newprops[p]) ? (e as any)[p] = newprops[p] : e.setAttribute(p, newprops[p])
+
+    // for (let p in newprops) {
+    //     let newval = newprops[p]
+    //     let del = p === undefined
+    //     isproperty(p, newval) ? (e as any)[p] = newval : del ? e.removeAttribute(p) : e.setAttribute(p, newval)
+    // }
 }
 
 /** syncs at position i of p. returns the number of the element past the last added element.
@@ -92,7 +101,7 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: IUpdateContext)
                 // tbd: code review this part
 
                 let isupdate = c?.h?.tag == h.tag
-                let state : FunCompState
+                let state: FunCompState
 
                 let ci: IClassComponent | undefined
 
@@ -108,7 +117,7 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: IUpdateContext)
                     if (uc.functionnode?.h == h) {
                         return sync(p, i, c.hr, uc)
                     }
-                    if(state?.uc) {
+                    if (state?.uc) {
                         //console.log("yeah")
                         state.updateglobal()
                         return i + 1
@@ -297,7 +306,7 @@ class FunCompState {
     }
 
     updateglobal() {
-        if(this.uc == "*") this.uc = this.element //adjust *, because setting this.element does not work
+        if (this.uc == "*") this.uc = this.element //adjust *, because setting this.element does not work
         this.update(...this.uc)
     }
 }

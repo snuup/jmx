@@ -31,8 +31,11 @@ let isobject = (o) => typeof o === "object";
 let isproperty = (name, value) => (['value', 'checked', 'disabled', 'className', 'style', 'href', 'src', 'selected', 'readOnly', 'tabIndex',].includes(name)
     || value instanceof Object
     || value instanceof Function);
+let clean = (o) => { for (let k in o)
+    o[k] === undefined && delete o[k]; };
 let setprops = (e, newprops = {}) => {
     let oldprops = evaluate(e.h?.p) ?? {};
+    clean(newprops);
     for (let p in oldprops)
         (!(p in newprops)) && isproperty(p, oldprops[p]) ? e[p] = null : e.removeAttribute(p);
     for (let p in newprops)
@@ -219,7 +222,9 @@ class JMXComp {
     element;
     constructor(props) {
         this.props = props;
+        this.init();
     }
+    init() { }
     mounted() { }
     update(uc) { }
     updateview() { updateview(this.element); }
