@@ -74,6 +74,10 @@ function sync(p, i, h, uc) {
             }
             else {
                 n = c;
+                if (props?.const && n.hasAttribute("const")) {
+                    console.log("skip const:", h);
+                    return i + 1;
+                }
                 setprops(n, props);
                 if (props?.update?.(c, uc))
                     return i + 1;

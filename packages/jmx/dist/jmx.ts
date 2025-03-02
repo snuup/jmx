@@ -82,6 +82,10 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: IUpdateContext)
                 props?.mounted?.(n)
             } else {
                 n = c as Element
+                if (props?.const && n.hasAttribute("const")) {
+                    console.log("skip const:", h);
+                    return i + 1
+                }
                 setprops(n, props)
                 if (props?.update?.(c, uc)) return i + 1
             }
