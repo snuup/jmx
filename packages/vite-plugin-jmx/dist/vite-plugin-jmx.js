@@ -33358,6 +33358,18 @@ var _isconstant = function isconstant(expression) {
   }
   return false;
 };
+function propsHasConst(e) {
+  if (libExports.isObjectExpression(e)) {
+    return e.properties.some(function (p) {
+      var _p$key, _p$key2;
+      console.log("pk:>", (_p$key = p.key) === null || _p$key === void 0 || (_p$key = _p$key.loc) === null || _p$key === void 0 ? void 0 : _p$key.identifierName, p, libExports.isObjectProperty(p));
+      var r = libExports.isObjectProperty(p) && ((_p$key2 = p.key) === null || _p$key2 === void 0 || (_p$key2 = _p$key2.loc) === null || _p$key2 === void 0 ? void 0 : _p$key2.identifierName) == "bunny";
+      if (r) console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! bunny ");
+      return r;
+    });
+  }
+  return false;
+}
 var lazify = function lazify(expression) {
   return libExports.arrowFunctionExpression([], expression);
 };
@@ -33384,15 +33396,18 @@ function _transform(code, filename) {
         var propsProperty;
         var props = args[1];
         var nopros = libExports.isNullLiteral(props);
+        var isconst = false;
         if (props && !nopros) {
-          props = lazifyifnotconstant(props);
+          isconst = propsHasConst(props);
+          if (isconst) console.log("ISCONST, so no thunk!!!!");
+          if (!isconst) props = lazifyifnotconstant(props);
           propsProperty = libExports.objectProperty(libExports.identifier("p"), props);
         }
         var childrenProperty;
         var cna = args.slice(2);
         if (cna.length) {
           var _cn = libExports.arrayExpression(cna);
-          childrenProperty = libExports.objectProperty(libExports.identifier("cn"), lazifyifnotconstant(_cn));
+          childrenProperty = libExports.objectProperty(libExports.identifier("cn"), isconst ? _cn : lazifyifnotconstant(_cn));
         }
         path.replaceWith(libExports.objectExpression([tagProperty, propsProperty, childrenProperty].filter(function (x) {
           return !!x;

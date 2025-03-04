@@ -9,15 +9,16 @@ const loggedmethodsex = (o, logger) => new Proxy(o, {
     get(target, name, receiver) {
         if (typeof target[name] === "function") {
             return function (...args) {
+                logger(name, args, undefined);
                 let r = target[name].apply(this, args);
-                logger(name, args, r);
                 return r;
             };
         }
         return Reflect.get(target, name, receiver);
     },
 });
-const loggedmethods = (o) => loggedmethodsex(o, (name, args, result) => console.log("%c" + name, "background:#585059;color:white;padding:2px;font-weight:bold", args, result));
+const loggedmethods = (o) => loggedmethodsex(o, (name, args, result) => console.log("%c" + name, "background:#585059;color:white;padding:2px;font-weight:bold", args));
+const loggedmethodscolored = (bgcolor, o) => loggedmethodsex(o, (name, args, result) => console.log("%c" + name, `background:${bgcolor};color:white;padding:2px;font-weight:bold`, args));
 
 let evaluate = (expr) => expr instanceof Function ? expr() : expr;
 let removeexcesschildren = (n, i) => { let c; while ((c = n.childNodes[i])) {
@@ -75,7 +76,6 @@ function sync(p, i, h, uc) {
             else {
                 n = c;
                 if (props?.const && n.hasAttribute("const")) {
-                    console.log("skip const:", h);
                     return i + 1;
                 }
                 setprops(n, props);
@@ -167,6 +167,7 @@ function patch2(e, h, uc = {}) {
 let isselector = (x) => typeof x === "string" || x instanceof Node;
 function updateview(...us) {
     {
+        console.log('%cupdateview', "background:violet;color:white;padding:2px", us);
         if (!us.length)
             us = [document.body];
         let uc;
@@ -237,5 +238,5 @@ function cc(...namesOrObjects) {
     return namesOrObjects.flatMap(n => (n.trim ? n : Object.keys(n).filter(k => n[k]))).join(' ');
 }
 
-export { JMXComp, When, cc, jsx, jsxf, loggedmethods, loggedmethodsex, mount, patch, patch2, patch3, rebind, updateview };
+export { JMXComp, When, cc, jsx, jsxf, loggedmethods, loggedmethodscolored, loggedmethodsex, mount, patch, patch2, patch3, rebind, updateview };
 //# sourceMappingURL=index.js.map

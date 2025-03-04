@@ -12,10 +12,8 @@ export const loggedmethodsex = <T extends Record<string, any>>(o: T, logger: (na
         if (typeof target[name] === "function") {
             return function (this: T, ...args: any[]) {
 
+                logger(name, args, undefined)
                 let r = target[name].apply(this, args)
-                logger(name, args, r)
-
-
                 return r
             }
         }
@@ -23,4 +21,5 @@ export const loggedmethodsex = <T extends Record<string, any>>(o: T, logger: (na
     },
 })
 
-export const loggedmethods = <T extends Record<string, any>>(o: T ): T => loggedmethodsex(o, (name, args, result) => console.log("%c" + name, "background:#585059;color:white;padding:2px;font-weight:bold", args, result))
+export const loggedmethods = <T extends Record<string, any>>(o: T ): T => loggedmethodsex(o, (name, args, result) => console.log("%c" + name, "background:#585059;color:white;padding:2px;font-weight:bold", args))
+export const loggedmethodscolored = <T extends Record<string, any>>(bgcolor: string, o: T ): T => loggedmethodsex(o, (name, args, result) => console.log("%c" + name, `background:${bgcolor};color:white;padding:2px;font-weight:bold`, args))

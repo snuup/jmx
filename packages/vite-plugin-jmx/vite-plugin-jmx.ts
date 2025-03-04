@@ -7,24 +7,61 @@ import * as fs from "fs"
 
 let isconstant = (expression: t.Expression | t.SpreadElement): boolean => {
     if (t.isStringLiteral(expression) || t.isNumericLiteral(expression) || t.isBooleanLiteral(expression) || t.isNullLiteral(expression)) {
-        return true;
+        return true
     }
     if (t.isObjectExpression(expression)) {
         return expression.properties.every(prop => {
             if (t.isObjectProperty(prop)) {
-                return t.isAssignmentPattern(prop.value) ? false : t.isExpression(prop.value) || t.isSpreadElement(prop.value) ? isconstant(prop.value) : false;
+                return t.isAssignmentPattern(prop.value) ? false : t.isExpression(prop.value) || t.isSpreadElement(prop.value) ? isconstant(prop.value) : false
             }
             if (t.isSpreadElement(prop)) {
-                return isconstant(prop.argument);
+                return isconstant(prop.argument)
             }
-            return false;
-        });
+            return false
+        })
     }
     if (t.isArrayExpression(expression)) {
-        return expression.elements.every(elem => isconstant(elem as t.Expression));
+        return expression.elements.every(elem => isconstant(elem as t.Expression))
     }
-    return false;
+    return false
 }
+
+// function propsHasConst(expression) {
+
+//     // Ensure it's an ObjectExpression
+//     if (!expression.isObjectExpression()) return false
+
+//     // Check if any property has the key "const"
+//     let r = expression.get("properties").some(prop =>
+//         prop.isObjectProperty() &&
+//         prop.get("key").isIdentifier({ name: "const" })
+//     )
+
+//     if (r) console.log("isconst!!")
+
+//     return r
+// }
+
+function propsHasConst(e) {
+
+    if (t.isObjectExpression(e)) {
+        return e.properties.some(p => {
+
+            console.log("pk:>", p.key?.loc?.identifierName, p, t.isObjectProperty(p))
+
+            let r = t.isObjectProperty(p) && p.key?.loc?.identifierName == "bunny"
+            if (r) console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! bunny ")
+            return r
+
+            //console.log("p:>", p)
+
+            //return p.key?.loc?.identifierName == "const"
+        })
+    }
+
+    return false
+}
+
 
 let lazify = (expression) => t.arrowFunctionExpression([], expression)
 let lazifyifnotconstant = (e) => isconstant(e) ? e : lazify(e)
@@ -44,7 +81,7 @@ function transform(code: string, filename: string) {
 
             if (t.isIdentifier(args[0]) && args[0].name == "jsxf") {
 
-                console.log("fragmento");
+                console.log("fragmento")
 
                 // fragment
                 // let F = jsx(jsxf, null, "aa", "bb");
@@ -66,11 +103,14 @@ function transform(code: string, filename: string) {
                 let propsProperty
                 let props = args[1]
                 let nopros = t.isNullLiteral(props)
+                let isconst = false
                 if (props && !nopros) {
 
                     //if (isconstant(props)) props = markit(props)
+                    isconst = propsHasConst(props)
+                    if (isconst) console.log("ISCONST, so no thunk!!!!")
 
-                    props = lazifyifnotconstant(props)
+                    if (!isconst) props = lazifyifnotconstant(props)
                     propsProperty = t.objectProperty(t.identifier("p"), props)
                 }
 
@@ -78,10 +118,7 @@ function transform(code: string, filename: string) {
                 let cna = args.slice(2)
                 if (cna.length) {
                     let cn = t.arrayExpression(cna)
-
-                    // if (isconstant(cn)) console.log("constant children", cn);
-
-                    childrenProperty = t.objectProperty(t.identifier("cn"), lazifyifnotconstant(cn))
+                    childrenProperty = t.objectProperty(t.identifier("cn"), isconst ? cn : lazifyifnotconstant(cn))
                 }
 
                 path.replaceWith(t.objectExpression([

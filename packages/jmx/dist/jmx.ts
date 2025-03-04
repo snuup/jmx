@@ -83,7 +83,6 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: IUpdateContext)
             } else {
                 n = c as Element
                 if (props?.const && n.hasAttribute("const")) {
-                    console.log("skip const:", h);
                     return i + 1
                 }
                 setprops(n, props)
@@ -217,7 +216,7 @@ let isselector = (x: any): x is Selector => typeof x === "string" || x instanceo
 // Implementation
 export function updateview(...us: Selectors): void {
     {
-        // console.log('updateview', us)
+        console.log('%cupdateview', "background:violet;color:white;padding:2px", us)
 
         //default parameter
         if (!us.length) us = [document.body]
