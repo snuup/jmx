@@ -33358,18 +33358,12 @@ var _isconstant = function isconstant(expression) {
   }
   return false;
 };
-function propsHasConst(e) {
-  if (libExports.isObjectExpression(e)) {
-    return e.properties.some(function (p) {
-      var _p$key, _p$key2;
-      console.log("pk:>", (_p$key = p.key) === null || _p$key === void 0 || (_p$key = _p$key.loc) === null || _p$key === void 0 ? void 0 : _p$key.identifierName, p, libExports.isObjectProperty(p));
-      var r = libExports.isObjectProperty(p) && ((_p$key2 = p.key) === null || _p$key2 === void 0 || (_p$key2 = _p$key2.loc) === null || _p$key2 === void 0 ? void 0 : _p$key2.identifierName) == "bunny";
-      if (r) console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! bunny ");
-      return r;
-    });
-  }
-  return false;
-}
+var propsHasConst = function propsHasConst(e) {
+  return libExports.isObjectExpression(e) && e.properties.some(function (p) {
+    var _p$key;
+    return libExports.isObjectProperty(p) && ((_p$key = p.key) === null || _p$key === void 0 || (_p$key = _p$key.loc) === null || _p$key === void 0 ? void 0 : _p$key.identifierName) == "immediate";
+  });
+};
 var lazify = function lazify(expression) {
   return libExports.arrowFunctionExpression([], expression);
 };
@@ -33399,7 +33393,6 @@ function _transform(code, filename) {
         var isconst = false;
         if (props && !nopros) {
           isconst = propsHasConst(props);
-          if (isconst) console.log("ISCONST, so no thunk!!!!");
           if (!isconst) props = lazifyifnotconstant(props);
           propsProperty = libExports.objectProperty(libExports.identifier("p"), props);
         }

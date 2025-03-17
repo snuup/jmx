@@ -26,43 +26,7 @@ let isconstant = (expression: t.Expression | t.SpreadElement): boolean => {
     return false
 }
 
-// function propsHasConst(expression) {
-
-//     // Ensure it's an ObjectExpression
-//     if (!expression.isObjectExpression()) return false
-
-//     // Check if any property has the key "const"
-//     let r = expression.get("properties").some(prop =>
-//         prop.isObjectProperty() &&
-//         prop.get("key").isIdentifier({ name: "const" })
-//     )
-
-//     if (r) console.log("isconst!!")
-
-//     return r
-// }
-
-function propsHasConst(e) {
-
-    if (t.isObjectExpression(e)) {
-        return e.properties.some(p => {
-
-            console.log("pk:>", p.key?.loc?.identifierName, p, t.isObjectProperty(p))
-
-            let r = t.isObjectProperty(p) && p.key?.loc?.identifierName == "bunny"
-            if (r) console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! bunny ")
-            return r
-
-            //console.log("p:>", p)
-
-            //return p.key?.loc?.identifierName == "const"
-        })
-    }
-
-    return false
-}
-
-
+let propsHasConst = e => (t.isObjectExpression(e)) && e.properties.some(p => t.isObjectProperty(p) && p.key?.loc?.identifierName == "immediate")
 let lazify = (expression) => t.arrowFunctionExpression([], expression)
 let lazifyifnotconstant = (e) => isconstant(e) ? e : lazify(e)
 //let markit = (expression) => t.arrowFunctionExpression([t.identifier("hase")], expression) // debug utility
@@ -105,11 +69,7 @@ function transform(code: string, filename: string) {
                 let nopros = t.isNullLiteral(props)
                 let isconst = false
                 if (props && !nopros) {
-
-                    //if (isconstant(props)) props = markit(props)
                     isconst = propsHasConst(props)
-                    if (isconst) console.log("ISCONST, so no thunk!!!!")
-
                     if (!isconst) props = lazifyifnotconstant(props)
                     propsProperty = t.objectProperty(t.identifier("p"), props)
                 }

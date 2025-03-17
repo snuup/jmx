@@ -216,7 +216,7 @@ let isselector = (x: any): x is Selector => typeof x === "string" || x instanceo
 // Implementation
 export function updateview(...us: Selectors): void {
     {
-        console.log('%cupdateview', "background:violet;color:white;padding:2px", us)
+        // console.log('%cupdateview', "background:violet;color:white;padding:2px", us)
 
         //default parameter
         if (!us.length) us = [document.body]
