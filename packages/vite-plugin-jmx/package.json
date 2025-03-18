@@ -1,7 +1,7 @@
 {
-	"name": "@snupo/vite-plugin",
+	"name": "@snupo/vite-plugin-jmx",
     "author": "snup",
-	"version": "0.0.7",
+	"version": "0.0.9",
 	"main": "dist/vite-plugin-jmx.js",
 	"types": "dist/types",
 	"devDependencies": {
