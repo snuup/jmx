@@ -1,12 +1,12 @@
 {
 	"name": "@snupo/jmx",
 	"author": "snup",
-	"version": "0.0.16",
+	"version": "0.0.17",
 	"publishConfig": {
 		"access": "public"
 	},
 	"main": "dist/index.js",
-	"types": "dist/types",
+    "types": "./dist/types/index.d.ts",
 	"files": [
 		"dist",
 		"jmx"
