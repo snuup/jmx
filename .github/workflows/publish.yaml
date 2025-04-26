@@ -35,9 +35,10 @@ jobs:
           echo "Scoped registry: $(npm config get @snupo:registry)"
           npm view @snupo/vite-plugin-jmx --json || echo "Package not published yet"
 
+
+
       # --- Changesets Version & Publish ---
-      - name: Create Release Pull Request or Publish
-        id: changesets
+      - name: Publish
         uses: changesets/action@v1
         with:
           # This will publish to npm if on master (no PR needed)
