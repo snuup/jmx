@@ -6,7 +6,8 @@
 		"packages/*"
 	],
 	"scripts": {
-		"build": "npm run build -w packages/jmx && npm run build -w packages/vite-plugin-jmx"
+		"build": "npm run build -w packages/jmx",
+		"buildxxxxx": "npm run build -w packages/jmx && npm run build -w packages/vite-plugin-jmx"
 	},
 	"devDependencies": {
 		"@changesets/cli": "^2.29.2",
