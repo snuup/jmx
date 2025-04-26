@@ -29,6 +29,12 @@ jobs:
       - name: Build packages
         run: npm run build
 
+      - name: Verify npm config
+        run: |
+          echo "Registry: $(npm config get registry)"
+          echo "Scoped registry: $(npm config get @snupo:registry)"
+          npm view @snupo/vite-plugin-jmx --json || echo "Package not published yet"
+
       # --- Changesets Version & Publish ---
       - name: Create Release Pull Request or Publish
         id: changesets
