@@ -36,6 +36,20 @@ jobs:
           npm view @snupo/vite-plugin-jmx --json || echo "Package not published yet"
 
 
+      - name: Version Packages
+        uses: changesets/action@v1
+        with:
+          publish: false  # Disable Changesets' publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Manual Publish
+        run: |
+          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > .npmrc
+          npm publish --access public
+        working-directory: ./packages/vite-plugin-jmx
+        env:
+          NPM_TOKEN: ${{ secrets.NPM }}
 
       # --- Changesets Version & Publish ---
       - name: Publish
@@ -46,3 +60,4 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed for PRs/releases
+
