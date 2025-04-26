@@ -2,6 +2,12 @@
 	"name": "jmx-tools",
 	"author": "snup",
 	"version": "0.0.7",
+	"workspaces": [
+		"packages/*"
+	],
+	"scripts": {
+        "build": "npm run build -w packages/jmx && npm run build -w packages/vite-plugin-jmx"
+	},
 	"devDependencies": {
 		"@rollup/plugin-typescript": "^12.1.2",
 		"path": "^0.12.7",

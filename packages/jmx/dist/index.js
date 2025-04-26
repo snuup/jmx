@@ -20,6 +20,9 @@ const loggedmethodsex = (o, logger) => new Proxy(o, {
 const loggedmethods = (o) => loggedmethodsex(o, (name, args, result) => console.log("%c" + name, "background:#585059;color:white;padding:2px;font-weight:bold", args));
 const loggedmethodscolored = (bgcolor, o) => loggedmethodsex(o, (name, args, result) => console.log("%c" + name, `background:${bgcolor};color:white;padding:2px;font-weight:bold`, args));
 
+window.jmx = {
+    create: document.createElement
+};
 let evaluate = (expr) => expr instanceof Function ? expr() : expr;
 let removeexcesschildren = (n, i) => { let c; while ((c = n.childNodes[i])) {
     c.remove();
@@ -68,7 +71,7 @@ function sync(p, i, h, uc) {
         if (iselement(h)) {
             let n;
             if (c?.tagName != h.tag) {
-                n = document.createElement(h.tag);
+                n = window.jmx.create(h.tag);
                 c ? c.replaceWith(n) : p.appendChild(n);
                 setprops(n, props);
                 props?.mounted?.(n);
