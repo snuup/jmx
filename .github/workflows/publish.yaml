@@ -8,10 +8,14 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
+
       - uses: actions/checkout@v4
         with:
           # Required for Changesets to detect git history
           fetch-depth: 0
+
+      - name: Clean npm cache
+        run: npm cache clean --force
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
