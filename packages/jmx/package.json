@@ -1,7 +1,7 @@
 {
 	"name": "@snupo/jmx",
 	"author": "snup",
-	"version": "0.0.19",
+	"version": "0.0.30",
 	"publishConfig": {
 		"access": "public"
 	},
