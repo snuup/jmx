@@ -1,0 +1,28 @@
+{
+	"name": "@snupo/vite-plugin-jmx",
+	"author": "snup",
+	"version": "0.0.10",
+	"publishConfig": {
+		"access": "public"
+	},
+	"main": "dist/vite-plugin-jmx.js",
+	"types": "dist/types",
+	"devDependencies": {
+		"@babel/generator": "^7.26.9",
+		"@babel/parser": "^7.26.9",
+		"@babel/plugin-transform-typescript": "^7.20.2",
+		"@babel/preset-env": "^7.26.8",
+		"@babel/traverse": "^7.26.9",
+		"@babel/types": "^7.19.3",
+		"@rollup/plugin-babel": "^6.0.4",
+		"@rollup/plugin-commonjs": "^28.0.2",
+		"@rollup/plugin-json": "^6.1.0",
+		"@rollup/plugin-node-resolve": "^16.0.0",
+		"@types/node": "^22.13.2",
+		"babel-preset-env": "^0.0.0"
+	},
+	"scripts": {
+		"build": "rollup -c"
+	},
+	"type": "module"
+}

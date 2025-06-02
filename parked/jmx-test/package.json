@@ -11,5 +11,6 @@
 		"happy-dom": "^16.8.1",
 		"vitest": "^3.0.5"
 	},
-	"type": "module"
+	"type": "module",
+    "private": true
 }
