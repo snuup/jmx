@@ -9,12 +9,12 @@ const enum NodeType { // vaporizes (but for that must be in this file, otherwise
 declare global {
     interface Window {
         jmx: {
-            create: typeof document.createElement
+            create: (tagName: string) => Element;
         }
     }
 }
 window.jmx = {
-    create: document.createElement
+    create: tagName => document.createElement(tagName)
 }
 
 let evaluate = <T>(expr: Expr<T>): T => expr instanceof Function ? expr() : expr
@@ -87,7 +87,7 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: IUpdateContext)
 
             let n: Element
 
-            if ((<Element>c)?.tagName != h.tag) {
+            if ((<Element>c)?.tagName.toUpperCase() != h.tag.toUpperCase()) {
                 n = window.jmx.create(h.tag)
                 c ? c.replaceWith(n) : p.appendChild(n)
                 setprops(n, props)

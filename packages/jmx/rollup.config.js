@@ -1,7 +1,7 @@
 import typescript from "@rollup/plugin-typescript"
 import clean from "rollup-plugin-cleanup"
 import copy from 'rollup-plugin-copy'
-import { createPathTransform } from 'rollup-sourcemap-path-transform'
+//import { createPathTransform } from 'rollup-sourcemap-path-transform'
 
 export default {
     input: 'index.ts',

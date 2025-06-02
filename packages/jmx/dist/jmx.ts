@@ -5,6 +5,18 @@ const enum NodeType { // vaporizes (but for that must be in this file, otherwise
     TextNode = 3,
 }
 
+// configuration
+declare global {
+    interface Window {
+        jmx: {
+            create: (tagName: string) => Element;
+        }
+    }
+}
+window.jmx = {
+    create: tagName => document.createElement(tagName)
+}
+
 let evaluate = <T>(expr: Expr<T>): T => expr instanceof Function ? expr() : expr
 let removeexcesschildren = (n: Element, i: number) => { let c: ChildNode; while ((c = n.childNodes[i])) { c.remove() } }
 let iswebcomponent = (h: HElement) => (h.tag as string).includes('-')
@@ -75,8 +87,8 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: IUpdateContext)
 
             let n: Element
 
-            if ((<Element>c)?.tagName != h.tag) {
-                n = document.createElement(h.tag)
+            if ((<Element>c)?.tagName.toUpperCase() != h.tag.toUpperCase()) {
+                n = window.jmx.create(h.tag)
                 c ? c.replaceWith(n) : p.appendChild(n)
                 setprops(n, props)
                 props?.mounted?.(n)

@@ -1,7 +1,7 @@
 {
-	"name": "@snupo/jmx",
-	"author": "snup",
-	"version": "0.0.17",
+	"name": "jmx-web",
+	"author": "snupo",
+	"version": "0.0.21",
 	"publishConfig": {
 		"access": "public"
 	},
