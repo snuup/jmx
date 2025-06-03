@@ -87,7 +87,7 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: IUpdateContext)
 
             let n: Element
 
-            if ((<Element>c)?.tagName.toUpperCase() != h.tag.toUpperCase()) {
+            if ((<Element>c)?.tagName != h.tag) {
                 n = window.jmx.create(h.tag)
                 c ? c.replaceWith(n) : p.appendChild(n)
                 setprops(n, props)

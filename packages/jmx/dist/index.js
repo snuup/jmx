@@ -70,7 +70,7 @@ function sync(p, i, h, uc) {
         const props = evaluate(h.p);
         if (iselement(h)) {
             let n;
-            if (c?.tagName.toUpperCase() != h.tag.toUpperCase()) {
+            if (c?.tagName != h.tag) {
                 n = window.jmx.create(h.tag);
                 c ? c.replaceWith(n) : p.appendChild(n);
                 setprops(n, props);
