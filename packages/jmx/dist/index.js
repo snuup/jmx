@@ -41,7 +41,7 @@ let setprops = (e, newprops = {}) => {
     let oldprops = evaluate(e.h?.p) ?? {};
     clean(newprops);
     for (let p in oldprops)
-        (!(p in newprops)) && isproperty(p, oldprops[p]) ? e[p] = null : e.removeAttribute(p);
+        ((!(p in newprops)) && isproperty(p, oldprops[p])) ? e[p] = null : e.removeAttribute(p);
     for (let p in newprops)
         isproperty(p, newprops[p]) ? e[p] = newprops[p] : e.setAttribute(p, newprops[p]);
 };
