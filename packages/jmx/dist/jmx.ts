@@ -36,7 +36,16 @@ let clean = (o: Record<string, any>) => { for (let k in o) o[k] === undefined &&
 let setprops = (e: Element, newprops: Props = {}) => {
     let oldprops = evaluate(e.h?.p) ?? {}
     clean(newprops)
-    for (let p in oldprops) ((!(p in newprops)) && isproperty(p, oldprops[p])) ? (e as any)[p] = null : e.removeAttribute(p)
+    for (let p in oldprops) {
+        if (!(p in newprops)) {
+            if (isproperty(p, oldprops[p])) {
+                (e as any)[p] = null
+            }
+            else {
+                e.removeAttribute(p)
+            }
+        }
+    }
     for (let p in newprops) isproperty(p, newprops[p]) ? (e as any)[p] = newprops[p] : e.setAttribute(p, newprops[p])
 
     // for (let p in newprops) {
