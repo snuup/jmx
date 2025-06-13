@@ -150,34 +150,12 @@ function patch(e, h, uc = {}) {
         e.replaceChildren();
     const p = e.parentElement;
     const i = [].indexOf.call(p.childNodes, e);
-    requestAnimationFrame(() => sync(p, i, h, uc));
-}
-function patch3(e, h, uc = {}) {
-    if (!e)
-        return;
-    if (uc.replace)
-        e.replaceChildren();
-    const p = e.parentElement;
-    const i = [].indexOf.call(p.childNodes, e);
     sync(p, i, h, uc);
-}
-function patch2(e, h, uc = {}) {
-    if (!e)
-        return;
-    if (uc.replace)
-        e.replaceChildren();
-    const p = e.parentElement;
-    const i = [].indexOf.call(p.childNodes, e);
-    return new Promise((resolve) => {
-        requestAnimationFrame(() => {
-            sync(p, i, h, uc);
-            resolve();
-        });
-    });
 }
 let isselector = (x) => typeof x === "string" || x instanceof Node;
 function updateview(...us) {
     {
+        console.log('%cupdateview', "background:violet;color:white;padding:2px", us);
         if (!us.length)
             us = [document.body];
         let uc;
@@ -186,12 +164,18 @@ function updateview(...us) {
             uc = u0;
             us = us.slice(1);
         }
-        us
-            .flatMap(x => (typeof x == 'string') ? [...(uc?.root ?? document).querySelectorAll(x)] : [x])
-            .forEach(e => {
-            if (!e?.h)
-                throw 'jmx: no h exists on the node';
-            patch(e, e.h, uc);
+        return new Promise((resolve) => {
+            requestAnimationFrame(() => {
+                console.log("inside reqanim", us);
+                us
+                    .flatMap(x => (typeof x == 'string') ? [...(uc?.root ?? document).querySelectorAll(x)] : [x])
+                    .forEach(e => {
+                    if (!e?.h)
+                        throw 'jmx: no h exists on the node';
+                    patch(e, e.h, uc);
+                });
+                resolve();
+            });
         });
     }
 }
@@ -248,5 +232,5 @@ function cc(...namesOrObjects) {
     return namesOrObjects.flatMap(n => (n.trim ? n : Object.keys(n).filter(k => n[k]))).join(' ');
 }
 
-export { JMXComp, When, cc, jsx, jsxf, loggedmethods, loggedmethodscolored, loggedmethodsex, mount, patch, patch2, patch3, rebind, updateview };
+export { JMXComp, When, cc, jsx, jsxf, loggedmethods, loggedmethodscolored, loggedmethodsex, mount, patch, rebind, updateview };
 //# sourceMappingURL=index.js.map
