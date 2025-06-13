@@ -173,44 +173,42 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: IUpdateContext)
 
 export function patch(e: Node | null, h: Expr<H>, uc: IUpdateContext = {}) {
     if (!e) return
-    //console.log("patch", e, uc, h)
     if (uc.replace) (e as HTMLElement).replaceChildren()
     const p = e.parentElement as HTMLElement
     const i = [].indexOf.call<any, any, any>(p.childNodes, e)
-    // always called deferred, because removing elements can trigger events and their handlers (like blur)
-    requestAnimationFrame(() => sync(p, i, h, uc))
-}
-
-export function patch3(e: Node | null, h: Expr<H>, uc: IUpdateContext = {}) {
-    if (!e) return
-    if (uc.replace) (e as HTMLElement).replaceChildren()
-    const p = e.parentElement as HTMLElement
-    const i = [].indexOf.call<any, any, any>(p.childNodes, e)
-    // always called deferred, because removing elements can trigger events and their handlers (like blur)
     sync(p, i, h, uc)
 }
 
-export function patch2(e: Node | null, h: Expr<H>, uc: IUpdateContext = {}) {
-    if (!e) return
-    if (uc.replace) (e as HTMLElement).replaceChildren()
-    const p = e.parentElement as HTMLElement
-    const i = [].indexOf.call<any, any, any>(p.childNodes, e)
-    // always called deferred, because removing elements can trigger events and their handlers (like blur)
-    return new Promise<void>((resolve) => {
+// export function patch3(e: Node | null, h: Expr<H>, uc: IUpdateContext = {}) {
+//     if (!e) return
+//     if (uc.replace) (e as HTMLElement).replaceChildren()
+//     const p = e.parentElement as HTMLElement
+//     const i = [].indexOf.call<any, any, any>(p.childNodes, e)
+//     // call deferred, because removing elements can trigger events and their handlers (like blur)
+//     sync(p, i, h, uc)
+// }
 
-        requestAnimationFrame(() => {
+// export function patch2(e: Node | null, h: Expr<H>, uc: IUpdateContext = {}) {
+//     if (!e) return
+//     if (uc.replace) (e as HTMLElement).replaceChildren()
+//     const p = e.parentElement as HTMLElement
+//     const i = [].indexOf.call<any, any, any>(p.childNodes, e)
+//     // always called deferred, because removing elements can trigger events and their handlers (like blur)
+//     return new Promise<void>((resolve) => {
 
-            // Your animation logic here
-            //console.log("Animation frame starts")
-            sync(p, i, h, uc)
-            //console.log("Animation frame done")
+//         requestAnimationFrame(() => {
 
-            // Resolve the promise after the frame completes
-            resolve()
-        })
-    })
+//             // Your animation logic here
+//             //console.log("Animation frame starts")
+//             sync(p, i, h, uc)
+//             //console.log("Animation frame done")
 
-}
+//             // Resolve the promise after the frame completes
+//             resolve()
+//         })
+//     })
+
+// }
 
 
 // Overload signatures
@@ -226,9 +224,9 @@ export function patch2(e: Node | null, h: Expr<H>, uc: IUpdateContext = {}) {
 let isselector = (x: any): x is Selector => typeof x === "string" || x instanceof Node
 
 // Implementation
-export function updateview(...us: Selectors): void {
+export function updateview(...us: Selectors): Promise<void> {
     {
-        // console.log('%cupdateview', "background:violet;color:white;padding:2px", us)
+        console.log('%cupdateview', "background:violet;color:white;padding:2px", us)
 
         //default parameter
         if (!us.length) us = [document.body]
@@ -241,12 +239,25 @@ export function updateview(...us: Selectors): void {
             us = us.slice(1) as any
         }
 
-        (us as Selector[])
-            .flatMap(x => (typeof x == 'string') ? [...(uc?.root ?? document).querySelectorAll(x)] : [x])
-            .forEach(e => {
-                if (!e?.h) throw 'jmx: no h exists on the node'
-                patch(e, e.h, uc)
+        return new Promise<void>((resolve) => {
+
+            requestAnimationFrame(() => {
+
+                console.log("inside reqanim", us);
+
+                (us as Selector[])
+                    .flatMap(x => (typeof x == 'string') ? [...(uc?.root ?? document).querySelectorAll(x)] : [x])
+                    .forEach(e => {
+                        if (!e?.h) throw 'jmx: no h exists on the node'
+                        patch(e, e.h, uc)
+                    })
+
+                // Resolve the promise after the frame completes
+                resolve()
             })
+        })
+
+
 
         // let nodes = [] as Element[]
 
