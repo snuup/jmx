@@ -1,7 +1,11 @@
 {
 	"name": "jmx-web",
 	"author": "snupo",
+<<<<<<< HEAD
 	"version": "0.0.26",
+=======
+	"version": "0.0.24",
+>>>>>>> promi
 	"publishConfig": {
 		"access": "public"
 	},
