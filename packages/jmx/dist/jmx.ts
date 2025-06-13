@@ -235,7 +235,7 @@ let isselector = (x: any): x is Selector => typeof x === "string" || x instanceo
 // Implementation
 export function updateview(...us: Selectors): Promise<void> {
     {
-        console.log('%cupdateview', "background:violet;color:white;padding:2px", us)
+        // console.log('%cupdateview', "background:violet;color:white;padding:2px", us)
 
         //default parameter
         if (!us.length) us = [document.body]
@@ -252,8 +252,6 @@ export function updateview(...us: Selectors): Promise<void> {
 
             requestAnimationFrame(() => {
 
-                console.log("inside reqanim", us);
-
                 (us as Selector[])
                     .flatMap(x => (typeof x == 'string') ? [...(uc?.root ?? document).querySelectorAll(x)] : [x])
                     .forEach(e => {
@@ -261,35 +259,9 @@ export function updateview(...us: Selectors): Promise<void> {
                         patch(e, e.h, uc)
                     })
 
-                // Resolve the promise after the frame completes
                 resolve()
             })
         })
-
-
-
-        // let nodes = [] as Element[]
-
-        // for (let us of us) {
-
-        //     if (!us) continue
-
-        //     if (typeof us == "string") {
-        //         nodes = [...(uc?.root ?? document).querySelectorAll(us)]
-        //     }
-        //     else if (us instanceof Node) {
-        //         nodes = [us as HTMLElement]
-        //     }
-        //     else {
-        //         uc = us
-        //     }
-
-        //     for (let n of nodes) {
-        //         if (!n?.h) throw 'jmx: no h exists on the node'
-        //         patch(n, n.h, uc)
-
-        //     }
-        // }
     }
 }
 

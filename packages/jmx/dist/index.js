@@ -155,7 +155,6 @@ function patch(e, h, uc = {}) {
 let isselector = (x) => typeof x === "string" || x instanceof Node;
 function updateview(...us) {
     {
-        console.log('%cupdateview', "background:violet;color:white;padding:2px", us);
         if (!us.length)
             us = [document.body];
         let uc;
@@ -166,7 +165,6 @@ function updateview(...us) {
         }
         return new Promise((resolve) => {
             requestAnimationFrame(() => {
-                console.log("inside reqanim", us);
                 us
                     .flatMap(x => (typeof x == 'string') ? [...(uc?.root ?? document).querySelectorAll(x)] : [x])
                     .forEach(e => {
