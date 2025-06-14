@@ -13,8 +13,9 @@ declare global {
         }
     }
 }
-window.jmx = {
-    create: tagName => document.createElement(tagName)
+
+(globalThis as any).jmx = {
+    create: (tagName: string) => document.createElement(tagName)
 }
 
 let evaluate = <T>(expr: Expr<T>): T => expr instanceof Function ? expr() : expr
