@@ -55,7 +55,7 @@ let setprops = (e, newprops = {}) => {
 };
 function sync(p, i, h, uc) {
     h = evaluate(h);
-    if (h === null || h === undefined)
+    if (h === null || h === undefined || h === false || h === true)
         return i;
     let c = p.childNodes[i];
     function synctextnode(text) {

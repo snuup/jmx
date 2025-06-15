@@ -66,7 +66,7 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: IUpdateContext)
     // console.log('%csync', "background:orange", p.tagName, i, h)
 
     h = evaluate(h)
-    if (h === null || h === undefined) return i // skip this element. not that !!h would forbid to render the number 0 or the boolean value false
+    if (h === null || h === undefined || h === false || h === true) return i // this is jsx standard behavior
 
     let c = p.childNodes[i] // is often null, eg during fresh creation
 
