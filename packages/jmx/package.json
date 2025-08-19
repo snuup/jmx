@@ -1,14 +1,19 @@
 {
-    "name": "jmx",
-    "version": "0.0.7",
-    "main": "index.ts",
-    "types": "dist/types",
-    "files": [
-        "dist",
-        "jmx"
-    ],
-    "scripts": {
-        "build": "rollup -c"
-    },
-    "type": "module"
+	"name": "jmx-web",
+	"author": "snupo",
+	"version": "0.0.30",
+	"publishConfig": {
+		"access": "public"
+	},
+	"main": "dist/index.js",
+    "types": "./dist/types/index.d.ts",
+	"files": [
+		"dist",
+		"jmx"
+	],
+	"scripts": {
+		"build": "rollup -c",
+		"publish": ""
+	},
+	"type": "module"
 }

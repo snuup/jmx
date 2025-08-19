@@ -1,13 +1,34 @@
-type Func<T> = () => T;
+export type Action = () => void;
+export type Func<T> = () => T;
 export type Expr<T> = T | Func<T>;
 export type Props = Record<string, any>;
-export type FComponent = (props: Props | undefined, children?: ChildrenH) => HElement;
+export interface FComponent {
+    (props: Props | undefined, children?: ChildrenH): HElement;
+    state?: Record<string, any>;
+}
+export type Selector = string | Node;
+export type Selectors = [(IUpdateContext | Selector)?, ...Selector[]];
+export interface FComponentState<P, S> {
+    (this: S & {
+        element: HTMLElement;
+        update: (...ss: Selectors) => void;
+        uc?: Selector | Selectors;
+    }, p: P): H;
+    state?: S;
+}
 export type FComponentT<P> = (pcn: P, cn?: Children) => H | void;
+export interface IUpdateContext {
+    patchElementOnly?: boolean;
+    replace?: boolean;
+    root?: HTMLElement;
+    functionnode?: HTMLElement;
+    [key: string]: any;
+}
 export interface IClassComponent {
     element: Node;
     props?: Record<string, any>;
     view(): H;
-    update(uc: UpdateContext): boolean | void;
+    update(uc: IUpdateContext): boolean | void;
     mounted(): void;
 }
 interface CComponent {
@@ -25,7 +46,7 @@ export type HElement = {
     cn: Children;
     i?: any;
 };
-type HCompFun = {
+export type HCompFun = {
     tag: FComponent;
     p?: Expr<Props>;
     cn?: Children;
@@ -38,13 +59,11 @@ export type HCompClass = {
 };
 export type HComp = HCompFun | HCompClass;
 export type H = HText | HElement | HComp | HFragment;
-export type UpdateContext = {
-    patchElementOnly?: boolean;
-    replace?: boolean;
-};
 declare global {
     interface Node {
         h?: HElement | HCompFun | HCompClass;
+        hr?: HElement;
+        state?: Record<string, any>;
     }
 }
 export {};

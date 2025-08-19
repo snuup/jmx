@@ -1,4 +1,1 @@
-- colored console
-- examine old tastejs jmx
-
-% simplify jsx -> arrays
+- make mounted optional for components

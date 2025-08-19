@@ -6,8 +6,6 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
     },
-    "author": "",
-    "license": "ISC",
     "dependencies": {
         "@babel/plugin-transform-typescript": "^7.20.2",
         "@types/node": "^16.11.11"

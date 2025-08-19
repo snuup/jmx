@@ -7,25 +7,26 @@ import * as fs from "fs"
 
 let isconstant = (expression: t.Expression | t.SpreadElement): boolean => {
     if (t.isStringLiteral(expression) || t.isNumericLiteral(expression) || t.isBooleanLiteral(expression) || t.isNullLiteral(expression)) {
-        return true;
+        return true
     }
     if (t.isObjectExpression(expression)) {
         return expression.properties.every(prop => {
             if (t.isObjectProperty(prop)) {
-                return t.isAssignmentPattern(prop.value) ? false : t.isExpression(prop.value) || t.isSpreadElement(prop.value) ? isconstant(prop.value) : false;
+                return t.isAssignmentPattern(prop.value) ? false : t.isExpression(prop.value) || t.isSpreadElement(prop.value) ? isconstant(prop.value) : false
             }
             if (t.isSpreadElement(prop)) {
-                return isconstant(prop.argument);
+                return isconstant(prop.argument)
             }
-            return false;
-        });
+            return false
+        })
     }
     if (t.isArrayExpression(expression)) {
-        return expression.elements.every(elem => isconstant(elem as t.Expression));
+        return expression.elements.every(elem => isconstant(elem as t.Expression))
     }
-    return false;
+    return false
 }
 
+let propsHasConst = e => (t.isObjectExpression(e)) && e.properties.some(p => t.isObjectProperty(p) && p.key?.loc?.identifierName == "immediate")
 let lazify = (expression) => t.arrowFunctionExpression([], expression)
 let lazifyifnotconstant = (e) => isconstant(e) ? e : lazify(e)
 //let markit = (expression) => t.arrowFunctionExpression([t.identifier("hase")], expression) // debug utility
@@ -44,7 +45,7 @@ function transform(code: string, filename: string) {
 
             if (t.isIdentifier(args[0]) && args[0].name == "jsxf") {
 
-                console.log("fragmento");
+                console.log("fragmento")
 
                 // fragment
                 // let F = jsx(jsxf, null, "aa", "bb");
@@ -66,11 +67,10 @@ function transform(code: string, filename: string) {
                 let propsProperty
                 let props = args[1]
                 let nopros = t.isNullLiteral(props)
+                let isconst = false
                 if (props && !nopros) {
-
-                    //if (isconstant(props)) props = markit(props)
-
-                    props = lazifyifnotconstant(props)
+                    isconst = propsHasConst(props)
+                    if (!isconst) props = lazifyifnotconstant(props)
                     propsProperty = t.objectProperty(t.identifier("p"), props)
                 }
 
@@ -78,10 +78,7 @@ function transform(code: string, filename: string) {
                 let cna = args.slice(2)
                 if (cna.length) {
                     let cn = t.arrayExpression(cna)
-
-                    // if (isconstant(cn)) console.log("constant children", cn);
-
-                    childrenProperty = t.objectProperty(t.identifier("cn"), lazifyifnotconstant(cn))
+                    childrenProperty = t.objectProperty(t.identifier("cn"), isconst ? cn : lazifyifnotconstant(cn))
                 }
 
                 path.replaceWith(t.objectExpression([

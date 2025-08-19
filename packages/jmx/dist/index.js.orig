@@ -20,8 +20,12 @@ const loggedmethodsex = (o, logger) => new Proxy(o, {
 const loggedmethods = (o) => loggedmethodsex(o, (name, args, result) => console.log("%c" + name, "background:#585059;color:white;padding:2px;font-weight:bold", args));
 const loggedmethodscolored = (bgcolor, o) => loggedmethodsex(o, (name, args, result) => console.log("%c" + name, `background:${bgcolor};color:white;padding:2px;font-weight:bold`, args));
 
-globalThis.jmx = {
-    create: (tagName) => document.createElement(tagName)
+window.jmx = {
+<<<<<<< HEAD
+    create: tagName => document.createElement(tagName)
+=======
+    create: document.createElement
+>>>>>>> 9805420a89101250c2ad990ec9c8c92a009e7e6c
 };
 let evaluate = (expr) => expr instanceof Function ? expr() : expr;
 let removeexcesschildren = (n, i) => { let c; while ((c = n.childNodes[i])) {
@@ -40,22 +44,14 @@ let clean = (o) => { for (let k in o)
 let setprops = (e, newprops = {}) => {
     let oldprops = evaluate(e.h?.p) ?? {};
     clean(newprops);
-    for (let p in oldprops) {
-        if (!(p in newprops)) {
-            if (isproperty(p, oldprops[p])) {
-                e[p] = null;
-            }
-            else {
-                e.removeAttribute(p);
-            }
-        }
-    }
+    for (let p in oldprops)
+        (!(p in newprops)) && isproperty(p, oldprops[p]) ? e[p] = null : e.removeAttribute(p);
     for (let p in newprops)
         isproperty(p, newprops[p]) ? e[p] = newprops[p] : e.setAttribute(p, newprops[p]);
 };
 function sync(p, i, h, uc) {
     h = evaluate(h);
-    if (h === null || h === undefined || h === false || h === true)
+    if (h === null || h === undefined)
         return i;
     let c = p.childNodes[i];
     function synctextnode(text) {
@@ -78,7 +74,11 @@ function sync(p, i, h, uc) {
         const props = evaluate(h.p);
         if (iselement(h)) {
             let n;
+<<<<<<< HEAD
+            if (c?.tagName.toUpperCase() != h.tag.toUpperCase()) {
+=======
             if (c?.tagName != h.tag) {
+>>>>>>> 9805420a89101250c2ad990ec9c8c92a009e7e6c
                 n = window.jmx.create(h.tag);
                 c ? c.replaceWith(n) : p.appendChild(n);
                 setprops(n, props);
@@ -150,7 +150,30 @@ function patch(e, h, uc = {}) {
         e.replaceChildren();
     const p = e.parentElement;
     const i = [].indexOf.call(p.childNodes, e);
+    requestAnimationFrame(() => sync(p, i, h, uc));
+}
+function patch3(e, h, uc = {}) {
+    if (!e)
+        return;
+    if (uc.replace)
+        e.replaceChildren();
+    const p = e.parentElement;
+    const i = [].indexOf.call(p.childNodes, e);
     sync(p, i, h, uc);
+}
+function patch2(e, h, uc = {}) {
+    if (!e)
+        return;
+    if (uc.replace)
+        e.replaceChildren();
+    const p = e.parentElement;
+    const i = [].indexOf.call(p.childNodes, e);
+    return new Promise((resolve) => {
+        requestAnimationFrame(() => {
+            sync(p, i, h, uc);
+            resolve();
+        });
+    });
 }
 let isselector = (x) => typeof x === "string" || x instanceof Node;
 function updateview(...us) {
@@ -163,17 +186,12 @@ function updateview(...us) {
             uc = u0;
             us = us.slice(1);
         }
-        return new Promise((resolve) => {
-            requestAnimationFrame(() => {
-                us
-                    .flatMap(x => (typeof x == 'string') ? [...(uc?.root ?? document).querySelectorAll(x)] : [x])
-                    .forEach(e => {
-                    if (!e?.h)
-                        throw 'jmx: no h exists on the node';
-                    patch(e, e.h, uc);
-                });
-                resolve();
-            });
+        us
+            .flatMap(x => (typeof x == 'string') ? [...(uc?.root ?? document).querySelectorAll(x)] : [x])
+            .forEach(e => {
+            if (!e?.h)
+                throw 'jmx: no h exists on the node';
+            patch(e, e.h, uc);
         });
     }
 }
@@ -230,5 +248,5 @@ function cc(...namesOrObjects) {
     return namesOrObjects.flatMap(n => (n.trim ? n : Object.keys(n).filter(k => n[k]))).join(' ');
 }
 
-export { JMXComp, When, cc, jsx, jsxf, loggedmethods, loggedmethodscolored, loggedmethodsex, mount, patch, rebind, updateview };
+export { JMXComp, When, cc, jsx, jsxf, loggedmethods, loggedmethodscolored, loggedmethodsex, mount, patch, patch2, patch3, rebind, updateview };
 //# sourceMappingURL=index.js.map
