@@ -1,8 +1,21 @@
-import { rebind } from './base'
-import { Expr, FComponent, H, HComp, HCompClass, HElement, HFragment, IClassComponent, Props, UpdateContext } from './h'
+import { mount, rebind } from './base'
+import { Expr, FComponent, H, HComp, HCompClass, HCompFun, HElement, HFragment, IClassComponent, Props, Selector, Selectors, IUpdateContext } from './h'
 
 const enum NodeType { // vaporizes (but for that must be in this file, otherwise not)
     TextNode = 3,
+}
+
+// configuration
+declare global {
+    interface Window {
+        jmx: {
+            create: (tagName: string) => Element;
+        }
+    }
+}
+
+(globalThis as any).jmx = {
+    create: (tagName: string) => document.createElement(tagName)
 }
 
 let evaluate = <T>(expr: Expr<T>): T => expr instanceof Function ? expr() : expr
@@ -19,10 +32,28 @@ let isproperty = (name: string, value: any) => (
     || value instanceof Function
 )
 
+let clean = (o: Record<string, any>) => { for (let k in o) o[k] === undefined && delete o[k] }
+
 let setprops = (e: Element, newprops: Props = {}) => {
     let oldprops = evaluate(e.h?.p) ?? {}
-    for (let p in oldprops) (!(p in newprops)) && isproperty(p, oldprops[p]) ? (e as any)[p] = null : e.removeAttribute(p)
+    clean(newprops)
+    for (let p in oldprops) {
+        if (!(p in newprops)) {
+            if (isproperty(p, oldprops[p])) {
+                (e as any)[p] = null
+            }
+            else {
+                e.removeAttribute(p)
+            }
+        }
+    }
     for (let p in newprops) isproperty(p, newprops[p]) ? (e as any)[p] = newprops[p] : e.setAttribute(p, newprops[p])
+
+    // for (let p in newprops) {
+    //     let newval = newprops[p]
+    //     let del = p === undefined
+    //     isproperty(p, newval) ? (e as any)[p] = newval : del ? e.removeAttribute(p) : e.setAttribute(p, newval)
+    // }
 }
 
 /** syncs at position i of p. returns the number of the element past the last added element.
@@ -30,12 +61,12 @@ let setprops = (e: Element, newprops: Props = {}) => {
  * if a fragment with 5 nodes was added, it returns i + 5
  * when a single element or component is added, it is i+1 since they always create exactly 1 node
 */
-function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext): number {
+function sync(p: Element, i: number, h: Expr<H | undefined>, uc: IUpdateContext): number {
 
-    // console.log('%csync', "background:orange", p.tagName, i, h, 'html = ' + document.body.outerHTML)
+    // console.log('%csync', "background:orange", p.tagName, i, h)
 
     h = evaluate(h)
-    if (h === null || h === undefined) return i // skip this element. not that !!h would forbid to render the number 0 or the boolean value false
+    if (h === null || h === undefined || h === false || h === true) return i // this is jsx standard behavior
 
     let c = p.childNodes[i] // is often null, eg during fresh creation
 
@@ -67,12 +98,15 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
             let n: Element
 
             if ((<Element>c)?.tagName != h.tag) {
-                n = document.createElement(h.tag)
+                n = window.jmx.create(h.tag)
                 c ? c.replaceWith(n) : p.appendChild(n)
                 setprops(n, props)
                 props?.mounted?.(n)
             } else {
                 n = c as Element
+                if (props?.const && n.hasAttribute("const")) {
+                    return i + 1
+                }
                 setprops(n, props)
                 if (props?.update?.(c, uc)) return i + 1
             }
@@ -89,7 +123,10 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
 
             case 'function':
 
+                // tbd: code review this part
+
                 let isupdate = c?.h?.tag == h.tag
+                let state: FunCompState
 
                 let ci: IClassComponent | undefined
 
@@ -100,11 +137,24 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
                     // if component instance returns truthy for update(), then syncing is susbstituted by the component
                     if (isupdate && ci.update(uc)) return i + 1
                 }
+                else {
+                    state = p.childNodes[i]?.state as any
+                    if (uc.functionnode?.h == h) {
+                        return sync(p, i, c.hr, uc)
+                    }
+                    if (state?.uc) {
+                        //console.log("yeah")
+                        state.updateglobal()
+                        return i + 1
+                    }
+                    //console.log("state >>>", state)
+                }
 
                 // materialize the component
                 // we run compoents view() and fun code often, we do not compare properties to avoid their computation
                 // this means that the inner hr (h resolved) is run often
-                let hr = ci?.view() ?? (h.tag as FComponent)(props, evaluate(h.cn))
+
+                let hr = ci?.view() ?? (h.tag as FComponent).bind(state ??= (h.tag.state ?? new FunCompState()))(props, evaluate(h.cn))
 
                 // a component can return undefined or null if it has no elements to show
                 if (hr === undefined || hr == null) return i
@@ -113,6 +163,9 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
 
                 let cn = p.childNodes[i]!
                 cn.h = h    // attach h onto the materialized component node
+                cn.hr = hr as any // tbd - nested functions !?
+                Object.assign(cn, { h, state })
+                if (state) state.element ??= cn
 
                 if (ci) ci.element = cn
                 if (!isupdate) ci?.mounted()
@@ -128,36 +181,140 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
     return i + 1
 }
 
-export function patch(e: Node | null, h: Expr<H>, uc: UpdateContext = {}) {
+export function patch(e: Node | null, h: Expr<H>, uc: IUpdateContext = {}) {
     if (!e) return
     if (uc.replace) (e as HTMLElement).replaceChildren()
     const p = e.parentElement as HTMLElement
     const i = [].indexOf.call<any, any, any>(p.childNodes, e)
-    // always called deferred, because removing elements can trigger events and their handlers (like blur)
-    requestAnimationFrame(() => sync(p, i, h, uc))
+    sync(p, i, h, uc)
 }
+
+// export function patch3(e: Node | null, h: Expr<H>, uc: IUpdateContext = {}) {
+//     if (!e) return
+//     if (uc.replace) (e as HTMLElement).replaceChildren()
+//     const p = e.parentElement as HTMLElement
+//     const i = [].indexOf.call<any, any, any>(p.childNodes, e)
+//     // call deferred, because removing elements can trigger events and their handlers (like blur)
+//     sync(p, i, h, uc)
+// }
+
+// export function patch2(e: Node | null, h: Expr<H>, uc: IUpdateContext = {}) {
+//     if (!e) return
+//     if (uc.replace) (e as HTMLElement).replaceChildren()
+//     const p = e.parentElement as HTMLElement
+//     const i = [].indexOf.call<any, any, any>(p.childNodes, e)
+//     // always called deferred, because removing elements can trigger events and their handlers (like blur)
+//     return new Promise<void>((resolve) => {
+
+//         requestAnimationFrame(() => {
+
+//             // Your animation logic here
+//             //console.log("Animation frame starts")
+//             sync(p, i, h, uc)
+//             //console.log("Animation frame done")
+
+//             // Resolve the promise after the frame completes
+//             resolve()
+//         })
+//     })
+
+// }
 
 
 // Overload signatures
-type Selector = string | Node | undefined | null
-type Selectors = Selector[]
 
-export function updateview(uc: UpdateContext, ...selectors: Selectors): void;
-export function updateview(...selectors: Selectors): void;
+
+//export function updateview(uc: UpdateContext, ...selectors: Selectors): void;
+//export function updateview(...selectors: Selectors): void;
+
+// class UpdateContext implements IUpdateContext {
+
+// }
+
+let isselector = (x: any): x is Selector => typeof x === "string" || x instanceof Node
 
 // Implementation
-export function updateview(...ucOrSelectors: (UpdateContext | Selector)[]): void {
+export function updateview(...us: Selectors): Promise<void> {
     {
-        let uc: UpdateContext
+        // console.log('%cupdateview', "background:violet;color:white;padding:2px", us)
 
-        ucOrSelectors
-        .flatMap(x => (typeof x == 'string') ? [...document.querySelectorAll(x)] : (x instanceof Node) ? [x] : (uc = x!, []))
-        .forEach(e => {
-            if (!e?.h) throw 'jmx: no h exists on the node';
-            patch(e, e.h, uc)
+        //default parameter
+        if (!us.length) us = [document.body]
+
+        let uc: IUpdateContext
+
+        let u0 = us[0]
+        if (!isselector(u0)) {
+            uc = u0!
+            us = us.slice(1) as any
+        }
+
+        return new Promise<void>((resolve) => {
+
+            requestAnimationFrame(() => {
+
+                (us as Selector[])
+                    .flatMap(x => (typeof x == 'string') ? [...(uc?.root ?? document).querySelectorAll(x)] : [x])
+                    .forEach(e => {
+                        if (!e?.h) throw 'jmx: no h exists on the node'
+                        patch(e, e.h, uc)
+                    })
+
+                resolve()
+            })
         })
     }
 }
 
 export function jsx(): HElement { throw 'jmx plugin not configured' } // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it
 export function jsxf(): HElement { throw 'jmx plugin not configured' } // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it
+
+mount({ updateview })
+
+class FunCompState {
+
+    element!: HTMLElement// | undefined
+    uc?: IUpdateContext
+
+    update(...us: Selectors) {
+
+        // console.log("fun update")
+
+        // update()
+        if (!us.length) {
+            updateview({ functionnode: this.element }, this.element)
+            return
+        }
+
+        let uc: IUpdateContext
+        let usx: Selector[]
+        let u0 = us[0]
+        if (!isselector(u0)) {
+            uc = u0!
+            const [_, ...ss] = us // as Selector[]
+            usx = ss
+        }
+        else {
+            uc = {}
+            usx = us as Selector[]
+        }
+        uc.root = this.element
+        uc.functionnode = this.element
+
+        if (!usx.length) usx = [this.element]
+
+        updateview(uc, ...usx)
+        // if (ss[0] == this.element) {
+        //     patch3(this.element, this.element.hr!)
+        // }
+        // else {
+        //     console.log("else - non full fun comp update")
+        //     updateview({ root: this.element }, ...ss)
+        // }
+    }
+
+    updateglobal() {
+        if (this.uc == "*") this.uc = this.element //adjust *, because setting this.element does not work
+        this.update(...this.uc)
+    }
+}

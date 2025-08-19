@@ -1,4 +1,4 @@
-import { Props, IClassComponent, UpdateContext, H, FComponentT, Children } from 'h'
+import { Props, IClassComponent, IUpdateContext, H, Children } from 'h'
 import { updateview } from './jmx'
 
 export type DeepReadonly<T> = { readonly [K in keyof T]: T[K] extends Record<string, unknown> ? DeepReadonly<T[K]> : T[K]; }
@@ -8,15 +8,16 @@ export const When = ({ cond }: { cond: boolean }, cn: Children) => cond ? { cn }
 export abstract class JMXComp<P extends Props = {}> implements IClassComponent {
 
     // assigned by jmx framework
-    element!: Node
+    element!: HTMLElement
 
     // we provide this ctor for jsx which uses ctor arguments as properties of class components.
     // at runtime, we pass the props directly
-    constructor(public props: P) { }
+    constructor(public props: P) { this.init() }
 
     // overrides
+    init() {}
     mounted() { }
-    update(uc: UpdateContext): boolean | void { }
+    update(uc: IUpdateContext): boolean | void { }
     abstract view(): H
 
     // utility: updates the component's view
