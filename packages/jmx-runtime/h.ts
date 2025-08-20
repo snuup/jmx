@@ -1,47 +1,21 @@
-// jmx internal types
+// jmx internal types - hopst
 // the following types describe the js expression we get from tsx after conversion be our jmx plugin
 // they can be useful for users as well, components might return them.
 
-export type Action = () => void
-export type Func<T> = () => T
+type Func<T> = () => T
 export type Expr<T> = T | Func<T>
 
 export type Props = Record<string, any>
 
-export interface FComponent{
-    (props: Props | undefined, children?: ChildrenH): HElement // show an example for usage of children
-    state?: Record<string, any>
-}
-
-export type Selector = string | Node
-export type Selectors = [(IUpdateContext | Selector)?, ...Selector[]]
-
-export interface FComponentState<P, S> {
-    (this: S & {
-        element: HTMLElement;
-        update: (...ss: Selectors) => void //Action | Selectors | Selector
-        uc?: Selector | Selectors
-    }, p: P): H;
-    state?: S;
-}
+export type FComponent = (props: Props | undefined, children?: ChildrenH) => HElement // show an example for usage of children
 
 export type FComponentT<P> = (pcn: P, cn?: Children) => H | void
-
-// runtime api
-export interface IUpdateContext {
-    patchElementOnly?: boolean
-    replace?: boolean
-    root?: HTMLElement
-    functionnode?: HTMLElement
-    [key: string]: any // expandos
-}
-
 
 export interface IClassComponent {
     element: Node
     props?: Record<string, any>
     view(): H
-    update(uc: IUpdateContext): boolean | void
+    update(uc: UpdateContext): boolean | void
     mounted(): void
 }
 
@@ -70,7 +44,7 @@ export type HElement =
         i?: any
     }
 
-export type HCompFun =
+type HCompFun =
     {
         tag: FComponent,
         p?: Expr<Props>
@@ -93,11 +67,14 @@ export type H = // a hyperscript atom that describes a ...
     | HComp // a dynamic component computing any other HNode
     | HFragment
 
+// runtime api
+export type UpdateContext = {
+    patchElementOnly?: boolean
+    replace?: boolean
+}
 
 declare global {
     interface Node {
         h?: HElement | HCompFun | HCompClass
-        hr?: HElement
-        state?: Record<string, any>
     }
 }
