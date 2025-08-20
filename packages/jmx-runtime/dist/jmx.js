@@ -23,7 +23,7 @@ let setprops = (e, newprops = {}) => {
     for (let p in newprops)
         isproperty(p, newprops[p]) ? (e[p] = newprops[p]) : e.setAttribute(p, newprops[p]);
 };
-function sync(p, i, h, uc) {
+function sync(p, i, h) {
     h = evaluate(h);
     if (h === null || h === undefined)
         return i;
@@ -42,7 +42,7 @@ function sync(p, i, h, uc) {
         function syncchildren(p, h, i) {
             evaluate(h.cn)
                 ?.flat()
-                .forEach(hc => (i = sync(p, i, hc, uc)));
+                .forEach(hc => (i = sync(p, i, hc)));
             return i;
         }
         if (isfragment(h))
@@ -59,11 +59,11 @@ function sync(p, i, h, uc) {
             else {
                 n = c;
                 setprops(n, props);
-                if (props?.update?.(c, uc))
+                if (props?.update?.(c, globaluc))
                     return i + 1;
             }
             n.h = h;
-            if (!uc.patchElementOnly && !iswebcomponent(h)) {
+            if (!globaluc.patchElementOnly && !iswebcomponent(h)) {
                 const j = syncchildren(n, h, 0);
                 removeexcesschildren(n, j);
             }
@@ -76,47 +76,57 @@ function sync(p, i, h, uc) {
                 if (isclasscomponent(h)) {
                     h.i = ci = c?.h?.i ?? rebind(new h.tag(props));
                     ci.props = props;
-                    if (isupdate && ci.update(uc))
+                    if (isupdate && ci.update(globaluc))
                         return i + 1;
                 }
                 let hr = ci?.view() ?? h.tag(props, evaluate(h.cn));
                 if (hr === undefined || hr == null)
                     return i;
-                let j = sync(p, i, hr, uc);
+                let j = sync(p, i, hr);
                 let cn = p.childNodes[i];
                 cn.h = h;
+                cn.setAttribute?.('comp', '');
+                console.log('cn.h = ', h);
                 if (ci)
                     ci.element = cn;
                 if (!isupdate)
                     ci?.mounted();
                 return j;
             case 'object':
-                return sync(p, i, h.tag, uc);
+                return sync(p, i, h.tag);
         }
     }
     synctextnode(h);
     return i + 1;
 }
-export function patch(e, h, uc = {}) {
+let globaluc = {};
+export function patch(e, h) {
     if (!e)
         return;
-    if (uc.replace)
+    if (globaluc.replace)
         e.replaceChildren();
     const p = e.parentElement;
     const i = [].indexOf.call(p.childNodes, e);
-    requestAnimationFrame(() => sync(p, i, h, uc));
+    requestAnimationFrame(() => sync(p, i, h));
 }
-export function updateview(...ucOrSelectors) {
+export function updateviewuc(uc, ...sels) {
     {
-        let uc;
-        ucOrSelectors
-            .flatMap(x => typeof x == 'string' ? [...document.querySelectorAll(x)] : x instanceof Node ? [x] : ((uc = x), []))
-            .forEach(e => {
-            if (!e?.h)
-                throw 'jmx: no h exists on the node';
-            patch(e, e.h, uc);
-        });
+        globaluc = uc;
+        updateviewinternal(...sels);
     }
+}
+export function updateview(...sels) {
+    {
+        globaluc = {};
+        updateviewinternal(...sels);
+    }
+}
+function updateviewinternal(...sels) {
+    sels.flatMap(s => (typeof s == 'string' ? [...document.querySelectorAll(s)] : s ? [s] : [])).forEach(e => {
+        if (!e?.h)
+            throw 'jmx: no h exists on the node';
+        patch(e, e.h);
+    });
 }
 export function jsx() {
     throw 'jmx plugin not configured';

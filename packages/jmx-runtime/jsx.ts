@@ -18,8 +18,6 @@
 //      Dovydas Navickas <https://github.com/DovydasNavickas>
 //      Stéphane Goetz <https://github.com/onigoetz>
 
-import { UpdateContext } from "index"
-
 declare global {
     namespace JSX {
         interface IntrinsicElements extends IntrinsicElementAttributes {
@@ -35,7 +33,7 @@ interface EventHandler<E extends Event> {
 
 export interface AdditionalElementAttributes {
     mounted?: (n:Node) => void
-    update?: (n:Node, uc:UpdateContext) => void
+    update?: (n:Node, uc:IUpdateContext) => void
 }
 
 export interface HTMLAttributes extends AdditionalElementAttributes {

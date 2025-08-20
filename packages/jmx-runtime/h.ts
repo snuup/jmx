@@ -15,12 +15,12 @@ export interface IClassComponent {
     element: Node
     props?: Record<string, any>
     view(): H
-    update(uc: UpdateContext): boolean | void
+    update(uc: IUpdateContext): boolean | void
     mounted(): void
 }
 
 interface CComponent {
-    new(props: any): IClassComponent // while a real component expresses its interface via props pass to the ctor, internally we assign props after construction with new()
+    new (props: any): IClassComponent // while a real component expresses its interface via props pass to the ctor, internally we assign props after construction with new()
 }
 
 export type ChildrenH = (H | undefined)[]
@@ -31,50 +31,45 @@ type HText =
     | number // text node
     | boolean // do not allow boolean, that
 
-export type HFragment =
-    {
-        cn: Children
-    }
+export type HFragment = {
+    cn: Children
+}
 
-export type HElement =
-    {
-        tag: string,
-        p?: Expr<Props>
-        cn: Children
-        i?: any
-    }
+export type HElement = {
+    tag: string
+    p?: Expr<Props>
+    cn: Children
+    i?: any
+}
 
-type HCompFun =
-    {
-        tag: FComponent,
-        p?: Expr<Props>
-        cn?: Children
-    }
+type HCompFun = {
+    tag: FComponent
+    p?: Expr<Props>
+    cn?: Children
+}
 
-export type HCompClass =
-    {
-        tag: CComponent,
-        p?: Expr<Props>
-        cn: Children
-        i: IClassComponent
-    }
+export type HCompClass = {
+    tag: CComponent
+    p?: Expr<Props>
+    cn: Children
+    i: IClassComponent
+}
 
 export type HComp = HCompFun | HCompClass
 
 export type H = // a hyperscript atom that describes a ...
-    | HText
-    | HElement // a tag, like p, div with attributes and children
-    | HComp // a dynamic component computing any other HNode
-    | HFragment
 
-// runtime api
-export type UpdateContext = {
-    patchElementOnly?: boolean
-    replace?: boolean
-}
+        | HText
+        | HElement // a tag, like p, div with attributes and children
+        | HComp // a dynamic component computing any other HNode
+        | HFragment
 
 declare global {
     interface Node {
         h?: HElement | HCompFun | HCompClass
+    }
+    export interface IUpdateContext {
+        patchElementOnly?: boolean
+        replace?: boolean
     }
 }

@@ -1,5 +1,15 @@
 import { rebind } from './base'
-import { Expr, FComponent, H, HComp, HCompClass, HElement, HFragment, IClassComponent, Props, UpdateContext } from './h'
+import {
+    Expr,
+    FComponent,
+    H,
+    HComp,
+    HCompClass,
+    HElement,
+    HFragment,
+    IClassComponent,
+    Props
+} from './h'
 
 const enum NodeType { // vaporizes (but for that must be in this file, otherwise not)
     TextNode = 3,
@@ -39,7 +49,7 @@ let setprops = (e: Element, newprops: Props = {}) => {
  * if a fragment with 5 nodes was added, it returns i + 5
  * when a single element or component is added, it is i+1 since they always create exactly 1 node
  */
-function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext): number {
+function sync(p: Element, i: number, h: Expr<H | undefined>): number {
     // console.log('%csync', "background:orange", p.tagName, i, h, 'html = ' + document.body.outerHTML)
 
     h = evaluate(h)
@@ -63,7 +73,7 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
         function syncchildren(p: Element, h: HElement | HComp | HFragment, i: number): number {
             evaluate(h.cn)
                 ?.flat()
-                .forEach(hc => (i = sync(p, i, hc, uc)))
+                .forEach(hc => (i = sync(p, i, hc)))
             return i
         }
 
@@ -82,11 +92,13 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
             } else {
                 n = c as Element
                 setprops(n, props)
-                if (props?.update?.(c, uc)) return i + 1
+                if (props?.update?.(c, globaluc)) return i + 1
             }
+
+            // if only components shall be updateable (advantage: close variables inside component functions are always fresh materialized, avoids surprises), comment this out
             n.h = h
 
-            if (!uc.patchElementOnly && !iswebcomponent(h as HElement)) {
+            if (!globaluc.patchElementOnly && !iswebcomponent(h as HElement)) {
                 // tbd: make "island" attribute
                 const j = syncchildren(n, h, 0)
                 removeexcesschildren(n, j)
@@ -105,7 +117,7 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
                     ci.props = props
 
                     // if component instance returns truthy for update(), then syncing is susbstituted by the component
-                    if (isupdate && ci.update(uc)) return i + 1
+                    if (isupdate && ci.update(globaluc)) return i + 1
                 }
 
                 // materialize the component
@@ -116,10 +128,12 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
                 // a component can return undefined or null if it has no elements to show
                 if (hr === undefined || hr == null) return i
 
-                let j = sync(p, i, hr, uc)
+                let j = sync(p, i, hr)
 
                 let cn = p.childNodes[i]!
                 cn.h = h // attach h onto the materialized component node
+                ;(cn as HTMLElement).setAttribute?.('comp', '')
+                console.log('cn.h = ', h)
 
                 if (ci) ci.element = cn
                 if (!isupdate) ci?.mounted()
@@ -127,7 +141,7 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
                 return j
 
             case 'object':
-                return sync(p, i, h.tag, uc) // tbd: type of h is not correct, h.tag == never
+                return sync(p, i, h.tag) // tbd: type of h is not correct, h.tag == never
         }
     }
     // text nodes
@@ -135,36 +149,39 @@ function sync(p: Element, i: number, h: Expr<H | undefined>, uc: UpdateContext):
     return i + 1
 }
 
-export function patch(e: Node | null, h: Expr<H>, uc: UpdateContext = {}) {
+let globaluc: IUpdateContext = {}
+
+export function patch(e: Node | null, h: Expr<H>) {
     if (!e) return
-    if (uc.replace) (e as HTMLElement).replaceChildren()
+    if (globaluc.replace) (e as HTMLElement).replaceChildren()
     const p = e.parentElement as HTMLElement
     const i = [].indexOf.call<any, any, any>(p.childNodes, e)
     // always called deferred, because removing elements can trigger events and their handlers (like blur)
-    requestAnimationFrame(() => sync(p, i, h, uc))
+    requestAnimationFrame(() => sync(p, i, h))
 }
 
 // Overload signatures
 type Selector = string | Node | undefined | null
 type Selectors = Selector[]
 
-export function updateview(uc: UpdateContext, ...selectors: Selectors): void
-export function updateview(...selectors: Selectors): void
-
-// Implementation
-export function updateview(...ucOrSelectors: (UpdateContext | Selector)[]): void {
+export function updateviewuc(uc: IUpdateContext, ...sels: Selectors): void {
     {
-        let uc: UpdateContext
-
-        ucOrSelectors
-            .flatMap(x =>
-                typeof x == 'string' ? [...document.querySelectorAll(x)] : x instanceof Node ? [x] : ((uc = x!), [])
-            )
-            .forEach(e => {
-                if (!e?.h) throw 'jmx: no h exists on the node'
-                patch(e, e.h, uc)
-            })
+        globaluc = uc
+        updateviewinternal(...sels)
     }
+}
+export function updateview(...sels: Selectors): void {
+    {
+        globaluc = {}
+        updateviewinternal(...sels)
+    }
+}
+
+function updateviewinternal(...sels: Selector[]): void {
+    sels.flatMap(s => (typeof s == 'string' ? [...document.querySelectorAll(s)] : s ? [s] : [])).forEach(e => {
+        if (!e?.h) throw 'jmx: no h exists on the node'
+        patch(e, e.h)
+    })
 }
 
 export function jsx(): HElement {

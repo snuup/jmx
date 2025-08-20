@@ -1,4 +1,4 @@
 - make mounted optional for components
 
 - study: configure that only components update
-- configure jsximportmodule
++ configure jsximportmodule -> did not work out

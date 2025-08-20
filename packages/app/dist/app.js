@@ -1,2 +1,157 @@
-function O(e){return Object.entries(Object.getOwnPropertyDescriptors(Object.getPrototypeOf(e))).filter(([n,t])=>n!="constructor"&&t.value instanceof Function).forEach(([n])=>e[n]=e[n].bind(e)),e}function h(e){Object.assign(globalThis,e)}let d=e=>e instanceof Function?e():e,v=(e,n)=>{let t;for(;t=e.childNodes[n];)t.remove()},N=e=>e.tag.includes("-"),A=e=>e.tag?.prototype?.view,w=e=>typeof e.tag=="string",E=e=>e.tag==null&&e.cn!=null,C=e=>typeof e=="object",g=(e,n)=>["value","checked","disabled","className","style","href","src","selected","readOnly","tabIndex"].includes(e)||n instanceof Object||n instanceof Function,m=(e,n={})=>{let t=d(e.h?.p)??{};for(let c in t)!(c in n)&&g(c,t[c])?e[c]=null:e.removeAttribute(c);for(let c in n)g(c,n[c])?e[c]=n[c]:e.setAttribute(c,n[c])};function f(e,n,t,c){if(t=d(t),t==null)return n;let l=e.childNodes[n];function j(a){if(l&&l.nodeType==3)l.textContent!=a&&(l.textContent=a);else{let r=document.createTextNode(a);l?l.replaceWith(r):e.appendChild(r)}}if(C(t)){let a=function(i,o,s){return d(o.cn)?.flat().forEach(u=>s=f(i,s,u,c)),s};var T=a;if(E(t))return a(e,t,n);const r=d(t.p);if(w(t)){let i;if(l?.tagName!=t.tag)i=document.createElement(t.tag),l?l.replaceWith(i):e.appendChild(i),m(i,r),r?.mounted?.(i);else if(i=l,m(i,r),r?.update?.(l,c))return n+1;if(i.h=t,!c.patchElementOnly&&!N(t)){const o=a(i,t,0);v(i,o)}return n+1}switch(typeof t.tag){case"function":let i=l?.h?.tag==t.tag,o;if(A(t)&&(t.i=o=l?.h?.i??O(new t.tag(r)),o.props=r,i&&o.update(c)))return n+1;let s=o?.view()??t.tag(r,d(t.cn));if(s===void 0||s==null)return n;let u=f(e,n,s,c),p=e.childNodes[n];return p.h=t,o&&(o.element=p),i||o?.mounted(),u;case"object":return f(e,n,t.tag,c)}}return j(t),n+1}function b(e,n,t={}){if(!e)return;t.replace&&e.replaceChildren();const c=e.parentElement,l=[].indexOf.call(c.childNodes,e);requestAnimationFrame(()=>f(c,l,n,t))}function D(...e){{let n;e.flatMap(t=>typeof t=="string"?[...document.querySelectorAll(t)]:t instanceof Node?[t]:(n=t,[])).forEach(t=>{if(!t?.h)throw"jmx: no h exists on the node";b(t,t.h,n)})}}let y={x:41},F=()=>({tag:"DIV",cn:['"" ',42]}),x=()=>({tag:"DIV",cn:()=>[y.x,{tag:F}]}),I=()=>({tag:"BODY",cn:()=>["hase war da 12: ",{tag:x}]});b(document.body,I);h({m:y,updateview:D});
+function rebind(o) {
+    Object.entries(Object.getOwnPropertyDescriptors(Object.getPrototypeOf(o)))
+        .filter(([name, p]) => name != 'constructor' && p.value instanceof Function)
+        .forEach(([name]) => o[name] = o[name].bind(o));
+    return o;
+}
+function mount(o) { Object.assign(globalThis, o); }
+
+let evaluate = (expr) => (expr instanceof Function ? expr() : expr);
+let removeexcesschildren = (n, i) => {
+    let c;
+    while ((c = n.childNodes[i])) {
+        c.remove();
+    }
+};
+let iswebcomponent = (h) => h.tag.includes('-');
+let isclasscomponent = (h) => h.tag?.prototype?.view;
+let iselement = (h) => typeof h.tag == 'string';
+let isfragment = (h) => {
+    return h.tag == undefined && h.cn != undefined;
+};
+let isobject = (o) => typeof o === 'object';
+let isproperty = (name, value) => ['value', 'checked', 'disabled', 'className', 'style', 'href', 'src', 'selected', 'readOnly', 'tabIndex'].includes(name) ||
+    value instanceof Object ||
+    value instanceof Function;
+let setprops = (e, newprops = {}) => {
+    let oldprops = evaluate(e.h?.p) ?? {};
+    for (let p in oldprops)
+        !(p in newprops) && isproperty(p, oldprops[p]) ? (e[p] = null) : e.removeAttribute(p);
+    for (let p in newprops)
+        isproperty(p, newprops[p]) ? (e[p] = newprops[p]) : e.setAttribute(p, newprops[p]);
+};
+function sync(p, i, h, uc) {
+    h = evaluate(h);
+    if (h === null || h === undefined)
+        return i;
+    let c = p.childNodes[i];
+    function synctextnode(text) {
+        if (c && c.nodeType == 3) {
+            if (c.textContent != text)
+                c.textContent = text;
+        }
+        else {
+            let tn = document.createTextNode(text);
+            c ? c.replaceWith(tn) : p.appendChild(tn);
+        }
+    }
+    if (isobject(h)) {
+        function syncchildren(p, h, i) {
+            evaluate(h.cn)
+                ?.flat()
+                .forEach(hc => (i = sync(p, i, hc, uc)));
+            return i;
+        }
+        if (isfragment(h))
+            return syncchildren(p, h, i);
+        const props = evaluate(h.p);
+        if (iselement(h)) {
+            let n;
+            if (c?.tagName != h.tag) {
+                n = document.createElement(h.tag);
+                c ? c.replaceWith(n) : p.appendChild(n);
+                setprops(n, props);
+                props?.mounted?.(n);
+            }
+            else {
+                n = c;
+                setprops(n, props);
+                if (props?.update?.(c, uc))
+                    return i + 1;
+            }
+            console.log("n.h = ", h);
+            n.h = h;
+            if (!uc.patchElementOnly && !iswebcomponent(h)) {
+                const j = syncchildren(n, h, 0);
+                removeexcesschildren(n, j);
+            }
+            return i + 1;
+        }
+        switch (typeof h.tag) {
+            case 'function':
+                let isupdate = c?.h?.tag == h.tag;
+                let ci;
+                if (isclasscomponent(h)) {
+                    h.i = ci = c?.h?.i ?? rebind(new h.tag(props));
+                    ci.props = props;
+                    if (isupdate && ci.update(uc))
+                        return i + 1;
+                }
+                let hr = ci?.view() ?? h.tag(props, evaluate(h.cn));
+                if (hr === undefined || hr == null)
+                    return i;
+                let j = sync(p, i, hr, uc);
+                let cn = p.childNodes[i];
+                cn.h = h;
+                if (ci)
+                    ci.element = cn;
+                if (!isupdate)
+                    ci?.mounted();
+                return j;
+            case 'object':
+                return sync(p, i, h.tag, uc);
+        }
+    }
+    synctextnode(h);
+    return i + 1;
+}
+function patch(e, h, uc = {}) {
+    if (!e)
+        return;
+    if (uc.replace)
+        e.replaceChildren();
+    const p = e.parentElement;
+    const i = [].indexOf.call(p.childNodes, e);
+    requestAnimationFrame(() => sync(p, i, h, uc));
+}
+function updateview(...ucOrSelectors) {
+    {
+        let uc;
+        ucOrSelectors
+            .flatMap(x => typeof x == 'string' ? [...document.querySelectorAll(x)] : x instanceof Node ? [x] : ((uc = x), []))
+            .forEach(e => {
+            if (!e?.h)
+                throw 'jmx: no h exists on the node';
+            patch(e, e.h, uc);
+        });
+    }
+}
+
+let m = {
+  x: 41
+};
+let AA = () => ({
+  tag: "DIV",
+  cn: ['"" ', 42]
+});
+let Lab = () => ({
+  tag: "DIV",
+  cn: () => [m.x, {
+    tag: AA
+  }]
+});
+let App = () => ({
+  tag: "BODY",
+  cn: () => [{
+    tag: "DIV",
+    cn: () => [m.x]
+  }, "hase war da 12: ", {
+    tag: Lab
+  }]
+});
+patch(document.body, App);
+mount({
+  m,
+  updateview
+});
 //# sourceMappingURL=app.js.map

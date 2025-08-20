@@ -4,12 +4,13 @@ let m = {
     x: 41,
 }
 
-let AA = () => <div>"" {42}</div>
+let AA = () => <a>"" {42}</a>
 
-let Lab = () => <div>{m.x}<AA /></div>
+let Lab = () => <b>{m.x}<AA /></b>
 
 let App = () => (
-    <body>
+    <body class={m.x.toString()}>
+        <div>{m.x}</div>
         hase war da 12: <Lab />
     </body>
 )

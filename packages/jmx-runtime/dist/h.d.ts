@@ -7,7 +7,7 @@ export interface IClassComponent {
     element: Node;
     props?: Record<string, any>;
     view(): H;
-    update(uc: UpdateContext): boolean | void;
+    update(uc: IUpdateContext): boolean | void;
     mounted(): void;
 }
 interface CComponent {
@@ -38,13 +38,13 @@ export type HCompClass = {
 };
 export type HComp = HCompFun | HCompClass;
 export type H = HText | HElement | HComp | HFragment;
-export type UpdateContext = {
-    patchElementOnly?: boolean;
-    replace?: boolean;
-};
 declare global {
     interface Node {
         h?: HElement | HCompFun | HCompClass;
+    }
+    export interface IUpdateContext {
+        patchElementOnly?: boolean;
+        replace?: boolean;
     }
 }
 export {};

@@ -6,9 +6,9 @@
         "module": "ESNext", /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', 'es2020', or 'ESNext'. */
 
         "declaration": true,                   /* Generates corresponding '.d.ts' file. */
-        "declarationDir": "dist/types",
         "declarationMap": true,                /* Generates a sourcemap for each corresponding '.d.ts' file. */
         "sourceMap": true, /* Generates corresponding '.map' file. */
+        "outDir": "dist", /* Redirect output structure to the directory. */
 
         "removeComments": true, /* Do not emit comments to output. */
         "strictNullChecks": true, /* Enable strict null checks. */
