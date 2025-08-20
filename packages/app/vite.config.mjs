@@ -9,7 +9,7 @@ export default {
     build: {
         target: 'esnext',
 
-        minify: false,
+        minify: true,
 
         sourcemap: true,
         rollupOptions: {
