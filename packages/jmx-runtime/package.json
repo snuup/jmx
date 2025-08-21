@@ -1,16 +1,13 @@
 {
 	"name": "jmx-runtime",
 	"author": "snupo",
-	"version": "0.0.7",
+	"version": "0.0.21",
 	"publishConfig": {
 		"access": "public"
 	},
 	"type": "module",
 	"main": "dist/index.js",
 	"types": "./dist/index.d.ts",
-	"files": [
-		"dist"
-	],
 	"scripts": {
 		"build": "tsc"
 	}

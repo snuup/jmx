@@ -1,4 +1,8 @@
 import { rebind } from './base';
+export function createElement(tag) {
+    let ns = window.jmx?.getnamespace?.(tag);
+    return ns ? document.createElementNS(ns, tag) : document.createElement(tag);
+}
 let evaluate = (expr) => (expr instanceof Function ? expr() : expr);
 let removeexcesschildren = (n, i) => {
     let c;
@@ -50,8 +54,8 @@ function sync(p, i, h) {
         const props = evaluate(h.p);
         if (iselement(h)) {
             let n;
-            if (c?.tagName != h.tag) {
-                n = document.createElement(h.tag);
+            if (c?.tagName?.toLowerCase() != h.tag.toLowerCase()) {
+                n = createElement(h.tag);
                 c ? c.replaceWith(n) : p.appendChild(n);
                 setprops(n, props);
                 props?.mounted?.(n);
@@ -79,7 +83,7 @@ function sync(p, i, h) {
                     if (isupdate && ci.update(globaluc))
                         return i + 1;
                 }
-                let hr = ci?.view() ?? h.tag(props, evaluate(h.cn));
+                let hr = ci?.view ? ci?.view() : h.tag(props, evaluate(h.cn));
                 if (hr === undefined || hr == null)
                     return i;
                 let j = sync(p, i, hr);
@@ -88,7 +92,7 @@ function sync(p, i, h) {
                 if (ci)
                     ci.element = cn;
                 if (!isupdate)
-                    ci?.mounted();
+                    ci?.mounted?.();
                 return j;
             case 'object':
                 return sync(p, i, h.tag);
@@ -120,16 +124,12 @@ export function updateview(...sels) {
     }
 }
 function updateviewinternal(...sels) {
+    if (!sels.length)
+        sels.push('body');
     sels.flatMap(s => (typeof s == 'string' ? [...document.querySelectorAll(s)] : s ? [s] : [])).forEach(e => {
         if (!e?.h)
             throw 'jmx: no h exists on the node';
         patch(e, e.h);
     });
-}
-export function jsx() {
-    throw 'jmx plugin not configured';
-}
-export function jsxf() {
-    throw 'jmx plugin not configured';
 }
 //# sourceMappingURL=jmx.js.map

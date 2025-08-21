@@ -61,7 +61,7 @@ function transform(code: string, filename: string) {
                 // let App3 = jsx("body", null, jsx(F, null), jsx("div", null));
 
                 const tag = args[0]
-                if (t.isStringLiteral(tag)) tag.value = tag.value.toUpperCase() // unless it is a component, tags are uppercase
+                //if (t.isStringLiteral(tag)) tag.value = tag.value.toUpperCase() // unless it is a component, tags are uppercase
                 let tagProperty = t.objectProperty(t.identifier("tag"), tag)
 
                 let propsProperty

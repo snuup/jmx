@@ -16,7 +16,7 @@ export abstract class JMXComp<P extends Props = {}> implements IClassComponent {
 
     // overrides
     mounted() { }
-    update(uc: IUpdateContext): boolean | void { }
+    update(uc?: IUpdateContext): boolean | void { }
     abstract view(): H
 
     // utility: updates the component's view

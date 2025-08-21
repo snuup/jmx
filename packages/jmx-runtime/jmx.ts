@@ -1,15 +1,11 @@
 import { rebind } from './base'
-import {
-    Expr,
-    FComponent,
-    H,
-    HComp,
-    HCompClass,
-    HElement,
-    HFragment,
-    IClassComponent,
-    Props
-} from './h'
+import { Expr, FComponent, H, HComp, HCompClass, HElement, HFragment, IClassComponent, Props } from './h'
+
+// config
+export function createElement(tag: string) {
+    let ns = window.jmx?.getnamespace?.(tag)
+    return ns ? document.createElementNS(ns, tag) : document.createElement(tag)
+}
 
 const enum NodeType { // vaporizes (but for that must be in this file, otherwise not)
     TextNode = 3,
@@ -50,7 +46,7 @@ let setprops = (e: Element, newprops: Props = {}) => {
  * when a single element or component is added, it is i+1 since they always create exactly 1 node
  */
 function sync(p: Element, i: number, h: Expr<H | undefined>): number {
-    // console.log('%csync', "background:orange", p.tagName, i, h, 'html = ' + document.body.outerHTML)
+    // console.log('%csync', "background:orange", p.tagName, i, h)
 
     h = evaluate(h)
     if (h === null || h === undefined) return i // skip this element. not that !!h would forbid to render the number 0 or the boolean value false
@@ -84,8 +80,8 @@ function sync(p: Element, i: number, h: Expr<H | undefined>): number {
         if (iselement(h)) {
             let n: Element
 
-            if ((<Element>c)?.tagName != h.tag) {
-                n = document.createElement(h.tag)
+            if ((<Element>c)?.tagName?.toLowerCase() != h.tag.toLowerCase()) {
+                n = createElement(h.tag)
                 c ? c.replaceWith(n) : p.appendChild(n)
                 setprops(n, props)
                 props?.mounted?.(n)
@@ -123,7 +119,9 @@ function sync(p: Element, i: number, h: Expr<H | undefined>): number {
                 // materialize the component
                 // we run compoents view() and fun code often, we do not compare properties to avoid their computation
                 // this means that the inner hr (h resolved) is run often
-                let hr = ci?.view() ?? (h.tag as FComponent)(props, evaluate(h.cn))
+                //
+                // if ci has a view, return ci.view() even if it is falsy, this is perfectly valid
+                let hr = ci?.view ? ci?.view() : (h.tag as FComponent)(props, evaluate(h.cn))
 
                 // a component can return undefined or null if it has no elements to show
                 if (hr === undefined || hr == null) return i
@@ -135,7 +133,7 @@ function sync(p: Element, i: number, h: Expr<H | undefined>): number {
                 // ;(cn as HTMLElement).setAttribute?.('comp', '')
 
                 if (ci) ci.element = cn
-                if (!isupdate) ci?.mounted()
+                if (!isupdate) ci?.mounted?.()
 
                 return j
 
@@ -177,15 +175,9 @@ export function updateview(...sels: Selectors): void {
 }
 
 function updateviewinternal(...sels: Selector[]): void {
+    if (!sels.length) sels.push('body')
     sels.flatMap(s => (typeof s == 'string' ? [...document.querySelectorAll(s)] : s ? [s] : [])).forEach(e => {
         if (!e?.h) throw 'jmx: no h exists on the node'
         patch(e, e.h)
     })
 }
-
-export function jsx(): HElement {
-    throw 'jmx plugin not configured'
-} // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it
-export function jsxf(): HElement {
-    throw 'jmx plugin not configured'
-} // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it

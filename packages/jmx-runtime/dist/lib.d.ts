@@ -12,7 +12,7 @@ export declare abstract class JMXComp<P extends Props = {}> implements IClassCom
     element: HTMLElement;
     constructor(props: P);
     mounted(): void;
-    update(uc: IUpdateContext): boolean | void;
+    update(uc?: IUpdateContext): boolean | void;
     abstract view(): H;
     updateview(): void;
 }

@@ -16,7 +16,7 @@ export interface IClassComponent {
     props?: Record<string, any>
     view(): H
     update(uc: IUpdateContext): boolean | void
-    mounted(): void
+    mounted?(): void
 }
 
 interface CComponent {
@@ -72,4 +72,17 @@ declare global {
         patchElementOnly?: boolean
         replace?: boolean
     }
+
+    export interface Window {
+        jmx?: {
+            getnamespace: (tag: string) => string | undefined
+        }
+    }
 }
+
+export function jsx(): HElement {
+    throw 'jmx plugin not configured'
+} // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it
+export function jsxf(): HElement {
+    throw 'jmx plugin not configured'
+} // dumy function for app code - jmx-plugin removes calls to this function, minifyer then removes it

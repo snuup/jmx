@@ -8,7 +8,7 @@ export interface IClassComponent {
     props?: Record<string, any>;
     view(): H;
     update(uc: IUpdateContext): boolean | void;
-    mounted(): void;
+    mounted?(): void;
 }
 interface CComponent {
     new (props: any): IClassComponent;
@@ -46,6 +46,13 @@ declare global {
         patchElementOnly?: boolean;
         replace?: boolean;
     }
+    export interface Window {
+        jmx?: {
+            getnamespace: (tag: string) => string | undefined;
+        };
+    }
 }
+export declare function jsx(): HElement;
+export declare function jsxf(): HElement;
 export {};
 //# sourceMappingURL=h.d.ts.map

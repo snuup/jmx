@@ -30838,7 +30838,6 @@ function _transform(code, filename) {
         path.replaceWith(libExports.objectExpression([libExports.objectProperty(libExports.identifier("cn"), lazifyifnotconstant(cn))]));
       } else {
         var tag = args[0];
-        if (libExports.isStringLiteral(tag)) tag.value = tag.value.toUpperCase();
         var tagProperty = libExports.objectProperty(libExports.identifier("tag"), tag);
         var propsProperty;
         var props = args[1];
