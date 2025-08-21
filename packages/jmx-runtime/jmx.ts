@@ -132,8 +132,7 @@ function sync(p: Element, i: number, h: Expr<H | undefined>): number {
 
                 let cn = p.childNodes[i]!
                 cn.h = h // attach h onto the materialized component node
-                ;(cn as HTMLElement).setAttribute?.('comp', '')
-                console.log('cn.h = ', h)
+                // ;(cn as HTMLElement).setAttribute?.('comp', '')
 
                 if (ci) ci.element = cn
                 if (!isupdate) ci?.mounted()

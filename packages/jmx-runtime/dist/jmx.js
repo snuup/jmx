@@ -85,8 +85,6 @@ function sync(p, i, h) {
                 let j = sync(p, i, hr);
                 let cn = p.childNodes[i];
                 cn.h = h;
-                cn.setAttribute?.('comp', '');
-                console.log('cn.h = ', h);
                 if (ci)
                     ci.element = cn;
                 if (!isupdate)
