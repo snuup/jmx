@@ -105,7 +105,7 @@ export function patch(e, h) {
         e.replaceChildren();
     const p = e.parentElement;
     const i = [].indexOf.call(p.childNodes, e);
-    requestAnimationFrame(() => sync(p, i, h));
+    sync(p, i, h);
 }
 export function updateviewuc(uc, ...sels) {
     {

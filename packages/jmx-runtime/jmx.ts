@@ -156,7 +156,7 @@ export function patch(e: Node | null, h: Expr<H>) {
     const p = e.parentElement as HTMLElement
     const i = [].indexOf.call<any, any, any>(p.childNodes, e)
     // always called deferred, because removing elements can trigger events and their handlers (like blur)
-    requestAnimationFrame(() => sync(p, i, h))
+    sync(p, i, h)
 }
 
 // Overload signatures
