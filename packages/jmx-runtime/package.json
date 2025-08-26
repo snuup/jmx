@@ -1,7 +1,7 @@
 {
 	"name": "jmx-runtime",
 	"author": "snupo",
-	"version": "0.0.21",
+	"version": "0.0.25",
 	"publishConfig": {
 		"access": "public"
 	},
