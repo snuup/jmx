@@ -21,6 +21,7 @@ export abstract class JMXComp<P extends Props = {}> implements IClassComponent {
 
     // utility: updates the component's view
     updateview() { updateview(this.element) }
+    get ismounted():boolean { return this.element as any }
 }
 
 export function cc(...namesOrObjects: (string | any)[]): string {
