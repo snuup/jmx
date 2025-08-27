@@ -9,6 +9,7 @@ export class JMXComp {
     mounted() { }
     update(uc) { }
     updateview() { updateview(this.element); }
+    get ismounted() { return this.element; }
 }
 export function cc(...namesOrObjects) {
     return namesOrObjects.flatMap(n => (n.trim ? n : Object.keys(n).filter(k => n[k]))).join(' ');
