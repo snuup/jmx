@@ -15,6 +15,7 @@ export declare abstract class JMXComp<P extends Props = {}> implements IClassCom
     update(uc?: IUpdateContext): boolean | void;
     abstract view(): H;
     updateview(): void;
+    get ismounted(): boolean;
 }
 export declare function cc(...namesOrObjects: (string | any)[]): string;
 //# sourceMappingURL=lib.d.ts.map

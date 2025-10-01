@@ -1,7 +1,7 @@
 {
 	"name": "jmx-runtime",
 	"author": "snupo",
-	"version": "0.0.26",
+	"version": "0.0.28",
 	"publishConfig": {
 		"access": "public"
 	},
@@ -9,6 +9,6 @@
 	"main": "dist/index.js",
 	"types": "./dist/index.d.ts",
 	"scripts": {
-		"build": "tsc"
+		"build": "rollup -c"
 	}
 }
