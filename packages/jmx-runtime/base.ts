@@ -1,5 +1,5 @@
-export function rebind(o: Record<string, any>) {
-    Object.entries(Object.getOwnPropertyDescriptors(Object.getPrototypeOf(o)))
+export function rebind(o: Record<string, any>, proto = Object.getPrototypeOf(o)) {
+    Object.entries(Object.getOwnPropertyDescriptors(proto))
         .filter(([name, p]) => name != 'constructor' && p.value instanceof Function)
         .forEach(([name]) => o[name] = o[name].bind(o))
     return o
