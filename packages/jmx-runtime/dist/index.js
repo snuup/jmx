@@ -100,7 +100,7 @@ function sync(p, i, h) {
                 let isupdate = c?.h?.tag == h.tag;
                 let ci;
                 if (isclasscomponent(h)) {
-                    h.i = ci = c?.h?.i ?? rebind(new h.tag(props));
+                    h.i = ci = isupdate ? c.h?.i : rebind(new h.tag(props));
                     ci.props = props;
                     if (isupdate && ci.update(globaluc))
                         return i + 1;

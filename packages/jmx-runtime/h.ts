@@ -17,6 +17,7 @@ export interface IClassComponent {
     view(): H
     update(uc: IUpdateContext): boolean | void
     mounted?(): void
+    //new(props: any): IClassComponent
 }
 
 interface CComponent {
