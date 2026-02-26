@@ -45,7 +45,7 @@ function transform(code: string, filename: string) {
 
             if (t.isIdentifier(args[0]) && args[0].name == "jsxf") {
 
-                console.log("fragmento")
+                // console.log("fragmento")
 
                 // fragment
                 // let F = jsx(jsxf, null, "aa", "bb");

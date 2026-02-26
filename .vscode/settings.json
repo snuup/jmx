@@ -8,5 +8,9 @@
         "**/Thumbs.db": true,
         "**/package-lock.json": true,
         "**/node_modules": false
+    },
+     "workbench.colorCustomizations": {
+        "titleBar.activeBackground": "#66968bcc",
+        "titleBar.activeForeground": "#ffffff"
     }
 }
