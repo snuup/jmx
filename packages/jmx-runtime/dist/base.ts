@@ -1,9 +1,9 @@
 export function hopsi() {}
 
-export function rebind(o: Record<string, any>, proto = Object.getPrototypeOf(o)) {
+export function rebind<T extends object>(o: T, proto = Object.getPrototypeOf(o)) : T {
     Object.entries(Object.getOwnPropertyDescriptors(proto))
         .filter(([name, p]) => name != 'constructor' && p.value instanceof Function)
-        .forEach(([name]) => o[name] = o[name].bind(o))
+        .forEach(([name]) => (o as any)[name] = (o as any)[name].bind(o))
     return o
 }
 

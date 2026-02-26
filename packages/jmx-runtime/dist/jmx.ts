@@ -109,10 +109,10 @@ function sync(p: Element, i: number, h: Expr<H | undefined>): number {
                 let ci: IClassComponent | undefined
 
                 if (isclasscomponent(h)) {
-                    h.i = ci = (c?.h as HCompClass)?.i ?? rebind(new h.tag(props))
+                    h.i = ci = isupdate ? (c.h as HCompClass)?.i : rebind(new h.tag(props))
                     ci.props = props
 
-                    // if component instance returns truthy for update(), then syncing is susbstituted by the component
+                    // if component instance returns truthy for update(), then this update substitutes syncing
                     if (isupdate && ci.update(globaluc)) return i + 1
                 }
 
@@ -128,10 +128,13 @@ function sync(p: Element, i: number, h: Expr<H | undefined>): number {
 
                 let j = sync(p, i, hr)
 
+                // now the dom element exists
+
                 let cn = p.childNodes[i]!
                 cn.h = h // attach h onto the materialized component node
                 // ;(cn as HTMLElement).setAttribute?.('comp', '')
 
+                // class component life cycle calls
                 if (ci) ci.element = cn
                 if (!isupdate) ci?.mounted?.()
 
