@@ -23,7 +23,7 @@ export default {
         typescript(),
         copy({
             targets: [
-                { src: '*.ts', dest: 'dist' }, // Copy all .ts files to dist/src
+                { src: '*.d.ts', dest: 'dist' }, // Copy all d.ts files to dist
             ],
         }),
         clean()
