@@ -131,7 +131,8 @@ function sync(p: Element, i: number, h: Expr<H | undefined>): number {
                 // now the dom element exists
 
                 let cn = p.childNodes[i]!
-                cn.h = h // attach h onto the materialized component node
+
+                if (cn) cn.h = h // attach h onto the materialized component node
                 // ;(cn as HTMLElement).setAttribute?.('comp', '')
 
                 // class component life cycle calls

@@ -110,7 +110,8 @@ function sync(p, i, h) {
                     return i;
                 let j = sync(p, i, hr);
                 let cn = p.childNodes[i];
-                cn.h = h;
+                if (cn)
+                    cn.h = h;
                 if (ci)
                     ci.element = cn;
                 if (!isupdate)
