@@ -27,7 +27,7 @@ let isfragment = (h: any): h is HFragment => {
 let isobject = (o: any): o is object => typeof o === 'object'
 
 let isproperty = (name: string, value: any) =>
-    ['value', 'checked', 'disabled', 'className', 'style', 'href', 'src', 'selected', 'readOnly', 'tabIndex'].includes(
+    ['value', 'checked', 'disabled', 'className', 'style', 'src', 'selected', 'readOnly', 'tabIndex'].includes(
         name
     ) ||
     value instanceof Object ||
