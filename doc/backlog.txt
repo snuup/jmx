@@ -1,4 +1,7 @@
 - make mounted optional for components
 
+- function component should be able to update itself (zwd, filterbox case)
+- svg auto namespace, remove need to configure
+
 - study: configure that only components update
 + configure jsximportmodule -> did not work out
